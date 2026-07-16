@@ -1,0 +1,92 @@
+name: Generate article draft
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_url:
+        description: Source article URL
+        required: true
+        type: string
+      slug:
+        description: Lowercase URL slug, for example clinic-line-booking
+        required: true
+        type: string
+      category:
+        description: Article category
+        required: true
+        default: 医療経営
+        type: string
+      cta:
+        description: CTA displayed on the article
+        required: true
+        default: consultation
+        type: choice
+        options:
+          - consultation
+          - lhub
+          - self-pay
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install generator dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install site dependencies
+        run: npm install
+
+      - name: Generate article and social drafts
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
+        run: |
+          python scripts/generate_content.py \
+            --url "${{ inputs.source_url }}" \
+            --slug "${{ inputs.slug }}" \
+            --category "${{ inputs.category }}" \
+            --cta "${{ inputs.cta }}"
+
+      - name: Build and validate site
+        env:
+          PUBLIC_SITE_URL: https://hatchyz-coder.github.io
+          BASE_PATH: /hdn-articles
+        run: npm run build
+
+      - name: Create pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SLUG: ${{ inputs.slug }}
+          SOURCE_URL: ${{ inputs.source_url }}
+        run: |
+          branch="content/auto-${SLUG}-${GITHUB_RUN_ID}"
+          git checkout -b "$branch"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/content/articles social outputs/en
+          git commit -m "Generate article draft: ${SLUG}"
+          git push origin "$branch"
+          gh pr create \
+            --base main \
+            --head "$branch" \
+            --title "Article draft: ${SLUG}" \
+            --body "## Generated content\n\n- Source: ${SOURCE_URL}\n- Article: src/content/articles/${SLUG}.md\n- Social drafts: social/${SLUG}/\n- English draft: outputs/en/${SLUG}.md\n\n## Review checklist\n\n- [ ] Source facts are accurate\n- [ ] No unsupported medical, legal, or advertising claims\n- [ ] Title and description match search intent\n- [ ] Internal links and CTA are appropriate\n- [ ] Social posts are suitable for each platform\n- [ ] Change draft: true to draft: false before publication"
