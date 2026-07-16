@@ -88,8 +88,10 @@ def ai_rank(candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
         "HDN JapanのSEO記事候補を選別してください。対象読者はクリニック経営者、医療事業者です。"
         "自由診療、医療広告、薬機法、景表法、再生医療、医療DX、患者導線、LINE、予約、決済、CRMとの関連性、"
         "検索意図、問い合わせへのつながりやすさ、情報の重要性を評価してください。"
-        "JSON配列のみを返し、各要素を {id, ai_score, reason, suggested_category, suggested_cta} としてください。"
-        "ai_scoreは0〜100、suggested_ctaはconsultation/lhub/self-payのいずれかです。\n\n"
+        "JSON配列のみを返し、各要素を "
+        "{id, ai_score, reason, suggested_category, suggested_cta, suggested_slug} としてください。"
+        "ai_scoreは0〜100、suggested_ctaはconsultation/lhub/self-payのいずれかです。"
+        "suggested_slugは検索意図が分かる英小文字・数字・ハイフンのみ、3〜8語程度としてください。\n\n"
         + json.dumps(compact, ensure_ascii=False)
     )
     payload = {
@@ -112,6 +114,7 @@ def ai_rank(candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 if content.get("type") == "output_text":
                     chunks.append(content.get("text", ""))
         text = "".join(chunks)
+    text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text.strip(), flags=re.I | re.S)
     ranked = json.loads(text)
     by_id = {int(item["id"]): item for item in ranked}
     for idx, candidate in enumerate(candidates):
@@ -120,6 +123,7 @@ def ai_rank(candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
         candidate["reason"] = ai.get("reason", "")
         candidate["suggested_category"] = ai.get("suggested_category", "医療経営")
         candidate["suggested_cta"] = ai.get("suggested_cta", "consultation")
+        candidate["suggested_slug"] = ai.get("suggested_slug", "")
     return candidates
 
 
@@ -133,7 +137,7 @@ def main() -> None:
     for source in config.get("sources", []):
         try:
             links = fetch_links(source)
-        except Exception as exc:  # keep other sources running
+        except Exception as exc:
             print(f"WARN {source['name']}: {exc}")
             continue
         for item in links:
