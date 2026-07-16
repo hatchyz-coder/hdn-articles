@@ -18,6 +18,7 @@ ARTICLE_DIR = ROOT / "src" / "content" / "articles"
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--min-score", type=int, default=70)
+    parser.add_argument("--exclude-file", type=Path)
     return parser.parse_args()
 
 
@@ -31,6 +32,16 @@ def existing_source_urls() -> set[str]:
         if match:
             urls.add(match.group(1).strip())
     return urls
+
+
+def excluded_urls(path: Path | None) -> set[str]:
+    if not path or not path.exists():
+        return set()
+    return {
+        line.strip()
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip().startswith(("http://", "https://"))
+    }
 
 
 def valid_slug(value: str) -> bool:
@@ -59,7 +70,7 @@ def main() -> int:
         return 0
 
     payload = json.loads(LATEST_PATH.read_text(encoding="utf-8"))
-    known_urls = existing_source_urls()
+    blocked_urls = existing_source_urls() | excluded_urls(args.exclude_file)
 
     for candidate in payload.get("candidates", []):
         url = str(candidate.get("url", "")).strip()
@@ -71,7 +82,7 @@ def main() -> int:
             continue
         if parsed.path.lower().endswith(".pdf"):
             continue
-        if url in known_urls:
+        if url in blocked_urls:
             continue
 
         slug = str(candidate.get("suggested_slug", "")).strip().lower()
