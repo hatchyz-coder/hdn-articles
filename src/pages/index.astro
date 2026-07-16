@@ -1,0 +1,17 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+const articles = (await getCollection('articles', ({ data }) => !data.draft)).sort((a,b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+---
+<BaseLayout title="HDN Articles | 医療経営・患者導線設計の実務知識" description="医療経営、自由診療、LINE活用、患者導線設計、薬機法・景表法に関する実務記事を掲載します。">
+  <section class="hero"><div class="wrap"><h1>医療経営と患者導線を、実務で使える知識に。</h1><p>広告、HP、LINE、予約、問診、決済、継続フォローまで。医療機関が現場で運用できる形に整理します。</p></div></section>
+  <main class="wrap grid">
+    {articles.map((article) => (
+      <article class="card">
+        <p class="meta">{article.data.category}｜{article.data.publishedAt.toLocaleDateString('ja-JP')}</p>
+        <h2><a href={`${import.meta.env.BASE_URL}articles/${article.id}/`}>{article.data.title}</a></h2>
+        <p>{article.data.description}</p>
+      </article>
+    ))}
+  </main>
+</BaseLayout>
