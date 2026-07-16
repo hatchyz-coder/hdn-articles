@@ -1,0 +1,42 @@
+---
+import '../styles/global.css';
+const {
+  title = 'HDN Articles',
+  description = '医療経営、患者導線設計、自由診療、LINE活用に関する実務記事。',
+  canonical,
+  type = 'website',
+} = Astro.props;
+const siteUrl = Astro.site ?? new URL('https://article.hdnjapan.com');
+const canonicalUrl = canonical ? new URL(canonical, siteUrl) : new URL(Astro.url.pathname, siteUrl);
+---
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content="HDN Articles" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="alternate" type="application/rss+xml" title="HDN Articles RSS" href={`${import.meta.env.BASE_URL}rss.xml`} />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap header-inner">
+        <a class="brand" href={import.meta.env.BASE_URL}>HDN Articles</a>
+        <nav class="nav" aria-label="主要ナビゲーション">
+          <a href={import.meta.env.BASE_URL}>記事一覧</a>
+          <a href="https://hdnjapan.com/lhub.html">LHub</a>
+          <a href="https://hdnjapan.com/">HDN Japan</a>
+        </nav>
+      </div>
+    </header>
+    <slot />
+    <footer class="footer"><div class="wrap">© HDN Inc.</div></footer>
+  </body>
+</html>
