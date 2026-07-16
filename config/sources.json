@@ -1,0 +1,47 @@
+{
+  "sources": [
+    {
+      "name": "厚生労働省",
+      "url": "https://www.mhlw.go.jp/stf/newpage_00001.html",
+      "domains": ["mhlw.go.jp"],
+      "priority": 5
+    },
+    {
+      "name": "PMDA",
+      "url": "https://www.pmda.go.jp/news/index.html",
+      "domains": ["pmda.go.jp"],
+      "priority": 5
+    },
+    {
+      "name": "消費者庁",
+      "url": "https://www.caa.go.jp/notice/",
+      "domains": ["caa.go.jp"],
+      "priority": 5
+    }
+  ],
+  "keywords": [
+    "自由診療",
+    "オンライン診療",
+    "医療広告",
+    "薬機法",
+    "景品表示法",
+    "再生医療",
+    "医療DX",
+    "LINE",
+    "予約",
+    "決済",
+    "患者",
+    "クリニック",
+    "診療所",
+    "医薬品",
+    "安全性",
+    "ガイドライン"
+  ],
+  "exclude_keywords": [
+    "採用情報",
+    "入札公告",
+    "調達情報",
+    "人事異動"
+  ],
+  "max_candidates_per_run": 20
+}
