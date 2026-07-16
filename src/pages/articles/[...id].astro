@@ -1,0 +1,43 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const articles = await getCollection('articles', ({ data }) => !data.draft);
+  return articles.map((article) => ({ params: { id: article.id }, props: { article } }));
+}
+
+const { article } = Astro.props;
+const { Content } = await render(article);
+const articleUrl = new URL(`${import.meta.env.BASE_URL}articles/${article.id}/`, Astro.site);
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: article.data.title,
+  description: article.data.description,
+  datePublished: article.data.publishedAt.toISOString(),
+  dateModified: (article.data.updatedAt ?? article.data.publishedAt).toISOString(),
+  author: { '@type': 'Person', name: article.data.author },
+  publisher: { '@type': 'Organization', name: '株式会社HDN', url: 'https://hdnjapan.com/' },
+  mainEntityOfPage: articleUrl.toString(),
+};
+const cta = {
+  consultation: ['この記事を自院の運用へ当てはめて整理する', 'https://forms.gle/148jgfSnDgDZ2HsEA'],
+  lhub: ['LHubの導入・運用を相談する', 'https://hdnjapan.com/lhub.html'],
+  'self-pay': ['自由診療の導入を相談する', 'https://hdnjapan.com/self-pay.html'],
+}[article.data.cta];
+---
+<BaseLayout title={`${article.data.title} | HDN Articles`} description={article.data.description} canonical={articleUrl} type="article">
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  <main class="wrap article">
+    <p class="meta">{article.data.category}｜{article.data.publishedAt.toLocaleDateString('ja-JP')}｜{article.data.author}</p>
+    <h1>{article.data.title}</h1>
+    <p>{article.data.description}</p>
+    <Content />
+    <aside class="cta">
+      <h2>記事を読んで終わらせず、実際の導線へ。</h2>
+      <p>クリニックごとに、患者が止まる場所とスタッフ負荷は異なります。現在の運用を確認したうえで、必要な場合だけ次の進め方をご提案します。</p>
+      <a class="button" href={cta[1]}>{cta[0]}</a>
+    </aside>
+  </main>
+</BaseLayout>
