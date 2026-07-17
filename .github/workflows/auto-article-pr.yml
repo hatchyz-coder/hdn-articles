@@ -1,4 +1,4 @@
-name: Auto-generate article PR
+name: Auto Article PR
 
 on:
   workflow_dispatch:
@@ -8,8 +8,6 @@ on:
         required: true
         default: '70'
         type: string
-  schedule:
-    - cron: '0 23 * * 1-5'
 
 permissions:
   contents: write
@@ -63,7 +61,7 @@ jobs:
       - name: Select highest-value eligible candidate
         id: pick
         env:
-          MIN_SCORE: ${{ inputs.min_score || '70' }}
+          MIN_SCORE: ${{ inputs.min_score }}
         run: |
           python scripts/select_top_candidate.py \
             --min-score "$MIN_SCORE" \
@@ -71,13 +69,15 @@ jobs:
 
       - name: Report no eligible candidate
         if: steps.pick.outputs.selected != 'true'
-        run: echo "No eligible candidate was found. Reason: ${{ steps.pick.outputs.reason }}"
+        run: |
+          echo "No eligible candidate was found."
+          echo "Reason: ${{ steps.pick.outputs.reason }}"
 
       - name: Generate article and channel drafts
         if: steps.pick.outputs.selected == 'true'
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
+          OPENAI_MODEL: gpt-5-mini
         run: |
           python scripts/generate_content.py \
             --url "${{ steps.pick.outputs.url }}" \
