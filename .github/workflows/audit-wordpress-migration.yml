@@ -1,0 +1,37 @@
+name: Audit WordPress Migration
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Audit existing WordPress URLs
+        run: python scripts/audit_wordpress_migration.py
+
+      - name: Commit migration inventory
+        run: |
+          if git diff --quiet -- data/migration reports/migration; then
+            echo "No migration audit changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/migration reports/migration
+          git commit -m "Update WordPress migration audit [skip ci]"
+          git push
