@@ -2,8 +2,6 @@ name: Discover article candidates
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '15 22 * * 1-5'
 
 permissions:
   contents: write
@@ -26,7 +24,7 @@ jobs:
       - name: Discover and rank candidates
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: gpt-5-mini
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
         run: python scripts/discover_sources.py
 
       - name: Commit candidate queue
