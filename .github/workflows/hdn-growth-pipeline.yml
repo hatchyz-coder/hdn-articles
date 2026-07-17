@@ -1,0 +1,188 @@
+name: HDN Growth Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      min_score:
+        description: Minimum AI score required for article drafting
+        required: true
+        default: '70'
+        type: string
+  schedule:
+    - cron: '15 22 * * 1-5'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: hdn-growth-pipeline
+  cancel-in-progress: false
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          npm install
+
+      - name: Discover and rank article candidates
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
+        run: python scripts/discover_sources.py
+
+      - name: Build opportunity report
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
+        run: python scripts/build_opportunity_report.py
+
+      - name: Commit candidate queue and report
+        run: |
+          if git diff --quiet -- data reports; then
+            echo "No queue or report changes."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data reports
+            git commit -m "Update HDN growth queue and report [skip ci]"
+            git push origin main
+          fi
+
+      - name: Collect source URLs already used by open pull requests
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr list --state open --limit 100 --json body > /tmp/open-prs.json
+          python3 - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          payload = json.loads(Path('/tmp/open-prs.json').read_text(encoding='utf-8'))
+          urls = set()
+          for item in payload:
+              body = item.get('body') or ''
+              match = re.search(r'^- Source:\s*(https?://\S+)', body, re.MULTILINE)
+              if match:
+                  urls.add(match.group(1).rstrip(').,]'))
+          Path('/tmp/open-pr-source-urls.txt').write_text('\n'.join(sorted(urls)), encoding='utf-8')
+          print(f'Excluded {len(urls)} source URLs from open pull requests')
+          PY
+
+      - name: Select highest-value eligible candidate
+        id: pick
+        env:
+          MIN_SCORE: ${{ inputs.min_score || '70' }}
+        run: |
+          python scripts/select_top_candidate.py \
+            --min-score "$MIN_SCORE" \
+            --exclude-file /tmp/open-pr-source-urls.txt
+
+      - name: Report no eligible candidate
+        if: steps.pick.outputs.selected != 'true'
+        run: |
+          echo "No eligible candidate was found."
+          echo "Reason: ${{ steps.pick.outputs.reason }}"
+
+      - name: Generate article and channel drafts
+        if: steps.pick.outputs.selected == 'true'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
+        run: |
+          python scripts/generate_content.py \
+            --url "${{ steps.pick.outputs.url }}" \
+            --slug "${{ steps.pick.outputs.slug }}" \
+            --category "${{ steps.pick.outputs.category }}" \
+            --cta "${{ steps.pick.outputs.cta }}"
+
+      - name: Build and validate site
+        if: steps.pick.outputs.selected == 'true'
+        env:
+          PUBLIC_SITE_URL: https://hatchyz-coder.github.io
+          BASE_PATH: /hdn-articles
+        run: npm run build
+
+      - name: Create review pull request
+        if: steps.pick.outputs.selected == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_URL: ${{ steps.pick.outputs.url }}
+          SLUG: ${{ steps.pick.outputs.slug }}
+          CATEGORY: ${{ steps.pick.outputs.category }}
+          CTA: ${{ steps.pick.outputs.cta }}
+          SCORE: ${{ steps.pick.outputs.score }}
+          SOURCE_TITLE: ${{ steps.pick.outputs.title }}
+          SELECTION_REASON: ${{ steps.pick.outputs.reason }}
+        run: |
+          branch="content/growth-${SLUG}-${GITHUB_RUN_ID}"
+          git checkout -b "$branch"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/content/articles social outputs/en
+          git commit -m "Generate HDN growth article draft: ${SLUG}"
+          git push origin "$branch"
+
+          cat > /tmp/pr-body.md <<EOF
+          ## HDN Growth Pipeline
+
+          - Source: ${SOURCE_URL}
+          - Source title: ${SOURCE_TITLE}
+          - AI score: ${SCORE}/100
+          - Selection reason: ${SELECTION_REASON}
+          - Category: ${CATEGORY}
+          - CTA: ${CTA}
+
+          ## Generated files
+
+          - Article: \`src/content/articles/${SLUG}.md\`
+          - Social drafts: \`social/${SLUG}/\`
+          - English draft: \`outputs/en/${SLUG}.md\`
+
+          ## Review checklist
+
+          - [ ] Primary-source facts and dates are accurate
+          - [ ] HDN commentary is separated from sourced facts
+          - [ ] No unsupported medical, legal, or advertising claims appear
+          - [ ] Search intent, title, headings, and description are aligned
+          - [ ] Internal links and CTA are useful rather than forced
+          - [ ] Social copy is suitable for each platform
+          - [ ] Change \`draft: true\` to \`draft: false\` only after approval
+          EOF
+
+          gh pr create \
+            --base main \
+            --head "$branch" \
+            --title "HDN Growth article draft: ${SLUG}" \
+            --body-file /tmp/pr-body.md
+
+      - name: Write workflow summary
+        if: always()
+        run: |
+          {
+            echo "## HDN Growth Pipeline"
+            echo ""
+            echo "- Candidate selected: ${{ steps.pick.outputs.selected || 'false' }}"
+            echo "- Reason: ${{ steps.pick.outputs.reason || 'not available' }}"
+            echo "- Score: ${{ steps.pick.outputs.score || 'n/a' }}"
+            echo "- Source: ${{ steps.pick.outputs.url || 'n/a' }}"
+          } >> "$GITHUB_STEP_SUMMARY"
