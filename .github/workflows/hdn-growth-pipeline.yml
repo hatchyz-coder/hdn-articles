@@ -8,6 +8,11 @@ on:
         required: true
         default: '70'
         type: string
+      audit_wordpress:
+        description: Also audit the existing WordPress article site
+        required: true
+        default: false
+        type: boolean
   schedule:
     - cron: '15 22 * * 1-5'
 
@@ -43,6 +48,10 @@ jobs:
           pip install -r requirements.txt
           npm install
 
+      - name: Audit existing WordPress URLs
+        if: github.event_name == 'workflow_dispatch' && inputs.audit_wordpress == true
+        run: python scripts/audit_wordpress_migration.py
+
       - name: Discover and rank article candidates
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -55,15 +64,15 @@ jobs:
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
         run: python scripts/build_opportunity_report.py
 
-      - name: Commit candidate queue and report
+      - name: Commit queue, report, and migration audit
         run: |
           if git diff --quiet -- data reports; then
-            echo "No queue or report changes."
+            echo "No queue, report, or migration changes."
           else
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add data reports
-            git commit -m "Update HDN growth queue and report [skip ci]"
+            git commit -m "Update HDN growth data and reports [skip ci]"
             git push origin main
           fi
 
@@ -181,6 +190,7 @@ jobs:
           {
             echo "## HDN Growth Pipeline"
             echo ""
+            echo "- WordPress audit requested: ${{ inputs.audit_wordpress || 'false' }}"
             echo "- Candidate selected: ${{ steps.pick.outputs.selected || 'false' }}"
             echo "- Reason: ${{ steps.pick.outputs.reason || 'not available' }}"
             echo "- Score: ${{ steps.pick.outputs.score || 'n/a' }}"
