@@ -161,13 +161,19 @@ def main() -> None:
 
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     LATEST_PATH.parent.mkdir(parents=True, exist_ok=True)
-    LATEST_PATH.write_text(
-        json.dumps({"generated_at": datetime.now(timezone.utc).isoformat(), "candidates": candidates}, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
-    seen.update(item["url"] for item in candidates)
-    SEEN_PATH.write_text(json.dumps(sorted(seen), ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"Discovered {len(candidates)} candidates")
+
+    if candidates:
+        LATEST_PATH.write_text(
+            json.dumps({"generated_at": datetime.now(timezone.utc).isoformat(), "candidates": candidates}, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        seen.update(item["url"] for item in candidates)
+        SEEN_PATH.write_text(json.dumps(sorted(seen), ensure_ascii=False, indent=2), encoding="utf-8")
+        print(f"Discovered {len(candidates)} new candidates and refreshed the pending queue")
+    else:
+        previous = load_json(LATEST_PATH, {"candidates": []})
+        pending_count = len(previous.get("candidates", []))
+        print(f"Discovered 0 new candidates; preserved {pending_count} pending candidates")
 
 
 if __name__ == "__main__":
