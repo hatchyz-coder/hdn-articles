@@ -31,13 +31,16 @@ const reports = (await getCollection('radarReports', ({ data }) =>
       </div>
     ) : (
       <section class="grid">
-        {reports.map((report) => (
-          <article class="card">
-            <p class="meta">{report.data.category}｜{report.data.publishedAt.toLocaleDateString('ja-JP')}</p>
-            <h2><a href={`${import.meta.env.BASE_URL}market-radar/reports/${report.id}/`}>{report.data.title}</a></h2>
-            <p>{report.data.description}</p>
-          </article>
-        ))}
+        {reports.map((report) => {
+          const slug = report.id.split('/').at(-1);
+          return (
+            <article class="card">
+              <p class="meta">{report.data.category}｜{report.data.publishedAt.toLocaleDateString('ja-JP')}</p>
+              <h2><a href={`${import.meta.env.BASE_URL}market-radar/reports/${slug}/`}>{report.data.title}</a></h2>
+              <p>{report.data.description}</p>
+            </article>
+          );
+        })}
       </section>
     )}
   </main>
