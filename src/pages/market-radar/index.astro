@@ -1,0 +1,44 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const reports = (await getCollection('radarReports', ({ data }) =>
+  data.product === 'market-radar' && !data.draft
+)).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+---
+
+<BaseLayout
+  title="MarketRadar | 市場データから消費者の迷いと商機を読む"
+  description="MarketRadarは、市場データを売れ筋ランキングで終わらせず、消費者の迷い、比較軸、商機へ変換する市場分析レポートです。"
+>
+  <section class="hero radar-hero">
+    <div class="wrap">
+      <p class="eyebrow">HDN Market Intelligence</p>
+      <h1>売れ筋より、<br />消費者の「迷い」を読む。</h1>
+      <p>市場データを、記事・SNS・営業資料・提案書に使える比較軸へ変換します。</p>
+    </div>
+  </section>
+
+  <main class="wrap radar-list">
+    <section class="radar-intro">
+      <h2>MarketRadarレポート</h2>
+      <p>くまポン、Yahoo!ショッピング、楽天市場などのデータを横断し、消費者が何を比較し、どこで意思決定に迷っているのかを整理します。</p>
+    </section>
+
+    {reports.length === 0 ? (
+      <div class="empty-state">
+        <p>現在、公開準備中のレポートがあります。</p>
+      </div>
+    ) : (
+      <section class="grid">
+        {reports.map((report) => (
+          <article class="card">
+            <p class="meta">{report.data.category}｜{report.data.publishedAt.toLocaleDateString('ja-JP')}</p>
+            <h2><a href={`${import.meta.env.BASE_URL}market-radar/reports/${report.id}/`}>{report.data.title}</a></h2>
+            <p>{report.data.description}</p>
+          </article>
+        ))}
+      </section>
+    )}
+  </main>
+</BaseLayout>
