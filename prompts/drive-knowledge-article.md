@@ -16,7 +16,7 @@ Evaluate the supplied internal Google Docs knowledge-base document and, only whe
 
 ## Source processing
 
-Long Google Docs may be supplied as multiple AI-generated chunk summaries rather than raw full text. When `source_processing.mode` is `chunk_summarized`, treat the summaries as source material for drafting, but mark important claims for human verification when context may have been compressed.
+Long Google Docs may be supplied as a sampled source containing the beginning, middle, and ending only. When `source_processing.mode` is `sampled_beginning_middle_ending`, treat the sample as source material for drafting, but mark important claims for human verification when context may have been omitted.
 
 ## Official-source research preparation
 
@@ -59,6 +59,8 @@ The Japanese article must include:
 - CTA connected to the selected CTA type.
 
 Target roughly 1,800 to 3,000 Japanese characters for the main article.
+
+Public author must be 羽田野 剛士. If the source was prepared by an external writer, that name may be kept only in internal metadata and must not be displayed in the public article body.
 
 ## Output
 

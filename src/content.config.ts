@@ -11,6 +11,7 @@ const articles = defineCollection({
     category: z.string(),
     tags: z.array(z.string()).default([]),
     author: z.string().default('羽田野 剛士'),
+    editorialSourceAuthor: z.string().optional(),
     draft: z.boolean().default(false),
     featured: z.boolean().default(false),
     sourceUrl: z.string().url().optional(),

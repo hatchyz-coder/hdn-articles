@@ -115,22 +115,23 @@ The `Google Drive Knowledge Base Article PR` workflow runs on weekdays and can a
 What it does:
 
 - Uses change detection and the `knowledge-base-state` branch cache instead of recursively scanning the configured `00_KnowledgeBase` folder.
-- On the first run, seeds from only the 20 most recently updated Google Docs found in the cached `00_KnowledgeBase` folder set.
+- On the first run, seeds from only the 5 most recently updated Google Docs directly under `00_KnowledgeBase`.
 - On later runs, uses the Google Drive Changes API and cached document metadata to avoid API access for unchanged documents.
 - Processes Google Docs only.
 - Reads document name, file ID, URL, and updated time before any document body access.
-- Immediately skips processed document IDs.
+- Selects only the newest unprocessed or updated Google Docs document.
+- Immediately skips processed document IDs unless the stored updated time changed.
 - Skips source documents already used in existing articles or open pull requests.
 - Evaluates meeting notes, including documents under `01_MeetingNotes`, as normal article candidates unless concrete sensitive content is present.
 - Skips documents with concrete confidentiality concerns and records the reason in the run log. The heuristic targets personal information, patient identifiers, contract amounts, credentials, explicit confidentiality markers, and non-public customer names; it does not skip a document merely because it contains words such as meeting note or sales discussion.
-- Sends only the first 5,000 characters of each unprocessed candidate document for preview scoring.
-- Uses AI to score at most two documents for article suitability and E-E-A-T: Experience, Expertise, Authority, and Trust.
+- Calls OpenAI at most once per workflow run. That single response returns article suitability, score, Japanese article draft, English draft, and social drafts.
 - Prepares official-source follow-up fields for human review: additional verification topics, official information source candidates, and claims not supported by the source document alone.
-- Fetches the full Google Docs body only for the final selected article candidate.
-- For long selected documents, sends only beginning, middle, and ending chunks to the final article-generation request instead of issuing multiple chunk-summary calls.
+- Fetches the Google Docs body only for the selected document.
+- Sends at most 12,000 characters to OpenAI. Long documents are sampled as beginning 4,000 characters, middle 4,000 characters, and ending 4,000 characters.
 - Generates at most one article per run.
 - Creates a Draft Pull Request only. It never publishes and never commits directly to `main`.
-- Sets an 8-minute workflow timeout, stops remaining script work after five minutes, and targets 60 seconds for no-candidate runs and 180 seconds for candidate runs.
+- Wraps the Python process in GNU `timeout --signal=TERM --kill-after=15s 240s`, sets a 6-minute job timeout, and records OS timeout as a normal operational result.
+- Records retry counts for interrupted or API-timeout documents. Documents with more than two retries are sent to manual review instead of being retried forever.
 
 Generated files include:
 
@@ -142,11 +143,28 @@ Generated files include:
 
 Processing state is restored from and saved back to the `knowledge-base-state` branch on every workflow run, including runs that produce no article candidate. The workflow also uploads the state directory as a GitHub Actions artifact named `knowledge-base-state-<run_id>` with 30-day retention. This keeps processing state out of `main` while preserving skip logs, zero-candidate runs, processed file IDs, updated times, and the latest research-review notes.
 
-The workflow summary reports Drive取得件数, 新規件数, AI評価件数, 記事生成件数, API呼び出し回数, 入力文字数, OpenAI処理時間, Drive処理時間, GitHub処理時間, ファイルI/O時間, キャッシュ処理時間, and 総実行時間. Logs include start, finish, and second-level timings for Drive, OpenAI, GitHub, file I/O, cache, preview export, preview AI evaluation, full document fetch, and article generation.
+The workflow summary reports the selected Document ID, document name, Drive処理秒数, Docs本文取得秒数, OpenAI処理秒数, state保存秒数, OpenAI API呼び出し回数, 入力文字数, 終了理由, 総実行時間, Drive取得件数, 新規件数, 記事生成件数, GitHub処理秒数, キャッシュ復元秒数, pip install秒数, and npm install秒数. Logs include start, finish, and second-level timings for Drive selection, Docs body fetch, the single OpenAI evaluation/generation call, state persistence, cache restore, and PR creation.
 
 The source reader is organized around source MIME types so future support can add Google Drive PDFs, Word documents, PowerPoint files, Excel workbooks, Markdown, and text files without changing the workflow contract. Those sources are defined but disabled until extractor and safety handling are implemented. Official-source enrichment is also isolated behind the research-extension output so later implementations can check MHLW, PMDA, Consumer Affairs Agency, academic societies, government agencies, manufacturer official pages, and papers before final article drafting.
 
 The PR body includes the source Google Docs URL, updated time, E-E-A-T score, and official-source review preparation. Human review is required before changing `draft: true` to `draft: false`.
+
+Manual diagnostics:
+
+1. Open `Actions`.
+2. Select `Google Drive Knowledge Base Article PR`.
+3. Select `Run workflow`.
+4. Optionally enter a Google Docs file ID in `document_id` to skip Drive discovery and test that one document.
+5. Set `dry_run` to `true` to verify Drive and Docs access without calling OpenAI or generating content.
+6. Confirm the Summary includes selected Document ID, document name, Drive seconds, Docs fetch seconds, OpenAI seconds, state save seconds, API call count, input characters, exit reason, and total runtime.
+
+Timeout smoke test:
+
+```bash
+python scripts/test_drive_reader_timeouts.py
+```
+
+On Ubuntu, this also verifies GNU `timeout` stops a simulated long-running process promptly. On platforms without GNU coreutils, the GNU timeout portion is skipped.
 
 ## Local commands
 

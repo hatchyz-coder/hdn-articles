@@ -8,6 +8,16 @@ on:
         required: true
         default: '70'
         type: string
+      document_id:
+        description: Optional Google Docs file ID for manual diagnostics
+        required: false
+        default: ''
+        type: string
+      dry_run:
+        description: Fetch Drive/Docs only without calling OpenAI
+        required: true
+        default: false
+        type: boolean
   schedule:
     - cron: '0 21 * * 0-4'
 
@@ -18,7 +28,7 @@ permissions:
 jobs:
   generate:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 6
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -33,7 +43,15 @@ jobs:
           cache-dependency-path: requirements.txt
 
       - name: Install Python dependencies
-        run: pip install -r requirements.txt
+        id: pip_install
+        run: |
+          start=$(date +%s)
+          echo "START pip install"
+          pip install -r requirements.txt
+          end=$(date +%s)
+          elapsed=$((end - start))
+          echo "END pip install: ${elapsed}s"
+          echo "pip_seconds=${elapsed}" >> "$GITHUB_OUTPUT"
 
       - name: Restore persistent knowledge-base state
         id: restore_state
@@ -96,18 +114,84 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
           MIN_SCORE: ${{ inputs.min_score || '70' }}
+          DOCUMENT_ID: ${{ inputs.document_id || '' }}
+          DRY_RUN: ${{ inputs.dry_run || false }}
+          PYTHONUNBUFFERED: '1'
         run: |
-          python scripts/generate_from_drive_knowledge.py \
-            --folder-id "$GOOGLE_DRIVE_KNOWLEDGE_FOLDER_ID" \
-            --service-account-json "$GOOGLE_SERVICE_ACCOUNT_JSON" \
-            --exclude-file /tmp/open-pr-drive-docs.txt \
-            --min-score "$MIN_SCORE" \
-            --state-path data/knowledge-base/processed-docs.json \
-            --report-path data/knowledge-base/latest-run.json \
-            --max-drive-files 20 \
-            --max-ai-evaluations 2 \
-            --preview-chars 5000 \
-            --stop-after-seconds 300
+          start=$(date +%s)
+          echo "START bounded Python runner"
+          args=(
+            scripts/generate_from_drive_knowledge.py
+            --folder-id "$GOOGLE_DRIVE_KNOWLEDGE_FOLDER_ID"
+            --service-account-json "$GOOGLE_SERVICE_ACCOUNT_JSON"
+            --exclude-file /tmp/open-pr-drive-docs.txt
+            --min-score "$MIN_SCORE"
+            --state-path data/knowledge-base/processed-docs.json
+            --report-path data/knowledge-base/latest-run.json
+            --max-drive-files 5
+          )
+          if [ -n "$DOCUMENT_ID" ]; then
+            args+=(--document-id "$DOCUMENT_ID")
+          fi
+          if [ "$DRY_RUN" = "true" ]; then
+            args+=(--dry-run)
+          fi
+
+          set +e
+          timeout --signal=TERM --kill-after=15s 240s python "${args[@]}"
+          status=$?
+          set -e
+          end=$(date +%s)
+          elapsed=$((end - start))
+          echo "END bounded Python runner: ${elapsed}s status=${status}"
+
+          if [ "$status" -eq 124 ] || [ "$status" -eq 137 ] || [ "$status" -eq 143 ]; then
+            echo "Python runner hit OS timeout; recording normal operational timeout result."
+            mkdir -p data/knowledge-base
+            python3 - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          state_path = Path("data/knowledge-base/processed-docs.json")
+          report_path = Path("data/knowledge-base/latest-run.json")
+          state = json.loads(state_path.read_text(encoding="utf-8")) if state_path.exists() else {"documents": {}}
+          now = datetime.now(timezone.utc).isoformat()
+          selected_id = ""
+          selected_name = ""
+          for doc_id, record in state.get("documents", {}).items():
+              if record.get("status") == "processing":
+                  selected_id = doc_id
+                  selected_name = record.get("name", "")
+                  record["status"] = "os_timeout"
+                  record["finishedAt"] = now
+                  record["retry_count"] = int(record.get("retry_count", 0)) + 1
+          state["updatedAt"] = now
+          report = {
+              "selected": False,
+              "reason": "os_timeout",
+              "createdAt": now,
+              "fileId": selected_id,
+              "name": selected_name,
+              "metrics": {
+                  "selectedDocumentId": selected_id,
+                  "selectedDocumentName": selected_name,
+                  "exitReason": "os_timeout",
+                  "executionSeconds": 240,
+                  "articlesGenerated": 0
+              }
+          }
+          state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          PY
+            echo "selected=false" >> "$GITHUB_OUTPUT"
+            echo "reason=os_timeout" >> "$GITHUB_OUTPUT"
+            echo "exitReason=os_timeout" >> "$GITHUB_OUTPUT"
+            echo "executionSeconds=240" >> "$GITHUB_OUTPUT"
+            echo "articlesGenerated=0" >> "$GITHUB_OUTPUT"
+          elif [ "$status" -ne 0 ]; then
+            exit "$status"
+          fi
 
       - name: Upload knowledge-base run state artifact
         if: always()
@@ -129,15 +213,12 @@ jobs:
             echo "github_seconds=0" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-
           tmpdir="$(mktemp -d)"
           statecopy="$tmpdir/knowledge-base"
           worktree="$tmpdir/state-worktree"
           cp -R data/knowledge-base "$statecopy"
-
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
           if git ls-remote --exit-code --heads origin knowledge-base-state > /dev/null 2>&1; then
             git fetch origin knowledge-base-state
             git worktree add "$worktree" origin/knowledge-base-state
@@ -150,12 +231,10 @@ jobs:
             git rm -r --cached . || true
             find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
           fi
-
           mkdir -p data
           rm -rf data/knowledge-base
           cp -R "$statecopy" data/knowledge-base
           git add data/knowledge-base
-
           if git diff --cached --quiet; then
             echo "Knowledge-base state is unchanged."
           else
@@ -180,8 +259,18 @@ jobs:
           node-version: '22'
 
       - name: Install site dependencies
+        id: npm_install
         if: steps.drive.outputs.selected == 'true'
-        run: npm install
+        run: |
+          start=$(date +%s)
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+          end=$(date +%s)
+          elapsed=$((end - start))
+          echo "npm_seconds=${elapsed}" >> "$GITHUB_OUTPUT"
 
       - name: Build and validate site
         if: steps.drive.outputs.selected == 'true'
@@ -213,7 +302,6 @@ jobs:
           git add src/content/articles social outputs/en
           git commit -m "Generate Drive knowledge article draft: ${SLUG}"
           git push origin "$branch"
-
           cat > /tmp/pr-body.md <<EOF
           ## Google Drive knowledge-base article draft
 
@@ -244,7 +332,6 @@ jobs:
           - [ ] Keep this pull request as Draft until human approval is complete
           - [ ] Change \`draft: true\` to \`draft: false\` only after editorial approval
           EOF
-
           gh pr create \
             --draft \
             --base main \
@@ -270,16 +357,21 @@ jobs:
             echo ""
             echo "| Metric | Value |"
             echo "| --- | ---: |"
+            echo "| 選定Document ID | ${{ steps.drive.outputs.selectedDocumentId || '' }} |"
+            echo "| 文書名 | ${{ steps.drive.outputs.selectedDocumentName || '' }} |"
+            echo "| Drive処理秒数 | ${{ steps.drive.outputs.driveSeconds || '0' }} |"
+            echo "| Docs本文取得秒数 | ${{ steps.drive.outputs.docsFetchSeconds || '0' }} |"
+            echo "| OpenAI処理秒数 | ${{ steps.drive.outputs.openaiSeconds || '0' }} |"
+            echo "| state保存秒数 | ${{ steps.drive.outputs.stateSaveSeconds || '0' }} |"
+            echo "| OpenAI API呼び出し回数 | ${{ steps.drive.outputs.apiCalls || '0' }} |"
+            echo "| 入力文字数 | ${{ steps.drive.outputs.inputCharacters || '0' }} |"
+            echo "| 終了理由 | ${{ steps.drive.outputs.exitReason || steps.drive.outputs.reason || '' }} |"
+            echo "| 総実行時間 | ${{ steps.drive.outputs.executionSeconds || '0' }} |"
             echo "| Drive取得件数 | ${{ steps.drive.outputs.driveFetched || '0' }} |"
             echo "| 新規件数 | ${{ steps.drive.outputs.newDocuments || '0' }} |"
-            echo "| AI評価件数 | ${{ steps.drive.outputs.aiEvaluations || '0' }} |"
             echo "| 記事生成件数 | ${{ steps.drive.outputs.articlesGenerated || '0' }} |"
-            echo "| API呼び出し回数 | ${{ steps.drive.outputs.apiCalls || '0' }} |"
-            echo "| 入力文字数 | ${{ steps.drive.outputs.inputCharacters || '0' }} |"
-            echo "| OpenAI処理時間 | ${{ steps.drive.outputs.openaiSeconds || '0' }} 秒 |"
-            echo "| Drive処理時間 | ${{ steps.drive.outputs.driveSeconds || '0' }} 秒 |"
-            echo "| GitHub処理時間 | ${github_seconds} 秒 |"
-            echo "| ファイルI/O時間 | ${{ steps.drive.outputs.fileIoSeconds || '0' }} 秒 |"
-            echo "| キャッシュ処理時間 | ${cache_seconds} 秒 + ${{ steps.drive.outputs.cacheSeconds || '0' }} 秒 |"
-            echo "| 総実行時間 | ${{ steps.drive.outputs.executionSeconds || '0' }} 秒 |"
+            echo "| GitHub処理秒数 | ${github_seconds} |"
+            echo "| キャッシュ復元秒数 | ${cache_seconds} |"
+            echo "| pip install秒数 | ${{ steps.pip_install.outputs.pip_seconds || '0' }} |"
+            echo "| npm install秒数 | ${{ steps.npm_install.outputs.npm_seconds || '0' }} |"
           } >> "$GITHUB_STEP_SUMMARY"
