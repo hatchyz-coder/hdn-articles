@@ -1,0 +1,164 @@
+name: Official Source Collector
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Collect candidates without updating persistent state
+        required: true
+        default: false
+        type: boolean
+      source_id:
+        description: Optional source id to collect only one official source
+        required: false
+        default: ''
+        type: string
+  schedule:
+    - cron: '0 22 * * 0-4'
+
+permissions:
+  contents: write
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Restore official source state
+        run: |
+          mkdir -p data/official-sources
+          if git ls-remote --exit-code --heads origin official-sources-state > /dev/null 2>&1; then
+            git fetch origin official-sources-state
+            git show origin/official-sources-state:data/official-sources/state.json > data/official-sources/state.json || true
+            git show origin/official-sources-state:data/official-sources/latest-run.json > data/official-sources/latest-run.json || true
+            git show origin/official-sources-state:data/official-sources/candidates.json > data/official-sources/candidates.json || true
+          else
+            echo "No official-sources-state branch exists yet."
+          fi
+
+      - name: Collect official source candidates
+        env:
+          PYTHONUNBUFFERED: '1'
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+          SOURCE_ID: ${{ github.event.inputs.source_id || '' }}
+        run: |
+          args=(
+            scripts/collect_official_sources.py
+            --state-path data/official-sources/state.json
+            --latest-run-path data/official-sources/latest-run.json
+            --candidates-path data/official-sources/candidates.json
+          )
+          if [ -n "$SOURCE_ID" ]; then
+            args+=(--source-id "$SOURCE_ID")
+          fi
+          if [ "$DRY_RUN" = "true" ]; then
+            args+=(--dry-run)
+          fi
+          timeout --signal=TERM --kill-after=15s 240s python -u "${args[@]}"
+
+      - name: Upload official source artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: official-source-collector-${{ github.run_id }}
+          path: |
+            data/official-sources/candidates.json
+            data/official-sources/latest-run.json
+            data/official-sources/state.json
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Persist official source state branch
+        if: always() && github.event.inputs.dry_run != 'true'
+        run: |
+          if [ ! -d data/official-sources ]; then
+            echo "No official source state directory to persist."
+            exit 0
+          fi
+          tmpdir="$(mktemp -d)"
+          statecopy="$tmpdir/official-sources"
+          worktree="$tmpdir/state-worktree"
+          cp -R data/official-sources "$statecopy"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin official-sources-state > /dev/null 2>&1; then
+            git fetch origin official-sources-state
+            git worktree add "$worktree" origin/official-sources-state
+            cd "$worktree"
+            git checkout -B official-sources-state
+          else
+            git worktree add --detach "$worktree" HEAD
+            cd "$worktree"
+            git checkout --orphan official-sources-state
+            git rm -r --cached . || true
+            find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          fi
+          mkdir -p data
+          rm -rf data/official-sources
+          cp -R "$statecopy" data/official-sources
+          git add data/official-sources
+          if git diff --cached --quiet; then
+            echo "Official source state is unchanged."
+          else
+            git commit -m "Update official source collector state [skip ci]"
+            git push origin official-sources-state
+          fi
+
+      - name: Write workflow summary
+        if: always()
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+
+          run_path = Path("data/official-sources/latest-run.json")
+          payload = json.loads(run_path.read_text(encoding="utf-8")) if run_path.exists() else {}
+          metrics = payload.get("metrics", {})
+          top = payload.get("top_candidates", [])
+
+          rows = [
+              ("対象情報源数", metrics.get("targeted_sources", 0)),
+              ("成功情報源数", metrics.get("successful_sources", 0)),
+              ("失敗情報源数", metrics.get("failed_sources", 0)),
+              ("unsupported数", metrics.get("unsupported_sources", 0)),
+              ("取得候補数", metrics.get("fetched_candidates", 0)),
+              ("新規候補数", metrics.get("new_candidates", 0)),
+              ("重複除外数", metrics.get("duplicate_candidates", 0)),
+              ("総HTTPリクエスト数", metrics.get("http_requests", 0)),
+              ("総実行時間", metrics.get("execution_seconds", 0)),
+          ]
+          print("## Official Source Collector")
+          print("")
+          print("| Metric | Value |")
+          print("| --- | ---: |")
+          for key, value in rows:
+              print(f"| {key} | {value} |")
+          print("")
+          print("### 上位候補5件")
+          if not top:
+              print("")
+              print("候補はありません。")
+          else:
+              print("")
+              for item in top[:5]:
+                  title = str(item.get("title", "")).replace("|", "\\|")
+                  url = item.get("url", "")
+                  score = item.get("score", 0)
+                  source = item.get("source_name", "")
+                  print(f"- {score}/100 [{title}]({url}) - {source}")
+          PY

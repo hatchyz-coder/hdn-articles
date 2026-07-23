@@ -1,0 +1,181 @@
+sources:
+  - id: mhlw
+    name: 厚生労働省
+    category: government
+    official_url: https://www.mhlw.go.jp/
+    feed_url: ""
+    enabled: true
+    priority: 5
+    keywords: [医療, 医療機関, 医療広告, 薬機法, 再生医療, 自由診療, オンライン診療, 診療報酬, 健康, 美容医療]
+    allowed_domains: [mhlw.go.jp]
+  - id: pmda
+    name: PMDA
+    category: government
+    official_url: https://www.pmda.go.jp/
+    feed_url: ""
+    enabled: true
+    priority: 5
+    keywords: [医薬品, 医療機器, 再生医療, 安全性, 添付文書, 承認, 回収, 注意喚起]
+    allowed_domains: [pmda.go.jp]
+  - id: caa
+    name: 消費者庁
+    category: government
+    official_url: https://www.caa.go.jp/
+    feed_url: ""
+    enabled: true
+    priority: 5
+    keywords: [景品表示法, 表示, 広告, 措置命令, 消費者, ステルスマーケティング, 特定商取引法]
+    allowed_domains: [caa.go.jp]
+  - id: jftc
+    name: 公正取引委員会
+    category: government
+    official_url: https://www.jftc.go.jp/
+    feed_url: ""
+    enabled: true
+    priority: 4
+    keywords: [独占禁止法, 下請法, フリーランス, 表示, 取引, ガイドライン]
+    allowed_domains: [jftc.go.jp]
+  - id: ppc
+    name: 個人情報保護委員会
+    category: government
+    official_url: https://www.ppc.go.jp/
+    feed_url: ""
+    enabled: true
+    priority: 5
+    keywords: [個人情報, 個人データ, 医療情報, 漏えい, 安全管理, ガイドライン]
+    allowed_domains: [ppc.go.jp]
+  - id: digital
+    name: デジタル庁
+    category: government
+    official_url: https://www.digital.go.jp/
+    feed_url: ""
+    enabled: true
+    priority: 4
+    keywords: [医療DX, マイナンバー, デジタル, オンライン, ガイドライン, 標準化]
+    allowed_domains: [digital.go.jp]
+  - id: soumu
+    name: 総務省
+    category: government
+    official_url: https://www.soumu.go.jp/
+    feed_url: ""
+    enabled: true
+    priority: 3
+    keywords: [通信, 個人情報, 電気通信, 迷惑メール, データ, AI, ガイドライン]
+    allowed_domains: [soumu.go.jp]
+  - id: meti
+    name: 経済産業省
+    category: government
+    official_url: https://www.meti.go.jp/
+    feed_url: ""
+    enabled: true
+    priority: 4
+    keywords: [ヘルスケア, 医療機器, DX, AI, 広告, ガイドライン, 補助金]
+    allowed_domains: [meti.go.jp]
+  - id: jma
+    name: 日本医師会
+    category: medical
+    official_url: https://www.med.or.jp/
+    feed_url: ""
+    enabled: true
+    priority: 4
+    keywords: [医療, 医療機関, オンライン診療, 医療DX, 診療, ガイドライン]
+    allowed_domains: [med.or.jp]
+  - id: jda
+    name: 日本歯科医師会
+    category: medical
+    official_url: https://www.jda.or.jp/
+    feed_url: ""
+    enabled: true
+    priority: 4
+    keywords: [歯科, 歯科医療, 医療広告, 口腔, 診療, ガイドライン]
+    allowed_domains: [jda.or.jp]
+  - id: jda-dermatology
+    name: 日本皮膚科学会
+    category: medical
+    official_url: https://www.dermatol.or.jp/
+    feed_url: ""
+    enabled: true
+    priority: 4
+    keywords: [皮膚科, 美容医療, 診療, ガイドライン, レーザー, しみ, 脱毛]
+    allowed_domains: [dermatol.or.jp]
+  - id: jsprs
+    name: 日本形成外科学会
+    category: medical
+    official_url: https://jsprs.or.jp/
+    feed_url: ""
+    enabled: true
+    priority: 4
+    keywords: [形成外科, 美容医療, 再建, 診療, ガイドライン]
+    allowed_domains: [jsprs.or.jp]
+  - id: jaam
+    name: 日本抗加齢医学会
+    category: medical
+    official_url: https://www.anti-aging.gr.jp/
+    feed_url: ""
+    enabled: true
+    priority: 3
+    keywords: [抗加齢, アンチエイジング, 自由診療, 美容医療, サプリメント]
+    allowed_domains: [anti-aging.gr.jp]
+  - id: jsrm
+    name: 日本再生医療学会
+    category: medical
+    official_url: https://www.jsrm.jp/
+    feed_url: ""
+    enabled: true
+    priority: 4
+    keywords: [再生医療, 細胞, 治療, 安全性, ガイドライン]
+    allowed_domains: [jsrm.jp]
+  - id: google-search-central
+    name: Google Search Central
+    category: platform
+    official_url: https://developers.google.com/search
+    feed_url: ""
+    enabled: true
+    priority: 4
+    keywords: [検索, SEO, Search, ranking, structured data, indexing, spam, Core Update]
+    allowed_domains: [developers.google.com]
+  - id: line-yahoo-developers
+    name: LINEヤフー Developers
+    category: platform
+    official_url: https://developers.line.biz/
+    feed_url: ""
+    enabled: true
+    priority: 4
+    keywords: [LINE, Messaging API, Login, LIFF, 予約, 通知, API]
+    allowed_domains: [developers.line.biz]
+  - id: meta-developers
+    name: Meta for Developers
+    category: platform
+    official_url: https://developers.facebook.com/
+    feed_url: ""
+    enabled: true
+    priority: 3
+    keywords: [Meta, Facebook, Instagram, Ads, API, Messenger, WhatsApp]
+    allowed_domains: [developers.facebook.com]
+  - id: github-changelog
+    name: GitHub Changelog
+    category: platform
+    official_url: https://github.blog/changelog/
+    feed_url: ""
+    enabled: true
+    priority: 3
+    keywords: [GitHub, Actions, Copilot, security, API, Pages, changelog]
+    allowed_domains: [github.blog]
+  - id: openai
+    name: OpenAI公式
+    category: platform
+    official_url: https://openai.com/news/
+    feed_url: ""
+    enabled: true
+    priority: 4
+    keywords: [OpenAI, API, model, safety, ChatGPT, developer, reasoning]
+    allowed_domains: [openai.com]
+  - id: google-ai
+    name: Google AI公式
+    category: platform
+    official_url: https://ai.google/
+    feed_url: ""
+    enabled: true
+    priority: 3
+    keywords: [Google AI, Gemini, model, developer, safety, API]
+    allowed_domains: [ai.google]

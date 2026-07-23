@@ -149,6 +149,42 @@ The source reader is organized around source MIME types so future support can ad
 
 The PR body includes the source Google Docs URL, updated time, E-E-A-T score, and official-source review preparation. Human review is required before changing `draft: true` to `draft: false`.
 
+## Official Source Collector
+
+The Official Source Collector is a separate MVP workflow for monitoring official information sources related to HDN's business, such as 厚生労働省, PMDA, 消費者庁, medical societies, and platform developer changelogs. It only saves update candidates for later human review. It does not generate article bodies, social copy, draft article pull requests, or automatic publication.
+
+Sources are configured in `config/official-sources.yaml`. To add a source, append an enabled source object with `id`, `name`, `category`, `official_url`, `feed_url`, `priority`, `keywords`, and `allowed_domains`. Leave `feed_url` blank when an official RSS or Atom feed is not known; do not invent feed URLs. Keep `allowed_domains` limited to domains the source is allowed to access.
+
+Manual run:
+
+```bash
+python scripts/collect_official_sources.py
+```
+
+Dry run:
+
+```bash
+python scripts/collect_official_sources.py --dry-run
+```
+
+Run one source only:
+
+```bash
+python scripts/collect_official_sources.py --source-id mhlw
+```
+
+In GitHub Actions, open `Official Source Collector`, select `Run workflow`, and optionally set `dry_run` or `source_id`. The scheduled run executes once per weekday and is bounded by GNU `timeout --signal=TERM --kill-after=15s 240s`.
+
+Persistent collector state is stored on the dedicated `official-sources-state` branch, not on `main`. The workflow restores and updates:
+
+- `data/official-sources/state.json`
+- `data/official-sources/latest-run.json`
+- `data/official-sources/candidates.json`
+
+The same files are uploaded as a workflow artifact named `official-source-collector-<run_id>`. Use the artifact to inspect candidates, source-level failures, unsupported JavaScript-required sites, duplicate counts, HTTP request counts, and the latest top candidates.
+
+If a source fails, check `data/official-sources/latest-run.json` in the artifact or the workflow summary. Failures are recorded per source and do not stop collection for other sources.
+
 Manual diagnostics:
 
 1. Open `Actions`.
