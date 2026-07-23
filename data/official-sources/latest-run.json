@@ -1,0 +1,138 @@
+{
+  "generated_at": "2026-07-23T22:51:40.387912+00:00",
+  "dry_run": false,
+  "source_id": "",
+  "metrics": {
+    "targeted_sources": 20,
+    "successful_sources": 5,
+    "failed_sources": 0,
+    "unsupported_sources": 0,
+    "fetched_candidates": 50,
+    "new_candidates": 50,
+    "duplicate_candidates": 0,
+    "http_requests": 6,
+    "execution_seconds": 6.548,
+    "source_results": [
+      {
+        "source_id": "mhlw",
+        "source_name": "厚生労働省",
+        "status": "success",
+        "candidate_count": 10,
+        "error": ""
+      },
+      {
+        "source_id": "pmda",
+        "source_name": "PMDA",
+        "status": "success",
+        "candidate_count": 10,
+        "error": ""
+      },
+      {
+        "source_id": "caa",
+        "source_name": "消費者庁",
+        "status": "success",
+        "candidate_count": 10,
+        "error": ""
+      },
+      {
+        "source_id": "jftc",
+        "source_name": "公正取引委員会",
+        "status": "success",
+        "candidate_count": 10,
+        "error": ""
+      },
+      {
+        "source_id": "ppc",
+        "source_name": "個人情報保護委員会",
+        "status": "success",
+        "candidate_count": 10,
+        "error": ""
+      }
+    ]
+  },
+  "top_candidates": [
+    {
+      "source_id": "ppc",
+      "source_name": "個人情報保護委員会",
+      "category": "government",
+      "title": "個人情報保護委員会について",
+      "url": "https://www.ppc.go.jp/aboutus/commission?ref=gnavi",
+      "published_at": "",
+      "discovered_at": "2026-07-23T22:51:40.387023+00:00",
+      "content_type": "html",
+      "matched_keywords": [
+        "個人情報"
+      ],
+      "priority": 5,
+      "status": "new",
+      "fingerprint": "d67a258348d8d87c152966e6c3c147e8a809dab31a01c4b8ebae22d1d44bb656",
+      "score": 55
+    },
+    {
+      "source_id": "ppc",
+      "source_name": "個人情報保護委員会",
+      "category": "government",
+      "title": "個人情報保護委員会の運営",
+      "url": "https://www.ppc.go.jp/aboutus/operating_policy?ref=gnavi",
+      "published_at": "",
+      "discovered_at": "2026-07-23T22:51:40.387182+00:00",
+      "content_type": "html",
+      "matched_keywords": [
+        "個人情報"
+      ],
+      "priority": 5,
+      "status": "new",
+      "fingerprint": "25319555f639f8e093c42eda13349af4f444622e1a97551b01ba76948b9213e8",
+      "score": 55
+    },
+    {
+      "source_id": "jftc",
+      "source_name": "公正取引委員会",
+      "category": "government",
+      "title": "公正取引委員会 について",
+      "url": "https://www.jftc.go.jp/soshiki/index.html",
+      "published_at": "",
+      "discovered_at": "2026-07-23T22:51:38.600363+00:00",
+      "content_type": "html",
+      "matched_keywords": [
+        "取引"
+      ],
+      "priority": 4,
+      "status": "new",
+      "fingerprint": "894e0eb236c811754145b9007f021790df4ad2e24715141975b63717bb79a53d",
+      "score": 43
+    },
+    {
+      "source_id": "jftc",
+      "source_name": "公正取引委員会",
+      "category": "government",
+      "title": "公正取引委員会の紹介",
+      "url": "https://www.jftc.go.jp/soshiki/profile/index.html",
+      "published_at": "",
+      "discovered_at": "2026-07-23T22:51:38.600533+00:00",
+      "content_type": "html",
+      "matched_keywords": [
+        "取引"
+      ],
+      "priority": 4,
+      "status": "new",
+      "fingerprint": "1575ded6fdbcf683c81dacb0d6356333d49a8ea78553fc65974d99872c0d9564",
+      "score": 43
+    },
+    {
+      "source_id": "mhlw",
+      "source_name": "厚生労働省",
+      "category": "government",
+      "title": "æ¬æã¸",
+      "url": "https://www.mhlw.go.jp/index.html",
+      "published_at": "",
+      "discovered_at": "2026-07-23T22:51:34.323064+00:00",
+      "content_type": "html",
+      "matched_keywords": [],
+      "priority": 5,
+      "status": "new",
+      "fingerprint": "1517b52d9c1288d85cabcce98abf92e8152e00e3d6cc2558fda8bcf643b0d7ae",
+      "score": 40
+    }
+  ]
+}
