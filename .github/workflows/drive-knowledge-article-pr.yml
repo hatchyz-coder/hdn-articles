@@ -294,6 +294,7 @@ jobs:
           RESEARCH_REVIEW: ${{ steps.drive.outputs.research_review }}
         run: |
           start=$(date +%s)
+          echo "Creating PR..."
           echo "START create article draft pull request"
           branch="content/drive-knowledge-${SLUG}-${GITHUB_RUN_ID}"
           git checkout -b "$branch"
@@ -357,6 +358,7 @@ jobs:
             echo ""
             echo "| Metric | Value |"
             echo "| --- | ---: |"
+            echo "| Last completed step | ${{ steps.drive.outputs.lastCompletedStep || 'not recorded' }} |"
             echo "| 選定Document ID | ${{ steps.drive.outputs.selectedDocumentId || '' }} |"
             echo "| 文書名 | ${{ steps.drive.outputs.selectedDocumentName || '' }} |"
             echo "| Drive処理秒数 | ${{ steps.drive.outputs.driveSeconds || '0' }} |"
