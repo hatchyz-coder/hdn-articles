@@ -1,0 +1,392 @@
+{
+  "selected": true,
+  "fileId": "11cs_0GbWW3bUcVG4QxH_jWK8f_INXQDwH4Vx_dJ02FA",
+  "name": "LH11_記事7_バイクショップのリピーター運営に｜LHubで整備・点検予約を一括管理 のコピー のコピー",
+  "url": "https://docs.google.com/document/d/11cs_0GbWW3bUcVG4QxH_jWK8f_INXQDwH4Vx_dJ02FA/edit?usp=drivesdk",
+  "modifiedTime": "2026-07-23T03:44:08.643Z",
+  "slug": "lhub-bike-shop-appointment-management",
+  "score": 85,
+  "eeat": {
+    "Experience": 70,
+    "Expertise": 75,
+    "Authority": 60,
+    "Trust": 80
+  },
+  "sourceProcessing": {
+    "mode": "full_text",
+    "sourceTextCharacters": 3426,
+    "chunks": 1,
+    "note": "Full Google Docs body was sent to the article evaluator."
+  },
+  "researchReview": {
+    "additionalVerificationTopics": [
+      "LHubが対応する具体的な決済サービス（例: PayPay、各カード会社）の一覧と手数料",
+      "LINE連携における同意取得とメッセージ配信ルール（各法令・プラットフォーム規約遵守）",
+      "データ移行方法とサポート範囲（CSVフォーマット、項目マッピング等）",
+      "顧客データの保管・暗号化・アクセス制御に関するセキュリティ仕様",
+      "配信機能（ステップ配信・セグメント配信）の細かな挙動と配信上限",
+      "導入後の運用工数（初期設定、スタッフ教育、月次運用）に関する実例"
+    ],
+    "officialSourceCandidates": [
+      "総務省（通信・プラットフォーム関連ガイドライン）",
+      "個人情報保護委員会（個人情報の取り扱い指針）",
+      "消費者庁（電子契約・決済に関する注意点）",
+      "経済産業省（中小企業のIT導入支援情報）",
+      "各決済事業者の公式サイト（PayPay、カード会社など）",
+      "LHub公式ページ（製品仕様・利用規約）"
+    ],
+    "unsupportedClaimsFromSourceOnly": [
+      "LHubが具体的に『PayPay』や各クレジットカードに対応しているという点（ドキュメントで言及はあるが、対応ブランド/手数料は未確認）",
+      "LHub導入によってリピート率が必ず向上するという成果（効果は環境や運用によるため、実データが必要）",
+      "自動リマインドやステップ配信の詳細な挙動・配信上限に関する仕様（仕様は別途確認が必要）",
+      "顧客データの保存方法・暗号化や外部連携時のセキュリティ詳細（ドキュメントには記載なし）"
+    ]
+  },
+  "outputs": [
+    "src/content/articles/lhub-bike-shop-appointment-management.md",
+    "social/lhub-bike-shop-appointment-management/x.md",
+    "social/lhub-bike-shop-appointment-management/facebook.md",
+    "social/lhub-bike-shop-appointment-management/linkedin.md",
+    "outputs/en/lhub-bike-shop-appointment-management.md"
+  ],
+  "runLog": [
+    {
+      "fileId": "1K19gL4HlWkk1wAuOHPX8q73ZNypGGVHo2AFfRWbHnl0",
+      "name": "LH12_記事5_着付け・出張ヘアメイクの繁忙期に｜負担を減らすLHubの実力 のコピー のコピー",
+      "status": "scored",
+      "score": 78
+    },
+    {
+      "fileId": "1IiKzog4fS2_86yplg35Yj3b7g0dpraQWt4Ehu0mT_Kc",
+      "name": "LH12_記事4_アロマセラピスト・ハーブ製品販売者に朗報｜施術・物販・ワークショップを一元化 のコピー のコピー",
+      "status": "scored",
+      "score": 80
+    },
+    {
+      "fileId": "1vhtu3aW-phgZqm-cXIZ3_oYmP-8hPOaGaKsSONkrgww",
+      "name": "LH12_記事6_“声”を活かせる基盤ツール｜収録依頼と個人活動をLHubで整理 のコピー のコピー",
+      "status": "skipped",
+      "reason": "AI score 78 below threshold or safety flags present",
+      "score": 78
+    },
+    {
+      "fileId": "1R6ugJhPWzRTP80Fk7rrK-Ab1RxlgvLbRRprqTBwEn6M",
+      "name": "LH12_記事3_出張シェフ・フードコーディネーターの管理課題に｜LHubでリピーター施策 のコピー のコピー",
+      "status": "scored",
+      "score": 80
+    },
+    {
+      "fileId": "1vDb-co_8OWbJoYPotGnCBJ42fs7I_K148U3tWO0gJ9M",
+      "name": "LH12_記事2_フリーランスのウェディング運営を支援｜見積・日程・受注管理にLHub のコピー のコピー",
+      "status": "scored",
+      "score": 82
+    },
+    {
+      "fileId": "11cs_0GbWW3bUcVG4QxH_jWK8f_INXQDwH4Vx_dJ02FA",
+      "name": "LH11_記事7_バイクショップのリピーター運営に｜LHubで整備・点検予約を一括管理 のコピー のコピー",
+      "status": "scored",
+      "score": 85
+    },
+    {
+      "fileId": "15toxUZFNs3zBGqUdLdo5YrrsuKLDPUCCKB1L8f4eTo8",
+      "name": "LH11_記事5_個人ツアーガイドの新しい運営形｜LHubで予約とリピーター管理を効率化 のコピー のコピー",
+      "status": "scored",
+      "score": 85
+    },
+    {
+      "fileId": "1AYRLcZtLQHAXdteexlFyuFx9mFG_duKrZuyLV2zHiI0",
+      "name": "LH12_記事1_士業の顧客関係を育てる運用へ｜相談管理と継続支援を進めるLHub のコピー のコピー",
+      "status": "scored",
+      "score": 75
+    },
+    {
+      "fileId": "1sASW9FyxDAFMIYLSk1Ys1Ji6BDS7hSFZkjth-3742EM",
+      "name": "LH11_記事6_ベビーシッター・家事代行にLHub｜定期契約と顧客管理をスムーズに のコピー のコピー",
+      "status": "scored",
+      "score": 78
+    },
+    {
+      "fileId": "13hleUhXDRPre-2kyG9kXbORb6NGwioPlDmbtOyOXKYQ",
+      "name": "LH11_記事1_古書店・ミニギャラリーの常連づくりに｜LHubで会員制運営をスマートに のコピー のコピー",
+      "status": "scored",
+      "score": 80
+    },
+    {
+      "fileId": "1rwISJjOOLOv58c-lgo5-y6I_SL2LNRQe5fkOoZQCEWE",
+      "name": "LH11_記事2_動物病院の予約・診療をもっとスムーズに｜LHubでオンライン診療にも対応 のコピー のコピー",
+      "status": "scored",
+      "score": 85
+    },
+    {
+      "fileId": "1lZpaP2SQibFNRCIDW6hpvEfAOHm3cfoosPY1V674xS0",
+      "name": "LH11_記事4_花屋・フラワーデザイナー必見｜LHubで定期配送と予約をまとめて管理 のコピー のコピー",
+      "status": "skipped",
+      "reason": "AI score 85 below threshold or safety flags present",
+      "score": 85
+    },
+    {
+      "fileId": "1h6T5E0rm_Lf_W2Rlb3XKm-_7ah7vmunNs8aoO92Ujgg",
+      "name": "LH10_記事7_農園体験を安定した収益モデルに｜LHubで季節予約と定額制を実現 のコピー のコピー",
+      "status": "skipped",
+      "reason": "AI score 80 below threshold or safety flags present",
+      "score": 80
+    },
+    {
+      "fileId": "189OAGmPAjzTIyI-vQg6t_vsDiPIBzY379Hba1BZPbhk",
+      "name": "LH11_記事3_フリーランスモデルの活動を支える｜LHubでファン管理と収益化を両立 のコピー のコピー",
+      "status": "skipped",
+      "reason": "AI score 75 below threshold or safety flags present",
+      "score": 75
+    },
+    {
+      "fileId": "1whZjuU6XuaNHt8ay2pV0Q_73R42ibMqnLc-XfMJJYyc",
+      "name": "LH10_記事5_シーシャバー・CBDカフェの常連囲い込み｜LHubで会員制とサブスクを導入 のコピー のコピー",
+      "status": "skipped",
+      "reason": "AI score 82 below threshold or safety flags present",
+      "score": 82
+    },
+    {
+      "fileId": "1OASALVMI2k4j7BByZpB3HXi04MFCN2hfggUIn-Upevs",
+      "name": "LH10_記事3_推しグッズ・カスタムプリント販売を効率化｜LHubでスムーズな予約〜決済 のコピー のコピー",
+      "status": "scored",
+      "score": 85
+    },
+    {
+      "fileId": "1DWphzCp05hCLXpL2C7j89alwMIYqKDVpY1PoQmmoJNw",
+      "name": "LH10_記事6_NFT・デジタルアート販売を一元化｜会員制・限定公開もLHubで！ のコピー のコピー",
+      "status": "scored",
+      "score": 85
+    },
+    {
+      "fileId": "1FApb5fu83UdOgCs5e8ILBzN8u67Tuo_NTzltpbKoDVg",
+      "name": "LH10_記事4_トレイルラン・アウトドアのコミュニティ運営に朗報｜活動資金と交流にLHubが一役 のコピー のコピー",
+      "status": "scored",
+      "score": 78
+    },
+    {
+      "fileId": "12_Qg3TjrjTUsHAMPqKXF0MM5x4irTmPpsT-c_UzYo2g",
+      "name": "LH9_記事7_クラフトビール醸造所のファンづくり｜LHubで定額制・限定販売を仕組み化（202511済） のコピー のコピー",
+      "status": "scored",
+      "score": 78
+    },
+    {
+      "fileId": "1jsN6_XW-O9XvLSuBRuP2-yoNxKH8fP6Zn-B7vLY9QFI",
+      "name": "LH5_記事2_LINE × 定期販売・会費管理で収益を安定化｜LHub活用パターン4選 のコピー のコピー",
+      "status": "skipped",
+      "reason": "AI score 80 below threshold or safety flags present",
+      "score": 80
+    },
+    {
+      "fileId": "1Nm0qfk8B2ImOZH0vhmslC9JW56YLgLjzIu8UCBCzMaU",
+      "name": "LH6_記事3_ハンドメイド・雑貨販売など個人ECの運営管理を一元化 のコピー のコピー",
+      "status": "scored",
+      "score": 82
+    },
+    {
+      "fileId": "1gF2D0fBuNNwk0aRAk8Dol2c7pRpx60sVzkvr6XuuO5w",
+      "name": "LH6_記事1_決済サービスの次を見据える“継続課金モデル”の強み のコピー のコピー",
+      "status": "scored",
+      "score": 78
+    },
+    {
+      "fileId": "19rxMDX1DxKoBI0cOM8I3Tbw6B1O_92hYYtjE2h1wvwc",
+      "name": "LH6_記事2_動画配信者とファンとの接点を深めるLHubの特性 のコピー のコピー",
+      "status": "scored",
+      "score": 80
+    },
+    {
+      "fileId": "17jsivipWg0gCw3S8tuDEeAd9GmEJy11MgiY4JVKEpzI",
+      "name": "LH5_記事1_LINEで予約・受注・販売・決済まで一元化｜LHubが選ばれる理由　済 のコピー のコピー",
+      "status": "scored",
+      "score": 80
+    },
+    {
+      "fileId": "1CywYniM2xWSoJ2poSupqqNr1dlAxS2IpIBDvALdiYVw",
+      "name": "LH9_記事6_eスポーツカフェ運営を支える新モデル｜LHubで大会予約・会員制・サブスクを実現 のコピー のコピー",
+      "status": "skipped_confidential",
+      "reason": "confidentiality heuristic matched: contract_amount"
+    },
+    {
+      "fileId": "1-zPzEqlL5pDdChYaJGBK37HWKKCNIhmTH8gFGUNPj6Q",
+      "name": "LH6_記事5_“信頼構築型”の相談・癒し・子育て支援ジャンルとの好相性 のコピー のコピー",
+      "status": "skipped",
+      "reason": "AI score 80 below threshold or safety flags present",
+      "score": 80
+    },
+    {
+      "fileId": "13yDfHz9q1gx4n216k84jiEhGK35e80BabYP1EWiyKAY",
+      "name": "LH6_記事6_デザイナー・ライターなどクリエイティブ系職の成果物収益化にも活用 のコピー のコピー",
+      "status": "skipped",
+      "reason": "AI score 85 below threshold or safety flags present",
+      "score": 85
+    },
+    {
+      "fileId": "1Lk564RIkqCF7fu4BWac0q1MUS4osT4TsGJdF_tUhA-0",
+      "name": "LH6_記事4_士業・講師・カメラマンなど「予約型サービス」に有用しやすい設計 のコピー のコピー",
+      "status": "scored",
+      "score": 85
+    },
+    {
+      "fileId": "1weDh1guOSdFfjhLzIeQlj0DOBZDsr--DUlh48bT4gDk",
+      "name": "LH9_記事2_古民家リノベ宿・シェアスペース運営にLHubを導入するメリットとは？ のコピー のコピー",
+      "status": "skipped",
+      "reason": "AI score 78 below threshold or safety flags present",
+      "score": 78
+    },
+    {
+      "fileId": "1NTKy0NAknfj5rZSSrgzvQKCZGnMDQtS5sWRgEvCxqnI",
+      "name": "LH9_記事5_ファンが通い続ける「推し活カフェ」運営に｜LHubで予約・会員制・物販を一元化 のコピー のコピー",
+      "status": "skipped",
+      "reason": "AI score 85 below threshold or safety flags present",
+      "score": 85
+    },
+    {
+      "fileId": "1Kvodeu8vYIKmeNFFC48M4wz5GRVJ6N8PexCVQ3WyC3E",
+      "name": "LH5_記事3_LINE連携でECをもっとシンプルに｜LHubが実現する拡張型ショッピング運営 のコピー のコピー",
+      "status": "scored",
+      "score": 80
+    },
+    {
+      "fileId": "1U3socAJkGI-KyMrme_ZxldMpbSPPBnxNpxRhIWSKRTs",
+      "name": "LH12_記事7_コスプレ・撮影会をスマートに運営｜LHubで動員力を底上げ のコピー のコピー",
+      "status": "skipped",
+      "reason": "AI score 70 below threshold or safety flags present",
+      "score": 70
+    },
+    {
+      "fileId": "157gc0U_5oxAQpAxzh2ITHp3sXrj7Tri9WwOJ6f4PlAc",
+      "name": "LH9_記事3_サウナブームで“ととのう”収入モデル｜LINE決済×会員制サービス活用術 のコピー のコピー",
+      "status": "scored",
+      "score": 85
+    },
+    {
+      "fileId": "1NQquHNQhIBnQu77PN8qmRthF0Re06KkW_h-iO1L9eTo",
+      "name": "LH9_記事4_SNSで人気のパーソナルカラー診断を収益化｜LHubで予約・診断後フォローを強化 のコピー のコピー",
+      "status": "skipped",
+      "reason": "AI score 82 below threshold or safety flags present",
+      "score": 82
+    },
+    {
+      "fileId": "13MWuqJVThucrfHQtVNxUT-rElWUZvMvkPbBNA0ruUT8",
+      "name": "LH8_記事6_鑑定と物販を自然につなぐ｜LHubで高額占いサービスを進化 のコピー のコピー",
+      "status": "scored",
+      "score": 75
+    },
+    {
+      "fileId": "1tDKrdXC__5rnGdhwC2pppTrXGY5f2riKMHGUwLtMl0g",
+      "name": "LH9_記事1_不動産仲介・管理業の業務をスマート化｜LHubで「予約・契約・決済」を一元管理 のコピー のコピー",
+      "status": "scored",
+      "score": 85
+    },
+    {
+      "fileId": "1QyvVBXL3Py2f6yTxQC_2zpg3oE74dBmkDk_S_Su3PII",
+      "name": "LH8_記事5_施術も物販も一元管理｜美容クリニックの業務効率化はLHubで のコピー のコピー",
+      "status": "scored",
+      "score": 85
+    },
+    {
+      "fileId": "1bF1K35xX-m4sbSfofIFCoM2_lSHu8DCXPiZLa8cklss",
+      "name": "LH8_記事4_オンライン診療をもっとスムーズに｜LHubで予約から処方箋発行まで完結 のコピー のコピー",
+      "status": "skipped",
+      "reason": "AI score 85 below threshold or safety flags present",
+      "score": 85
+    },
+    {
+      "fileId": "15FoLvpRn3nUkidmxjEVv3MwgPDRLjtBHDybPJEwZkLo",
+      "name": "LH8_記事7_占い師の新しい収益モデル｜LHubで始める会員制・サブスク鑑定 のコピー のコピー",
+      "status": "scored",
+      "score": 75
+    },
+    {
+      "fileId": "1rT-f34x4rmQLa97BxQ-EacnSAvahMvpC4yF6tkbzW4A",
+      "name": "LH8_記事1_3業種で実証｜LHubが変える「販売・予約・顧客管理」の新常識 のコピー のコピー",
+      "status": "scored",
+      "score": 80
+    },
+    {
+      "fileId": "1BNVTqdH9gx4kZ120oK7_cqniHcuOJkulcsidM6TDlvo",
+      "name": "LH8_記事2_一点ものを売り逃さない｜古着業者がLHubで実現する販売スピード革命 のコピー のコピー",
+      "status": "scored",
+      "score": 78
+    },
+    {
+      "fileId": "10xzydtE_CNWfxBNq_-W5-OX1riviwM4wK7Pd4BhbZ-8",
+      "name": "LH8_記事3_常連客の“推し店”に｜LHubでつくる古着ファンコミュニティ のコピー のコピー",
+      "status": "skipped",
+      "reason": "AI score 80 below threshold or safety flags present",
+      "score": 80
+    },
+    {
+      "fileId": "1tlmyUuowcR_-5slWFABxD59A8dUrpKlgBnIEtlTm4Y0",
+      "name": "LH7_記事7_ファンとの“つながり”を可視化する｜LHubでファンクラブ運営をもっと柔軟に のコピー のコピー",
+      "status": "skipped",
+      "reason": "AI score 82 below threshold or safety flags present",
+      "score": 82
+    },
+    {
+      "fileId": "1fr0zP6FMj7U4tZF8rgQQWEPEZBOqZVeHna9oRg2bN7M",
+      "name": "LH7_記事6_占い師・鑑定師のLINE活用術｜LHubで「依頼・予約・決済」をすべて自動化 のコピー のコピー",
+      "status": "scored",
+      "score": 78
+    },
+    {
+      "fileId": "115C16sO7TDyVG8o9Hwq9eoiXFzipjxbQLz0LJyKp_7Q",
+      "name": "LH7_記事1_オンライン診療をLINEで完結｜LHubがつなぐ予約・決済・処方のスマート導線 のコピー のコピー",
+      "status": "scored",
+      "score": 80
+    },
+    {
+      "fileId": "1uQuf8SQoreVdV3d4WC6FuJrL88DnUUmEEBxA85O_490",
+      "name": "LH7_記事4_整体院・接骨院の顧客対応をスマート化｜LHubで実現する“通いやすい”仕組み のコピー のコピー",
+      "status": "scored",
+      "score": 85
+    },
+    {
+      "fileId": "1ZBn61G8oBlH7lO6feD9sc-uo7vczBpZ9pbRZeP-AJ6k",
+      "name": "LH7_記事5_教室経営に“ちょうどいい”LINEツール｜LHubで月謝・予約・体験申込もスムーズに のコピー のコピー",
+      "status": "skipped",
+      "reason": "AI score 78 below threshold or safety flags present",
+      "score": 78
+    },
+    {
+      "fileId": "1OwrG8vtFMm9vchctzI0v_KrmXSfPiiy4YSczd219MVs",
+      "name": "LH7_記事3_予約もリピートもLINEに集約｜エステサロンが注目するLHubの実力 のコピー のコピー",
+      "status": "scored",
+      "score": 80
+    },
+    {
+      "fileId": "1eSqfHIUJZdfVaypRBvefwDY9mor8l7BruqCRQfS5EME",
+      "name": "LH7_記事2_患者の“うっかり忘れ”を防ぐ｜歯科クリニックにLHubが選ばれる理由 のコピー のコピー",
+      "status": "skipped",
+      "reason": "AI score 82 below threshold or safety flags present",
+      "score": 82
+    },
+    {
+      "fileId": "12YxAZ0MOttYAoKrUZxdpkhhsIG5IRyRrXzMDKfqtuRc",
+      "name": "HUSH開発プロジェクト 進捗報告書",
+      "status": "skipped",
+      "reason": "AI score 80 below threshold or safety flags present",
+      "score": 80
+    },
+    {
+      "fileId": "1ZKowageydED_CbXUNaszOwbMMlD3ylwdDQXfmA_NmfY",
+      "name": "大川歯科_医師採用相場調査_採用ページ追記案",
+      "status": "skipped",
+      "reason": "AI score 85 below threshold or safety flags present",
+      "score": 85
+    },
+    {
+      "fileId": "1LZGoLM7SDmoSeZue6F2SAxwlG2Daogs2tKviWymyi6U",
+      "name": "大川歯科_医師採用相場調査_採用ページ追記案（元原稿）",
+      "status": "skipped_confidential",
+      "reason": "confidentiality heuristic matched: postal_address"
+    },
+    {
+      "fileId": "1c8SXNFwSvD495txTRcSgUWNzkoZqSnS3EexoP0neA0Y",
+      "name": "竹内先生とのMTG結果（CTFさんへご報告）",
+      "status": "skipped",
+      "reason": "元資料には個人名（竹内先生、羽田野氏など）や特定の組織（YDC、CTF）および当該当事者間の法的/契約的争いに関する具体的な内部情報が含まれています。HDNの公開用知識ベース記事では、非公開の個人情報・社名・クライアント固有の紛争内容や契約詳細を含めて生成することはできません。このため、本資料を基に公開記事資産を作成するのは不適切であり、生成を中止します。必要であれば、個人名や企業名を一般化・匿名化し、争点を一般的なガイドラインや運用上の注意点として再構成した上で改めて記事化の可否を相談してください。",
+      "score": 30
+    }
+  ]
+}

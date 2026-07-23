@@ -1,0 +1,584 @@
+{
+  "documents": {
+    "1vhtu3aW-phgZqm-cXIZ3_oYmP-8hPOaGaKsSONkrgww": {
+      "name": "LH12_記事6_“声”を活かせる基盤ツール｜収録依頼と個人活動をLHubで整理 のコピー のコピー",
+      "url": "https://docs.google.com/document/d/1vhtu3aW-phgZqm-cXIZ3_oYmP-8hPOaGaKsSONkrgww/edit?usp=drivesdk",
+      "modifiedTime": "2026-07-23T03:44:09.768Z",
+      "processedAt": "2026-07-23T05:38:30.862192+00:00",
+      "status": "skipped",
+      "reason": "AI score 78 below threshold or safety flags present",
+      "score": 78,
+      "eeat": {
+        "Experience": 70,
+        "Expertise": 65,
+        "Authority": 60,
+        "Trust": 70
+      },
+      "flags": [
+        "product_marketing",
+        "internal_draft"
+      ],
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3702,
+        "chunks": 1,
+        "note": "Full Google Docs body was sent to the article evaluator."
+      }
+    },
+    "1lZpaP2SQibFNRCIDW6hpvEfAOHm3cfoosPY1V674xS0": {
+      "name": "LH11_記事4_花屋・フラワーデザイナー必見｜LHubで定期配送と予約をまとめて管理 のコピー のコピー",
+      "url": "https://docs.google.com/document/d/1lZpaP2SQibFNRCIDW6hpvEfAOHm3cfoosPY1V674xS0/edit?usp=drivesdk",
+      "modifiedTime": "2026-07-23T03:43:53.195Z",
+      "processedAt": "2026-07-23T05:46:18.898216+00:00",
+      "status": "skipped",
+      "reason": "AI score 85 below threshold or safety flags present",
+      "score": 85,
+      "eeat": {
+        "Experience": 70,
+        "Expertise": 65,
+        "Authority": 60,
+        "Trust": 70
+      },
+      "flags": [
+        "no_personal_data",
+        "no_confidential_client_info",
+        "no_patient_data"
+      ],
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3430,
+        "chunks": 1,
+        "note": "Full Google Docs body was sent to the article evaluator."
+      }
+    },
+    "1h6T5E0rm_Lf_W2Rlb3XKm-_7ah7vmunNs8aoO92Ujgg": {
+      "name": "LH10_記事7_農園体験を安定した収益モデルに｜LHubで季節予約と定額制を実現 のコピー のコピー",
+      "url": "https://docs.google.com/document/d/1h6T5E0rm_Lf_W2Rlb3XKm-_7ah7vmunNs8aoO92Ujgg/edit?usp=drivesdk",
+      "modifiedTime": "2026-07-23T03:43:53.195Z",
+      "processedAt": "2026-07-23T05:47:08.057823+00:00",
+      "status": "skipped",
+      "reason": "AI score 80 below threshold or safety flags present",
+      "score": 80,
+      "eeat": {
+        "Experience": 70,
+        "Expertise": 70,
+        "Authority": 60,
+        "Trust": 75
+      },
+      "flags": [
+        "contains_unverified_case_study",
+        "mentions_commercial_product",
+        "no_personal_data"
+      ],
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3486,
+        "chunks": 1,
+        "note": "Full Google Docs body was sent to the article evaluator."
+      }
+    },
+    "189OAGmPAjzTIyI-vQg6t_vsDiPIBzY379Hba1BZPbhk": {
+      "name": "LH11_記事3_フリーランスモデルの活動を支える｜LHubでファン管理と収益化を両立 のコピー のコピー",
+      "url": "https://docs.google.com/document/d/189OAGmPAjzTIyI-vQg6t_vsDiPIBzY379Hba1BZPbhk/edit?usp=drivesdk",
+      "modifiedTime": "2026-07-23T03:43:53.195Z",
+      "processedAt": "2026-07-23T05:47:50.652731+00:00",
+      "status": "skipped",
+      "reason": "AI score 75 below threshold or safety flags present",
+      "score": 75,
+      "eeat": {
+        "Experience": 60,
+        "Expertise": 65,
+        "Authority": 50,
+        "Trust": 80
+      },
+      "flags": [
+        "product_name_present"
+      ],
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3422,
+        "chunks": 1,
+        "note": "Full Google Docs body was sent to the article evaluator."
+      }
+    },
+    "1whZjuU6XuaNHt8ay2pV0Q_73R42ibMqnLc-XfMJJYyc": {
+      "name": "LH10_記事5_シーシャバー・CBDカフェの常連囲い込み｜LHubで会員制とサブスクを導入 のコピー のコピー",
+      "url": "https://docs.google.com/document/d/1whZjuU6XuaNHt8ay2pV0Q_73R42ibMqnLc-XfMJJYyc/edit?usp=drivesdk",
+      "modifiedTime": "2026-07-23T03:43:52.723Z",
+      "processedAt": "2026-07-23T05:48:35.864887+00:00",
+      "status": "skipped",
+      "reason": "AI score 82 below threshold or safety flags present",
+      "score": 82,
+      "eeat": {
+        "Experience": 70,
+        "Expertise": 75,
+        "Authority": 60,
+        "Trust": 65
+      },
+      "flags": [
+        "no_confidential_info"
+      ],
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3566,
+        "chunks": 1,
+        "note": "Full Google Docs body was sent to the article evaluator."
+      }
+    },
+    "1jsN6_XW-O9XvLSuBRuP2-yoNxKH8fP6Zn-B7vLY9QFI": {
+      "name": "LH5_記事2_LINE × 定期販売・会費管理で収益を安定化｜LHub活用パターン4選 のコピー のコピー",
+      "url": "https://docs.google.com/document/d/1jsN6_XW-O9XvLSuBRuP2-yoNxKH8fP6Zn-B7vLY9QFI/edit?usp=drivesdk",
+      "modifiedTime": "2026-07-23T03:43:35.901Z",
+      "processedAt": "2026-07-23T05:52:59.742428+00:00",
+      "status": "skipped",
+      "reason": "AI score 80 below threshold or safety flags present",
+      "score": 80,
+      "eeat": {
+        "Experience": 75,
+        "Expertise": 70,
+        "Authority": 60,
+        "Trust": 65
+      },
+      "flags": [
+        "no_personal_data",
+        "no_client_names",
+        "product_marketing_content",
+        "mentions_medical_use"
+      ],
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3650,
+        "chunks": 1,
+        "note": "Full Google Docs body was sent to the article evaluator."
+      }
+    },
+    "1CywYniM2xWSoJ2poSupqqNr1dlAxS2IpIBDvALdiYVw": {
+      "name": "LH9_記事6_eスポーツカフェ運営を支える新モデル｜LHubで大会予約・会員制・サブスクを実現 のコピー のコピー",
+      "url": "https://docs.google.com/document/d/1CywYniM2xWSoJ2poSupqqNr1dlAxS2IpIBDvALdiYVw/edit?usp=drivesdk",
+      "modifiedTime": "2026-07-23T03:43:35.767Z",
+      "processedAt": "2026-07-23T05:56:28.734436+00:00",
+      "status": "skipped_confidential",
+      "reason": "confidentiality heuristic matched: contract_amount",
+      "flags": [
+        "contract_amount"
+      ]
+    },
+    "1-zPzEqlL5pDdChYaJGBK37HWKKCNIhmTH8gFGUNPj6Q": {
+      "name": "LH6_記事5_“信頼構築型”の相談・癒し・子育て支援ジャンルとの好相性 のコピー のコピー",
+      "url": "https://docs.google.com/document/d/1-zPzEqlL5pDdChYaJGBK37HWKKCNIhmTH8gFGUNPj6Q/edit?usp=drivesdk",
+      "modifiedTime": "2026-07-23T03:43:35.767Z",
+      "processedAt": "2026-07-23T05:57:18.545901+00:00",
+      "status": "skipped",
+      "reason": "AI score 80 below threshold or safety flags present",
+      "score": 80,
+      "eeat": {
+        "Experience": 70,
+        "Expertise": 65,
+        "Authority": 60,
+        "Trust": 70
+      },
+      "flags": [
+        "contains_product_name",
+        "marketing_content"
+      ],
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3635,
+        "chunks": 1,
+        "note": "Full Google Docs body was sent to the article evaluator."
+      }
+    },
+    "13yDfHz9q1gx4n216k84jiEhGK35e80BabYP1EWiyKAY": {
+      "name": "LH6_記事6_デザイナー・ライターなどクリエイティブ系職の成果物収益化にも活用 のコピー のコピー",
+      "url": "https://docs.google.com/document/d/13yDfHz9q1gx4n216k84jiEhGK35e80BabYP1EWiyKAY/edit?usp=drivesdk",
+      "modifiedTime": "2026-07-23T03:43:35.767Z",
+      "processedAt": "2026-07-23T05:58:08.253102+00:00",
+      "status": "skipped",
+      "reason": "AI score 85 below threshold or safety flags present",
+      "score": 85,
+      "eeat": {
+        "Experience": 70,
+        "Expertise": 75,
+        "Authority": 60,
+        "Trust": 70
+      },
+      "flags": [
+        "internal_product_marketing",
+        "no_personal_data",
+        "no_patient_information",
+        "no_confidential_client_data"
+      ],
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3361,
+        "chunks": 1,
+        "note": "Full Google Docs body was sent to the article evaluator."
+      }
+    },
+    "1weDh1guOSdFfjhLzIeQlj0DOBZDsr--DUlh48bT4gDk": {
+      "name": "LH9_記事2_古民家リノベ宿・シェアスペース運営にLHubを導入するメリットとは？ のコピー のコピー",
+      "url": "https://docs.google.com/document/d/1weDh1guOSdFfjhLzIeQlj0DOBZDsr--DUlh48bT4gDk/edit?usp=drivesdk",
+      "modifiedTime": "2026-07-23T03:43:35.767Z",
+      "processedAt": "2026-07-23T05:59:37.767474+00:00",
+      "status": "skipped",
+      "reason": "AI score 78 below threshold or safety flags present",
+      "score": 78,
+      "eeat": {
+        "Experience": 70,
+        "Expertise": 65,
+        "Authority": 60,
+        "Trust": 75
+      },
+      "flags": [
+        "no_confidential_info"
+      ],
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3805,
+        "chunks": 1,
+        "note": "Full Google Docs body was sent to the article evaluator."
+      }
+    },
+    "1NTKy0NAknfj5rZSSrgzvQKCZGnMDQtS5sWRgEvCxqnI": {
+      "name": "LH9_記事5_ファンが通い続ける「推し活カフェ」運営に｜LHubで予約・会員制・物販を一元化 のコピー のコピー",
+      "url": "https://docs.google.com/document/d/1NTKy0NAknfj5rZSSrgzvQKCZGnMDQtS5sWRgEvCxqnI/edit?usp=drivesdk",
+      "modifiedTime": "2026-07-23T03:43:19.175Z",
+      "processedAt": "2026-07-23T06:00:31.354580+00:00",
+      "status": "skipped",
+      "reason": "AI score 85 below threshold or safety flags present",
+      "score": 85,
+      "eeat": {
+        "Experience": 75,
+        "Expertise": 70,
+        "Authority": 60,
+        "Trust": 70
+      },
+      "flags": [
+        "contains_product_name",
+        "no_personal_data",
+        "no_confidential_client_info"
+      ],
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3965,
+        "chunks": 1,
+        "note": "Full Google Docs body was sent to the article evaluator."
+      }
+    },
+    "1U3socAJkGI-KyMrme_ZxldMpbSPPBnxNpxRhIWSKRTs": {
+      "name": "LH12_記事7_コスプレ・撮影会をスマートに運営｜LHubで動員力を底上げ のコピー のコピー",
+      "url": "https://docs.google.com/document/d/1U3socAJkGI-KyMrme_ZxldMpbSPPBnxNpxRhIWSKRTs/edit?usp=drivesdk",
+      "modifiedTime": "2026-07-23T03:43:19.175Z",
+      "processedAt": "2026-07-23T06:02:05.505541+00:00",
+      "status": "skipped",
+      "reason": "AI score 70 below threshold or safety flags present",
+      "score": 70,
+      "eeat": {
+        "Experience": 80,
+        "Expertise": 75,
+        "Authority": 60,
+        "Trust": 70
+      },
+      "flags": [
+        "contains_internal_product_name",
+        "no_personal_data",
+        "no_confidential_client_data"
+      ],
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3810,
+        "chunks": 1,
+        "note": "Full Google Docs body was sent to the article evaluator."
+      }
+    },
+    "1NQquHNQhIBnQu77PN8qmRthF0Re06KkW_h-iO1L9eTo": {
+      "name": "LH9_記事4_SNSで人気のパーソナルカラー診断を収益化｜LHubで予約・診断後フォローを強化 のコピー のコピー",
+      "url": "https://docs.google.com/document/d/1NQquHNQhIBnQu77PN8qmRthF0Re06KkW_h-iO1L9eTo/edit?usp=drivesdk",
+      "modifiedTime": "2026-07-23T03:43:19.175Z",
+      "processedAt": "2026-07-23T06:03:50.331404+00:00",
+      "status": "skipped",
+      "reason": "AI score 82 below threshold or safety flags present",
+      "score": 82,
+      "eeat": {
+        "Experience": 80,
+        "Expertise": 75,
+        "Authority": 70,
+        "Trust": 80
+      },
+      "flags": [
+        "internal_marketing_content",
+        "no_personal_data"
+      ],
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 4115,
+        "chunks": 1,
+        "note": "Full Google Docs body was sent to the article evaluator."
+      }
+    },
+    "1bF1K35xX-m4sbSfofIFCoM2_lSHu8DCXPiZLa8cklss": {
+      "name": "LH8_記事4_オンライン診療をもっとスムーズに｜LHubで予約から処方箋発行まで完結 のコピー のコピー",
+      "url": "https://docs.google.com/document/d/1bF1K35xX-m4sbSfofIFCoM2_lSHu8DCXPiZLa8cklss/edit?usp=drivesdk",
+      "modifiedTime": "2026-07-23T03:43:18.472Z",
+      "processedAt": "2026-07-23T06:07:42.940631+00:00",
+      "status": "skipped",
+      "reason": "AI score 85 below threshold or safety flags present",
+      "score": 85,
+      "eeat": {
+        "Experience": 70,
+        "Expertise": 75,
+        "Authority": 60,
+        "Trust": 65
+      },
+      "flags": [
+        "no_personal_data",
+        "no_confidential_client_data"
+      ],
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3612,
+        "chunks": 1,
+        "note": "Full Google Docs body was sent to the article evaluator."
+      }
+    },
+    "10xzydtE_CNWfxBNq_-W5-OX1riviwM4wK7Pd4BhbZ-8": {
+      "name": "LH8_記事3_常連客の“推し店”に｜LHubでつくる古着ファンコミュニティ のコピー のコピー",
+      "url": "https://docs.google.com/document/d/10xzydtE_CNWfxBNq_-W5-OX1riviwM4wK7Pd4BhbZ-8/edit?usp=drivesdk",
+      "modifiedTime": "2026-07-23T03:43:02.540Z",
+      "processedAt": "2026-07-23T06:12:00.759904+00:00",
+      "status": "skipped",
+      "reason": "AI score 80 below threshold or safety flags present",
+      "score": 80,
+      "eeat": {
+        "Experience": 75,
+        "Expertise": 70,
+        "Authority": 65,
+        "Trust": 80
+      },
+      "flags": [
+        "no_personal_data",
+        "no_patient_information",
+        "no_client_names",
+        "internal_draft"
+      ],
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3589,
+        "chunks": 1,
+        "note": "Full Google Docs body was sent to the article evaluator."
+      }
+    },
+    "1tlmyUuowcR_-5slWFABxD59A8dUrpKlgBnIEtlTm4Y0": {
+      "name": "LH7_記事7_ファンとの“つながり”を可視化する｜LHubでファンクラブ運営をもっと柔軟に のコピー のコピー",
+      "url": "https://docs.google.com/document/d/1tlmyUuowcR_-5slWFABxD59A8dUrpKlgBnIEtlTm4Y0/edit?usp=drivesdk",
+      "modifiedTime": "2026-07-23T03:43:02.540Z",
+      "processedAt": "2026-07-23T06:12:56.541542+00:00",
+      "status": "skipped",
+      "reason": "AI score 82 below threshold or safety flags present",
+      "score": 82,
+      "eeat": {
+        "Experience": 70,
+        "Expertise": 65,
+        "Authority": 50,
+        "Trust": 72
+      },
+      "flags": [
+        "no_confidential_info_detected"
+      ],
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3804,
+        "chunks": 1,
+        "note": "Full Google Docs body was sent to the article evaluator."
+      }
+    },
+    "1ZBn61G8oBlH7lO6feD9sc-uo7vczBpZ9pbRZeP-AJ6k": {
+      "name": "LH7_記事5_教室経営に“ちょうどいい”LINEツール｜LHubで月謝・予約・体験申込もスムーズに のコピー のコピー",
+      "url": "https://docs.google.com/document/d/1ZBn61G8oBlH7lO6feD9sc-uo7vczBpZ9pbRZeP-AJ6k/edit?usp=drivesdk",
+      "modifiedTime": "2026-07-23T03:43:02.529Z",
+      "processedAt": "2026-07-23T06:16:30.810312+00:00",
+      "status": "skipped",
+      "reason": "AI score 78 below threshold or safety flags present",
+      "score": 78,
+      "eeat": {
+        "Experience": 75,
+        "Expertise": 70,
+        "Authority": 55,
+        "Trust": 75
+      },
+      "flags": [
+        "product_marketing_content",
+        "no_personal_data",
+        "no_confidential_client_examples"
+      ],
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3330,
+        "chunks": 1,
+        "note": "Full Google Docs body was sent to the article evaluator."
+      }
+    },
+    "1eSqfHIUJZdfVaypRBvefwDY9mor8l7BruqCRQfS5EME": {
+      "name": "LH7_記事2_患者の“うっかり忘れ”を防ぐ｜歯科クリニックにLHubが選ばれる理由 のコピー のコピー",
+      "url": "https://docs.google.com/document/d/1eSqfHIUJZdfVaypRBvefwDY9mor8l7BruqCRQfS5EME/edit?usp=drivesdk",
+      "modifiedTime": "2026-07-23T03:43:02.529Z",
+      "processedAt": "2026-07-23T06:18:20.778816+00:00",
+      "status": "skipped",
+      "reason": "AI score 82 below threshold or safety flags present",
+      "score": 82,
+      "eeat": {
+        "Experience": 70,
+        "Expertise": 65,
+        "Authority": 60,
+        "Trust": 60
+      },
+      "flags": [
+        "no_personal_data",
+        "no_confidential_clients",
+        "marketing_material"
+      ],
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3511,
+        "chunks": 1,
+        "note": "Full Google Docs body was sent to the article evaluator."
+      }
+    },
+    "12YxAZ0MOttYAoKrUZxdpkhhsIG5IRyRrXzMDKfqtuRc": {
+      "name": "HUSH開発プロジェクト 進捗報告書",
+      "url": "https://docs.google.com/document/d/12YxAZ0MOttYAoKrUZxdpkhhsIG5IRyRrXzMDKfqtuRc/edit?usp=drivesdk",
+      "modifiedTime": "2026-07-23T00:48:16.001Z",
+      "processedAt": "2026-07-23T06:19:23.050214+00:00",
+      "status": "skipped",
+      "reason": "AI score 80 below threshold or safety flags present",
+      "score": 80,
+      "eeat": {
+        "Experience": 80,
+        "Expertise": 72,
+        "Authority": 65,
+        "Trust": 75
+      },
+      "flags": [
+        "contains_external_company_names",
+        "internal_project_report",
+        "commercial_development_details"
+      ],
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 1717,
+        "chunks": 1,
+        "note": "Full Google Docs body was sent to the article evaluator."
+      }
+    },
+    "1ZKowageydED_CbXUNaszOwbMMlD3ylwdDQXfmA_NmfY": {
+      "name": "大川歯科_医師採用相場調査_採用ページ追記案",
+      "url": "https://docs.google.com/document/d/1ZKowageydED_CbXUNaszOwbMMlD3ylwdDQXfmA_NmfY/edit?usp=drivesdk",
+      "modifiedTime": "2026-07-22T23:33:15.296Z",
+      "processedAt": "2026-07-23T06:20:22.065132+00:00",
+      "status": "skipped",
+      "reason": "AI score 85 below threshold or safety flags present",
+      "score": 85,
+      "eeat": {
+        "Experience": 80,
+        "Expertise": 85,
+        "Authority": 70,
+        "Trust": 80
+      },
+      "flags": [
+        "source_contains_company_name",
+        "no_personal_data",
+        "no_patient_data"
+      ],
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 2589,
+        "chunks": 1,
+        "note": "Full Google Docs body was sent to the article evaluator."
+      }
+    },
+    "1LZGoLM7SDmoSeZue6F2SAxwlG2Daogs2tKviWymyi6U": {
+      "name": "大川歯科_医師採用相場調査_採用ページ追記案（元原稿）",
+      "url": "https://docs.google.com/document/d/1LZGoLM7SDmoSeZue6F2SAxwlG2Daogs2tKviWymyi6U/edit?usp=drivesdk",
+      "modifiedTime": "2026-07-22T23:32:28.601Z",
+      "processedAt": "2026-07-23T06:20:22.827968+00:00",
+      "status": "skipped_confidential",
+      "reason": "confidentiality heuristic matched: postal_address",
+      "flags": [
+        "postal_address"
+      ]
+    },
+    "1c8SXNFwSvD495txTRcSgUWNzkoZqSnS3EexoP0neA0Y": {
+      "name": "竹内先生とのMTG結果（CTFさんへご報告）",
+      "url": "https://docs.google.com/document/d/1c8SXNFwSvD495txTRcSgUWNzkoZqSnS3EexoP0neA0Y/edit?usp=drivesdk",
+      "modifiedTime": "2026-07-22T23:08:16.014Z",
+      "processedAt": "2026-07-23T06:20:46.202624+00:00",
+      "status": "skipped",
+      "reason": "元資料には個人名（竹内先生、羽田野氏など）や特定の組織（YDC、CTF）および当該当事者間の法的/契約的争いに関する具体的な内部情報が含まれています。HDNの公開用知識ベース記事では、非公開の個人情報・社名・クライアント固有の紛争内容や契約詳細を含めて生成することはできません。このため、本資料を基に公開記事資産を作成するのは不適切であり、生成を中止します。必要であれば、個人名や企業名を一般化・匿名化し、争点を一般的なガイドラインや運用上の注意点として再構成した上で改めて記事化の可否を相談してください。",
+      "score": 30,
+      "eeat": {
+        "Experience": 35,
+        "Expertise": 45,
+        "Authority": 30,
+        "Trust": 25
+      },
+      "flags": [
+        "personal_names",
+        "internal_client_names",
+        "legal_dispute_details",
+        "potentially_confidential_contract_info"
+      ],
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 1160,
+        "chunks": 1,
+        "note": "Full Google Docs body was sent to the article evaluator."
+      }
+    },
+    "11cs_0GbWW3bUcVG4QxH_jWK8f_INXQDwH4Vx_dJ02FA": {
+      "name": "LH11_記事7_バイクショップのリピーター運営に｜LHubで整備・点検予約を一括管理 のコピー のコピー",
+      "url": "https://docs.google.com/document/d/11cs_0GbWW3bUcVG4QxH_jWK8f_INXQDwH4Vx_dJ02FA/edit?usp=drivesdk",
+      "modifiedTime": "2026-07-23T03:44:08.643Z",
+      "processedAt": "2026-07-23T06:20:46.203756+00:00",
+      "status": "generated",
+      "slug": "lhub-bike-shop-appointment-management",
+      "score": 85,
+      "eeat": {
+        "Experience": 70,
+        "Expertise": 75,
+        "Authority": 60,
+        "Trust": 80
+      },
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3426,
+        "chunks": 1,
+        "note": "Full Google Docs body was sent to the article evaluator."
+      },
+      "researchReview": {
+        "additionalVerificationTopics": [
+          "LHubが対応する具体的な決済サービス（例: PayPay、各カード会社）の一覧と手数料",
+          "LINE連携における同意取得とメッセージ配信ルール（各法令・プラットフォーム規約遵守）",
+          "データ移行方法とサポート範囲（CSVフォーマット、項目マッピング等）",
+          "顧客データの保管・暗号化・アクセス制御に関するセキュリティ仕様",
+          "配信機能（ステップ配信・セグメント配信）の細かな挙動と配信上限",
+          "導入後の運用工数（初期設定、スタッフ教育、月次運用）に関する実例"
+        ],
+        "officialSourceCandidates": [
+          "総務省（通信・プラットフォーム関連ガイドライン）",
+          "個人情報保護委員会（個人情報の取り扱い指針）",
+          "消費者庁（電子契約・決済に関する注意点）",
+          "経済産業省（中小企業のIT導入支援情報）",
+          "各決済事業者の公式サイト（PayPay、カード会社など）",
+          "LHub公式ページ（製品仕様・利用規約）"
+        ],
+        "unsupportedClaimsFromSourceOnly": [
+          "LHubが具体的に『PayPay』や各クレジットカードに対応しているという点（ドキュメントで言及はあるが、対応ブランド/手数料は未確認）",
+          "LHub導入によってリピート率が必ず向上するという成果（効果は環境や運用によるため、実データが必要）",
+          "自動リマインドやステップ配信の詳細な挙動・配信上限に関する仕様（仕様は別途確認が必要）",
+          "顧客データの保存方法・暗号化や外部連携時のセキュリティ詳細（ドキュメントには記載なし）"
+        ]
+      }
+    }
+  },
+  "updatedAt": "2026-07-23T06:20:46.203763+00:00"
+}
