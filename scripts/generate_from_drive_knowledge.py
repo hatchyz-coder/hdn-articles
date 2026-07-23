@@ -9,9 +9,12 @@ import os
 import re
 import sys
 import time
+import traceback
 from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
+
+print("Starting...", flush=True)
 
 import requests
 
@@ -40,6 +43,7 @@ OPENAI_TIMEOUT = (10, 45)
 MAX_SEED_FILES = 5
 MAX_INPUT_CHARS = 12000
 MAX_RETRIES = 2
+LAST_COMPLETED_STEP = "Starting"
 
 SOURCE_TYPES = {
     DOC_MIME: {"kind": "google_doc", "enabled": True},
@@ -91,6 +95,32 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def log(message: str) -> None:
+    print(message, flush=True)
+
+
+def mark_step(step: str) -> None:
+    global LAST_COMPLETED_STEP
+    LAST_COMPLETED_STEP = step
+    log(step)
+
+
+def execute_api(label: str, request: Any) -> Any:
+    started = time.monotonic()
+    log(f"START {label}")
+    try:
+        result = request.execute()
+    except Exception as exc:
+        elapsed = time.monotonic() - started
+        log(f"END {label} ERROR ({elapsed:.2f}s): {type(exc).__name__}: {exc}")
+        raise
+    elapsed = time.monotonic() - started
+    global LAST_COMPLETED_STEP
+    LAST_COMPLETED_STEP = label
+    log(f"END {label} ({elapsed:.2f}s)")
+    return result
+
+
 def load_json(path: Path, default: Any) -> Any:
     if not path.exists():
         return default
@@ -118,6 +148,7 @@ class RunTimer:
         self.metrics: dict[str, Any] = {
             "selectedDocumentId": "",
             "selectedDocumentName": "",
+            "lastCompletedStep": LAST_COMPLETED_STEP,
             "driveFetched": 0,
             "newDocuments": 0,
             "aiEvaluations": 0,
@@ -171,11 +202,18 @@ def credentials_from_env(raw_json: str) -> service_account.Credentials:
 
 
 def google_services(raw_json: str) -> tuple[Any, Any]:
+    mark_step("Connecting Drive...")
     if build is None:
         raise RuntimeError("google-api-python-client is required")
     credentials = credentials_from_env(raw_json)
+    started = time.monotonic()
+    log("START Google API client build")
     drive = build("drive", "v3", credentials=credentials, cache_discovery=False)
     docs = build("docs", "v1", credentials=credentials, cache_discovery=False)
+    elapsed = time.monotonic() - started
+    global LAST_COMPLETED_STEP
+    LAST_COMPLETED_STEP = "Google API client build"
+    log(f"END Google API client build ({elapsed:.2f}s)")
     return drive, docs
 
 
@@ -193,19 +231,22 @@ def drive_cache(state: dict[str, Any], root_folder_id: str) -> dict[str, Any]:
 
 
 def get_start_page_token(drive: Any) -> str:
-    return drive.changes().getStartPageToken(supportsAllDrives=True).execute()["startPageToken"]
+    return execute_api("Drive Start Page Token API", drive.changes().getStartPageToken(supportsAllDrives=True))["startPageToken"]
 
 
 def list_recent_seed_docs(drive: Any, folder_id: str, limit: int) -> list[dict[str, Any]]:
-    response = drive.files().list(
-        q=f"'{folder_id}' in parents and trashed = false and mimeType = '{DOC_MIME}'",
-        spaces="drive",
-        fields="files(id,name,mimeType,modifiedTime,webViewLink,parents)",
-        orderBy="modifiedTime desc",
-        pageSize=limit,
-        supportsAllDrives=True,
-        includeItemsFromAllDrives=True,
-    ).execute()
+    response = execute_api(
+        "Drive Recent Docs API",
+        drive.files().list(
+            q=f"'{folder_id}' in parents and trashed = false and mimeType = '{DOC_MIME}'",
+            spaces="drive",
+            fields="files(id,name,mimeType,modifiedTime,webViewLink,parents)",
+            orderBy="modifiedTime desc",
+            pageSize=limit,
+            supportsAllDrives=True,
+            includeItemsFromAllDrives=True,
+        ),
+    )
     return response.get("files", [])
 
 
@@ -218,14 +259,17 @@ def list_changed_docs(drive: Any, cache: dict[str, Any], root_folder_id: str, li
     folder_ids = set(cache.get("folderIds", [root_folder_id]))
     enabled_mimes = enabled_source_mime_types()
     docs_by_id: dict[str, dict[str, Any]] = {}
-    response = drive.changes().list(
-        pageToken=token,
-        spaces="drive",
-        fields="nextPageToken,newStartPageToken,changes(removed,file(id,name,mimeType,modifiedTime,webViewLink,parents,trashed))",
-        pageSize=50,
-        supportsAllDrives=True,
-        includeItemsFromAllDrives=True,
-    ).execute()
+    response = execute_api(
+        "Drive Changes API",
+        drive.changes().list(
+            pageToken=token,
+            spaces="drive",
+            fields="nextPageToken,newStartPageToken,changes(removed,file(id,name,mimeType,modifiedTime,webViewLink,parents,trashed))",
+            pageSize=50,
+            supportsAllDrives=True,
+            includeItemsFromAllDrives=True,
+        ),
+    )
     for change in response.get("changes", []):
         item = change.get("file") or {}
         if change.get("removed") or item.get("trashed"):
@@ -243,11 +287,14 @@ def list_changed_docs(drive: Any, cache: dict[str, Any], root_folder_id: str, li
 
 
 def get_doc_metadata(drive: Any, document_id: str) -> dict[str, Any]:
-    return drive.files().get(
-        fileId=document_id,
-        fields="id,name,mimeType,modifiedTime,webViewLink,parents",
-        supportsAllDrives=True,
-    ).execute()
+    return execute_api(
+        "Drive File Metadata API",
+        drive.files().get(
+            fileId=document_id,
+            fields="id,name,mimeType,modifiedTime,webViewLink,parents",
+            supportsAllDrives=True,
+        ),
+    )
 
 
 def existing_source_urls() -> set[str]:
@@ -284,6 +331,7 @@ def is_unprocessed_or_updated(state: dict[str, Any], doc: dict[str, Any]) -> boo
 
 
 def select_target_doc(drive: Any, state: dict[str, Any], folder_id: str, args: argparse.Namespace, timer: RunTimer) -> tuple[dict[str, Any] | None, str]:
+    mark_step("Listing changes...")
     with timer.section("driveSeconds", "Drive select target document"):
         if args.document_id:
             doc = get_doc_metadata(drive, args.document_id)
@@ -303,6 +351,7 @@ def select_target_doc(drive: Any, state: dict[str, Any], folder_id: str, args: a
             }
         candidates = [doc for doc in docs if is_unprocessed_or_updated(state, doc)]
         timer.metrics["newDocuments"] = len(candidates)
+        mark_step("Selecting document...")
         return (candidates[0], mode) if candidates else (None, mode)
 
 
@@ -338,6 +387,7 @@ def mark_finished(state: dict[str, Any], doc: dict[str, Any], status: str, detai
 
 def save_state_and_report(args: argparse.Namespace, state: dict[str, Any], report: dict[str, Any], timer: RunTimer) -> None:
     started = time.monotonic()
+    mark_step("Writing state...")
     print(f"START state and latest-run save at {now_iso()}", flush=True)
     write_json(args.state_path, state)
     timer.add("stateSaveSeconds", time.monotonic() - started)
@@ -351,6 +401,7 @@ def save_state_and_report(args: argparse.Namespace, state: dict[str, Any], repor
 
 
 def write_all_outputs(metrics: dict[str, Any], selected: bool, reason: str = "") -> None:
+    metrics["lastCompletedStep"] = LAST_COMPLETED_STEP
     write_output("selected", "true" if selected else "false")
     if reason:
         write_output("reason", reason)
@@ -364,7 +415,8 @@ def confidentiality_flags(name: str, text: str) -> list[str]:
 
 
 def extract_text_from_doc(docs: Any, document_id: str) -> str:
-    document = docs.documents().get(documentId=document_id).execute()
+    mark_step("Fetching document...")
+    document = execute_api("Google Docs API", docs.documents().get(documentId=document_id))
     parts: list[str] = []
 
     def read_elements(elements: list[dict[str, Any]]) -> None:
@@ -422,13 +474,19 @@ def call_openai_once(doc: dict[str, Any], source_text: str, source_processing: d
     timer.metrics["apiCalls"] = 1
     timer.metrics["aiEvaluations"] = 1
     timer.metrics["inputCharacters"] = len(payload_input) + len(instructions)
+    mark_step("Calling OpenAI...")
     if mock_timeout:
         with timer.section("openaiSeconds", "OpenAI mock timeout"):
+            log("START OpenAI")
+            log("END OpenAI TIMEOUT (0.00s)")
+            log("HTTP timeout type: mock_timeout")
             raise TimeoutError("OpenAI mock timed out")
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
         raise RuntimeError("OPENAI_API_KEY is not configured")
     with timer.section("openaiSeconds", "OpenAI single evaluation/generation call"):
+        started = time.monotonic()
+        log("START OpenAI")
         try:
             response = requests.post(
                 "https://api.openai.com/v1/responses",
@@ -442,8 +500,25 @@ def call_openai_once(doc: dict[str, Any], source_text: str, source_processing: d
                     "store": False,
                 },
             )
+        except requests.ConnectTimeout as exc:
+            elapsed = time.monotonic() - started
+            log(f"END OpenAI TIMEOUT ({elapsed:.2f}s)")
+            log("HTTP timeout type: connect_timeout")
+            raise TimeoutError("OpenAI API connect timeout") from exc
+        except requests.ReadTimeout as exc:
+            elapsed = time.monotonic() - started
+            log(f"END OpenAI TIMEOUT ({elapsed:.2f}s)")
+            log("HTTP timeout type: read_timeout")
+            raise TimeoutError("OpenAI API read timeout") from exc
         except requests.Timeout as exc:
-            raise TimeoutError("OpenAI API timed out after connect/read timeout") from exc
+            elapsed = time.monotonic() - started
+            log(f"END OpenAI TIMEOUT ({elapsed:.2f}s)")
+            log("HTTP timeout type: timeout")
+            raise TimeoutError("OpenAI API timed out") from exc
+        elapsed = time.monotonic() - started
+        global LAST_COMPLETED_STEP
+        LAST_COMPLETED_STEP = "OpenAI"
+        log(f"END OpenAI ({elapsed:.2f}s)")
     response.raise_for_status()
     output_text = response.json().get("output_text", "")
     if not output_text:
@@ -559,10 +634,12 @@ def finish(args: argparse.Namespace, state: dict[str, Any], report: dict[str, An
     save_state_and_report(args, state, report, timer)
     write_all_outputs(timer.metrics, selected, reason)
     print(f"FINISH {reason} total={timer.metrics['executionSeconds']}s", flush=True)
+    mark_step("Finished.")
     return 0
 
 
 def main() -> int:
+    mark_step("Loading configuration...")
     args = parse_args()
     timer = RunTimer()
     state = load_json(args.state_path, {"documents": {}})
@@ -656,4 +733,7 @@ if __name__ == "__main__":
         raise SystemExit(main())
     except Exception as exc:
         print(f"ERROR: {exc}", file=sys.stderr, flush=True)
+        traceback.print_exc()
+        write_output("lastCompletedStep", LAST_COMPLETED_STEP)
+        write_output("reason", f"exception: {type(exc).__name__}")
         raise SystemExit(1)
