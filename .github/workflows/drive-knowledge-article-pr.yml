@@ -18,7 +18,7 @@ permissions:
 jobs:
   generate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 8
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -29,12 +29,17 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements.txt
 
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
       - name: Restore persistent knowledge-base state
+        id: restore_state
         run: |
+          start=$(date +%s)
+          echo "START restore persistent knowledge-base state"
           mkdir -p data/knowledge-base
           if git ls-remote --exit-code --heads origin knowledge-base-state > /dev/null 2>&1; then
             git fetch origin knowledge-base-state
@@ -44,12 +49,24 @@ jobs:
           else
             echo "No knowledge-base-state branch exists yet."
           fi
+          end=$(date +%s)
+          elapsed=$((end - start))
+          echo "END restore persistent knowledge-base state: ${elapsed}s"
+          echo "cache_seconds=${elapsed}" >> "$GITHUB_OUTPUT"
 
       - name: Collect Google Docs already used by open pull requests
+        id: collect_prs
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh pr list --state open --limit 100 --json body > /tmp/open-prs.json
+          start=$(date +%s)
+          echo "START collect open PR Google Docs references"
+          if timeout 20s gh pr list --state open --limit 50 --json body > /tmp/open-prs.json; then
+            echo "Open PR metadata collected."
+          else
+            echo "WARN: open PR metadata collection timed out or failed; continuing with an empty exclusion list."
+            echo "[]" > /tmp/open-prs.json
+          fi
           python3 - <<'PY'
           import json
           import re
@@ -66,6 +83,10 @@ jobs:
           Path('/tmp/open-pr-drive-docs.txt').write_text('\n'.join(sorted(tokens)), encoding='utf-8')
           print(f'Excluded {len(tokens)} Google Docs references from open pull requests')
           PY
+          end=$(date +%s)
+          elapsed=$((end - start))
+          echo "END collect open PR Google Docs references: ${elapsed}s"
+          echo "github_seconds=${elapsed}" >> "$GITHUB_OUTPUT"
 
       - name: Generate one Drive knowledge-base article draft
         id: drive
@@ -84,23 +105,9 @@ jobs:
             --state-path data/knowledge-base/processed-docs.json \
             --report-path data/knowledge-base/latest-run.json \
             --max-drive-files 20 \
-            --max-ai-evaluations 5 \
-            --preview-chars 5000
-
-      - name: Write workflow summary
-        if: always()
-        run: |
-          {
-            echo "## Google Drive Knowledge Base Article PR"
-            echo ""
-            echo "| Metric | Value |"
-            echo "| --- | ---: |"
-            echo "| Drive取得件数 | ${{ steps.drive.outputs.driveFetched || '0' }} |"
-            echo "| 新規文書件数 | ${{ steps.drive.outputs.newDocuments || '0' }} |"
-            echo "| AI評価件数 | ${{ steps.drive.outputs.aiEvaluations || '0' }} |"
-            echo "| 記事生成件数 | ${{ steps.drive.outputs.articlesGenerated || '0' }} |"
-            echo "| 実行時間 | ${{ steps.drive.outputs.executionSeconds || '0' }} 秒 |"
-          } >> "$GITHUB_STEP_SUMMARY"
+            --max-ai-evaluations 2 \
+            --preview-chars 5000 \
+            --stop-after-seconds 300
 
       - name: Upload knowledge-base run state artifact
         if: always()
@@ -112,10 +119,14 @@ jobs:
           retention-days: 30
 
       - name: Persist knowledge-base state branch
+        id: persist_state
         if: always()
         run: |
+          start=$(date +%s)
+          echo "START persist knowledge-base state branch"
           if [ ! -d data/knowledge-base ]; then
             echo "No state directory to persist."
+            echo "github_seconds=0" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -151,6 +162,10 @@ jobs:
             git commit -m "Update knowledge-base processing state [skip ci]"
             git push origin knowledge-base-state
           fi
+          end=$(date +%s)
+          elapsed=$((end - start))
+          echo "END persist knowledge-base state branch: ${elapsed}s"
+          echo "github_seconds=${elapsed}" >> "$GITHUB_OUTPUT"
 
       - name: Report no eligible document
         if: steps.drive.outputs.selected != 'true'
@@ -176,6 +191,7 @@ jobs:
         run: npm run build
 
       - name: Create draft pull request
+        id: create_article_pr
         if: steps.drive.outputs.selected == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -188,6 +204,8 @@ jobs:
           EEAT: ${{ steps.drive.outputs.eeat }}
           RESEARCH_REVIEW: ${{ steps.drive.outputs.research_review }}
         run: |
+          start=$(date +%s)
+          echo "START create article draft pull request"
           branch="content/drive-knowledge-${SLUG}-${GITHUB_RUN_ID}"
           git checkout -b "$branch"
           git config user.name "github-actions[bot]"
@@ -233,3 +251,35 @@ jobs:
             --head "$branch" \
             --title "Drive knowledge article draft: ${SLUG}" \
             --body-file /tmp/pr-body.md
+          end=$(date +%s)
+          elapsed=$((end - start))
+          echo "END create article draft pull request: ${elapsed}s"
+          echo "github_seconds=${elapsed}" >> "$GITHUB_OUTPUT"
+
+      - name: Write workflow summary
+        if: always()
+        run: |
+          github_seconds=$(( \
+            ${{ steps.collect_prs.outputs.github_seconds || '0' }} + \
+            ${{ steps.persist_state.outputs.github_seconds || '0' }} + \
+            ${{ steps.create_article_pr.outputs.github_seconds || '0' }} \
+          ))
+          cache_seconds=${{ steps.restore_state.outputs.cache_seconds || '0' }}
+          {
+            echo "## Google Drive Knowledge Base Article PR"
+            echo ""
+            echo "| Metric | Value |"
+            echo "| --- | ---: |"
+            echo "| Drive取得件数 | ${{ steps.drive.outputs.driveFetched || '0' }} |"
+            echo "| 新規件数 | ${{ steps.drive.outputs.newDocuments || '0' }} |"
+            echo "| AI評価件数 | ${{ steps.drive.outputs.aiEvaluations || '0' }} |"
+            echo "| 記事生成件数 | ${{ steps.drive.outputs.articlesGenerated || '0' }} |"
+            echo "| API呼び出し回数 | ${{ steps.drive.outputs.apiCalls || '0' }} |"
+            echo "| 入力文字数 | ${{ steps.drive.outputs.inputCharacters || '0' }} |"
+            echo "| OpenAI処理時間 | ${{ steps.drive.outputs.openaiSeconds || '0' }} 秒 |"
+            echo "| Drive処理時間 | ${{ steps.drive.outputs.driveSeconds || '0' }} 秒 |"
+            echo "| GitHub処理時間 | ${github_seconds} 秒 |"
+            echo "| ファイルI/O時間 | ${{ steps.drive.outputs.fileIoSeconds || '0' }} 秒 |"
+            echo "| キャッシュ処理時間 | ${cache_seconds} 秒 + ${{ steps.drive.outputs.cacheSeconds || '0' }} 秒 |"
+            echo "| 総実行時間 | ${{ steps.drive.outputs.executionSeconds || '0' }} 秒 |"
+          } >> "$GITHUB_STEP_SUMMARY"

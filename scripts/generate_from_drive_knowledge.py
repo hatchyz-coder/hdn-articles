@@ -30,11 +30,22 @@ MAX_DIRECT_SOURCE_CHARS = 30000
 CHUNK_CHARS = 12000
 PREVIEW_CHARS = 5000
 MAX_DISCOVERY_FILES = 20
-MAX_AI_EVALUATIONS = 5
+MAX_AI_EVALUATIONS = 2
 CHANGES_PAGE_SIZE = 100
+OPENAI_TIMEOUT = (10, 90)
+STOP_AFTER_SECONDS = 300
 
 DOC_MIME = "application/vnd.google-apps.document"
 FOLDER_MIME = "application/vnd.google-apps.folder"
+SOURCE_TYPES = {
+    DOC_MIME: {"kind": "google_doc", "enabled": True},
+    "application/pdf": {"kind": "pdf", "enabled": False},
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": {"kind": "docx", "enabled": False},
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation": {"kind": "pptx", "enabled": False},
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {"kind": "xlsx", "enabled": False},
+    "text/markdown": {"kind": "markdown", "enabled": False},
+    "text/plain": {"kind": "text", "enabled": False},
+}
 SCOPES = [
     "https://www.googleapis.com/auth/drive.readonly",
     "https://www.googleapis.com/auth/documents.readonly",
@@ -72,6 +83,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-drive-files", type=int, default=MAX_DISCOVERY_FILES)
     parser.add_argument("--max-ai-evaluations", type=int, default=MAX_AI_EVALUATIONS)
     parser.add_argument("--preview-chars", type=int, default=PREVIEW_CHARS)
+    parser.add_argument("--stop-after-seconds", type=int, default=STOP_AFTER_SECONDS)
     return parser.parse_args()
 
 
@@ -104,6 +116,41 @@ def log_timing(label: str, started_at: float) -> float:
     elapsed = time.monotonic() - started_at
     print(f"TIMING {label}: {elapsed:.2f}s", flush=True)
     return elapsed
+
+
+def default_metrics() -> dict[str, Any]:
+    return {
+        "driveFetched": 0,
+        "newDocuments": 0,
+        "aiEvaluations": 0,
+        "articlesGenerated": 0,
+        "apiCalls": 0,
+        "inputCharacters": 0,
+        "openaiSeconds": 0.0,
+        "driveSeconds": 0.0,
+        "githubSeconds": 0.0,
+        "fileIoSeconds": 0.0,
+        "cacheSeconds": 0.0,
+        "executionSeconds": 0.0,
+    }
+
+
+def add_metric(metrics: dict[str, Any], key: str, value: float | int) -> None:
+    metrics[key] = round(float(metrics.get(key, 0)) + float(value), 2)
+
+
+def timed_section(metrics: dict[str, Any], metric_key: str, label: str, started_at: float) -> float:
+    elapsed = log_timing(label, started_at)
+    add_metric(metrics, metric_key, elapsed)
+    return elapsed
+
+
+def should_stop(run_started: float, stop_after_seconds: int) -> bool:
+    return time.monotonic() - run_started >= stop_after_seconds
+
+
+def trim_for_output(value: str, limit: int = 1000) -> str:
+    return value if len(value) <= limit else value[:limit] + "...[truncated]"
 
 
 def credentials_from_env(raw_json: str) -> service_account.Credentials:
@@ -166,9 +213,11 @@ def list_recent_docs_for_folders(drive: Any, folder_ids: list[str], limit: int) 
     started = time.monotonic()
     docs_by_id: dict[str, dict[str, Any]] = {}
     per_folder_limit = max(1, min(limit, 20))
+    enabled_mimes = enabled_source_mime_types()
+    mime_query = " or ".join(f"mimeType = '{mime_type}'" for mime_type in enabled_mimes)
     for folder_id in folder_ids:
         response = drive.files().list(
-            q=f"'{folder_id}' in parents and trashed = false and mimeType = '{DOC_MIME}'",
+            q=f"'{folder_id}' in parents and trashed = false and ({mime_query})",
             spaces="drive",
             fields="files(id, name, mimeType, modifiedTime, webViewLink, parents)",
             orderBy="modifiedTime desc",
@@ -195,6 +244,7 @@ def list_changed_docs(drive: Any, cache: dict[str, Any], root_folder_id: str, li
 
     started = time.monotonic()
     folder_ids = set(cache.get("folderIds", [root_folder_id]))
+    enabled_mimes = enabled_source_mime_types()
     docs_by_id: dict[str, dict[str, Any]] = {}
     page_token = token
     while page_token and len(docs_by_id) < limit:
@@ -218,7 +268,7 @@ def list_changed_docs(drive: Any, cache: dict[str, Any], root_folder_id: str, li
             if item.get("mimeType") == FOLDER_MIME and parents & folder_ids:
                 folder_ids.add(item["id"])
                 continue
-            if item.get("mimeType") == DOC_MIME and parents & folder_ids:
+            if item.get("mimeType") in enabled_mimes and parents & folder_ids:
                 docs_by_id[item["id"]] = item
         page_token = response.get("nextPageToken")
         if response.get("newStartPageToken"):
@@ -354,22 +404,31 @@ def response_text(payload: dict[str, Any]) -> str:
     return "\n".join(chunks)
 
 
-def call_openai_json(instructions: str, user_input: dict[str, Any], max_output_tokens: int) -> dict[str, Any]:
+def call_openai_json(instructions: str, user_input: dict[str, Any], max_output_tokens: int, metrics: dict[str, Any]) -> dict[str, Any]:
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
         raise RuntimeError("OPENAI_API_KEY is not configured")
-    response = requests.post(
-        "https://api.openai.com/v1/responses",
-        timeout=180,
-        headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-        json={
-            "model": os.getenv("OPENAI_MODEL", "gpt-5-mini"),
-            "instructions": instructions,
-            "input": json.dumps(user_input, ensure_ascii=False),
-            "max_output_tokens": max_output_tokens,
-            "store": False,
-        },
-    )
+    payload_input = json.dumps(user_input, ensure_ascii=False)
+    add_metric(metrics, "apiCalls", 1)
+    add_metric(metrics, "inputCharacters", len(payload_input) + len(instructions))
+    started = time.monotonic()
+    try:
+        response = requests.post(
+            "https://api.openai.com/v1/responses",
+            timeout=OPENAI_TIMEOUT,
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+            json={
+                "model": os.getenv("OPENAI_MODEL", "gpt-5-mini"),
+                "instructions": instructions,
+                "input": payload_input,
+                "max_output_tokens": max_output_tokens,
+                "store": False,
+            },
+        )
+    except requests.Timeout as exc:
+        timed_section(metrics, "openaiSeconds", "OpenAI API timeout", started)
+        raise TimeoutError("OpenAI API timed out after connect/read timeout") from exc
+    timed_section(metrics, "openaiSeconds", "OpenAI API call", started)
     response.raise_for_status()
     output_text = response_text(response.json())
     output_text = re.sub(r"^```(?:json)?\s*|\s*```$", "", (output_text or "").strip(), flags=re.I | re.S)
@@ -378,8 +437,7 @@ def call_openai_json(instructions: str, user_input: dict[str, Any], max_output_t
     return json.loads(output_text)
 
 
-def summarize_long_source(doc: dict[str, Any], text: str) -> tuple[str, dict[str, Any]]:
-    chunks = chunk_text(text)
+def select_article_source_text(text: str) -> tuple[str, dict[str, Any]]:
     if len(text) <= MAX_DIRECT_SOURCE_CHARS:
         return text, {
             "mode": "full_text",
@@ -388,45 +446,28 @@ def summarize_long_source(doc: dict[str, Any], text: str) -> tuple[str, dict[str
             "note": "Full Google Docs body was sent to the article evaluator.",
         }
 
-    instructions = (
-        "Summarize this Google Docs chunk for later Japanese article evaluation. "
-        "Preserve concrete facts, operational insights, uncertainties, safety concerns, "
-        "claims that need official-source verification, and potential confidential details. "
-        "Do not add facts. Return JSON only with summary, key_points, risks, verification_needed, unsupported_claims."
-    )
-    summaries: list[dict[str, Any]] = []
-    for index, chunk in enumerate(chunks, start=1):
-        summaries.append(call_openai_json(
-            instructions,
-            {
-                "document": {"name": doc["name"], "file_id": doc["id"]},
-                "chunk_index": index,
-                "chunk_count": len(chunks),
-                "chunk_text": chunk,
-            },
-            2500,
-        ))
-    combined = {
-        "document_name": doc["name"],
-        "source_text_was_chunk_summarized": True,
-        "source_text_characters": len(text),
-        "chunk_count": len(chunks),
-        "chunk_summaries": summaries,
-    }
-    return json.dumps(combined, ensure_ascii=False), {
-        "mode": "chunk_summarized",
+    part_size = min(CHUNK_CHARS, MAX_DIRECT_SOURCE_CHARS // 3)
+    midpoint = max(0, (len(text) // 2) - (part_size // 2))
+    tail_start = max(0, len(text) - part_size)
+    parts = [
+        {"position": "beginning", "text": text[:part_size]},
+        {"position": "middle", "text": text[midpoint:midpoint + part_size]},
+        {"position": "ending", "text": text[tail_start:]},
+    ]
+    return json.dumps({"source_text_was_sampled": True, "chunks": parts}, ensure_ascii=False), {
+        "mode": "sampled_beginning_middle_ending",
         "sourceTextCharacters": len(text),
-        "chunks": len(chunks),
-        "chunkCharacters": CHUNK_CHARS,
+        "chunks": 3,
+        "chunkCharacters": part_size,
         "note": (
-            "Google Docs text exceeded the direct evaluation limit. The script split it "
-            "into chunks and sent AI-generated chunk summaries to the article evaluator."
+            "Google Docs text exceeded the direct article-generation limit. The script sent "
+            "only beginning, middle, and ending chunks to keep the final document to one OpenAI call."
         ),
     }
 
 
-def call_openai(doc: dict[str, Any], text: str) -> tuple[dict[str, Any], dict[str, Any]]:
-    source_text, source_processing = summarize_long_source(doc, text)
+def call_openai(doc: dict[str, Any], text: str, metrics: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
+    source_text, source_processing = select_article_source_text(text)
     instructions = PROMPT_PATH.read_text(encoding="utf-8")
     user_input = {
         "document": {
@@ -440,10 +481,10 @@ def call_openai(doc: dict[str, Any], text: str) -> tuple[dict[str, Any], dict[st
         "official_source_research_extension": official_source_extension(),
         "allowed_links": ALLOWED_LINKS,
     }
-    return call_openai_json(instructions, user_input, 8000), source_processing
+    return call_openai_json(instructions, user_input, 8000, metrics), source_processing
 
 
-def evaluate_preview(doc: dict[str, Any], preview_text: str) -> dict[str, Any]:
+def evaluate_preview(doc: dict[str, Any], preview_text: str, metrics: dict[str, Any]) -> dict[str, Any]:
     instructions = (
         "Evaluate whether this Google Docs preview is a good HDN Japan article candidate. "
         "Use only the supplied preview. Do not write the article. "
@@ -465,7 +506,7 @@ def evaluate_preview(doc: dict[str, Any], preview_text: str) -> dict[str, Any]:
         "preview_characters": len(preview_text),
         "official_source_research_extension": official_source_extension(),
     }
-    return call_openai_json(instructions, user_input, 2000)
+    return call_openai_json(instructions, user_input, 2000, metrics)
 
 
 def official_source_extension() -> dict[str, Any]:
@@ -627,29 +668,70 @@ def write_summary_outputs(metrics: dict[str, Any]) -> None:
         write_output(key, str(value))
 
 
+def finish_without_article(
+    args: argparse.Namespace,
+    state: dict[str, Any],
+    run_log: list[dict[str, Any]],
+    metrics: dict[str, Any],
+    run_started: float,
+    reason: str,
+    extra: dict[str, Any] | None = None,
+) -> int:
+    metrics["articlesGenerated"] = 0
+    metrics["executionSeconds"] = round(time.monotonic() - run_started, 2)
+    io_started = time.monotonic()
+    write_json(args.state_path, state)
+    metrics["fileIoSeconds"] = round(float(metrics.get("fileIoSeconds", 0)) + (time.monotonic() - io_started), 2)
+    report = {
+        "selected": False,
+        "reason": reason,
+        "runLog": run_log,
+        "metrics": metrics,
+        "officialSourceResearchExtension": official_source_extension(),
+        **(extra or {}),
+    }
+
+
+def enabled_source_mime_types() -> set[str]:
+    return {mime_type for mime_type, config in SOURCE_TYPES.items() if config.get("enabled")}
+    io_started = time.monotonic()
+    write_json(args.report_path, report)
+    timed_section(metrics, "fileIoSeconds", "write no-article report", io_started)
+    write_output("selected", "false")
+    write_output("reason", reason)
+    write_summary_outputs(metrics)
+    print(f"No article generated: {reason}")
+    return 0
+
+
 def main() -> int:
     run_started = time.monotonic()
     args = parse_args()
     if not args.folder_id:
         raise RuntimeError("GOOGLE_DRIVE_KNOWLEDGE_FOLDER_ID is not configured")
 
+    metrics = default_metrics()
     setup_started = time.monotonic()
     drive, docs = drive_docs_services(args.service_account_json)
+    timed_section(metrics, "driveSeconds", "build Google API clients", setup_started)
+    io_started = time.monotonic()
     state = load_json(args.state_path, {"documents": {}})
     used_sources = existing_source_urls()
     excluded = excluded_tokens(args.exclude_file)
+    timed_section(metrics, "fileIoSeconds", "load state and local duplicate indexes", io_started)
     run_log: list[dict[str, Any]] = []
     candidates: list[dict[str, Any]] = []
     ai_evaluation_count = 0
-    log_timing("setup", setup_started)
 
     discovery_started = time.monotonic()
     discovered_docs, discovery_mode = discover_recent_or_changed_docs(drive, state, args.folder_id, args.max_drive_files)
-    discovery_seconds = log_timing(f"Drive discovery mode={discovery_mode}", discovery_started)
+    discovery_seconds = timed_section(metrics, "driveSeconds", f"Drive discovery mode={discovery_mode}", discovery_started)
     processed_docs = state.get("documents", {})
     drive_fetched_count = len(discovered_docs)
+    metrics["driveFetched"] = drive_fetched_count
 
     new_docs: list[dict[str, Any]] = []
+    cache_started = time.monotonic()
     for doc in discovered_docs:
         doc_url = doc.get("webViewLink") or f"https://docs.google.com/document/d/{doc['id']}"
         update_document_cache(state, doc)
@@ -660,15 +742,19 @@ def main() -> int:
             run_log.append({"fileId": doc["id"], "name": doc["name"], "status": "skipped_duplicate"})
             continue
         new_docs.append(doc)
+    timed_section(metrics, "cacheSeconds", "filter cached/duplicate documents", cache_started)
+    metrics["newDocuments"] = len(new_docs)
 
     docs_to_evaluate = new_docs[: args.max_ai_evaluations]
     for doc in docs_to_evaluate:
+        if should_stop(run_started, args.stop_after_seconds):
+            return finish_without_article(args, state, run_log, metrics, run_started, "stopped before AI evaluation because 5-minute budget was reached")
         doc_started = time.monotonic()
         print(f"START document {doc['id']} {doc['name']}", flush=True)
         doc_url = doc.get("webViewLink") or f"https://docs.google.com/document/d/{doc['id']}"
         preview_started = time.monotonic()
         preview_text = extract_preview_from_doc(drive, doc["id"], args.preview_chars)
-        preview_seconds = log_timing(f"preview stage {doc['id']}", preview_started)
+        preview_seconds = timed_section(metrics, "driveSeconds", f"preview stage {doc['id']}", preview_started)
         if len(preview_text) < 500:
             reason = "document text is too short to support a reliable article"
             update_state(state, doc, "skipped", {"reason": reason})
@@ -685,8 +771,16 @@ def main() -> int:
             continue
 
         ai_started = time.monotonic()
-        preview_eval = evaluate_preview(doc, preview_text)
-        ai_evaluation_count += 1
+        try:
+            preview_eval = evaluate_preview(doc, preview_text, metrics)
+            ai_evaluation_count += 1
+            metrics["aiEvaluations"] = ai_evaluation_count
+        except TimeoutError as exc:
+            reason = str(exc)
+            update_state(state, doc, "skipped_timeout", {"reason": reason, "previewCharacters": len(preview_text)})
+            elapsed = log_timing(f"END document {doc['id']} skipped_timeout", doc_started)
+            run_log.append({"fileId": doc["id"], "name": doc["name"], "status": "skipped_timeout", "reason": reason, "seconds": round(elapsed, 2)})
+            continue
         ai_seconds = log_timing(f"preview AI evaluation {doc['id']}", ai_started)
         ai_flags = [str(flag) for flag in preview_eval.get("confidentiality_flags", []) if str(flag).strip()]
         score = int(preview_eval.get("score", 0))
@@ -702,6 +796,8 @@ def main() -> int:
         run_log.append({"fileId": doc["id"], "name": doc["name"], "status": "scored", "score": score, "seconds": round(elapsed, 2), "aiSeconds": round(ai_seconds, 2)})
 
     if candidates:
+        if should_stop(run_started, args.stop_after_seconds):
+            return finish_without_article(args, state, run_log, metrics, run_started, "stopped before full generation because 5-minute budget was reached")
         selected = max(candidates, key=lambda item: item["score"])
         generation_started = time.monotonic()
         doc = selected["doc"]
@@ -710,33 +806,22 @@ def main() -> int:
         print(f"START full generation {doc['id']} {doc['name']}", flush=True)
         full_text_started = time.monotonic()
         text = extract_text_from_doc(docs, doc["id"])
-        full_text_seconds = log_timing(f"full Google Docs fetch {doc['id']}", full_text_started)
-        data, source_processing = call_openai(doc, text)
+        full_text_seconds = timed_section(metrics, "driveSeconds", f"full Google Docs fetch {doc['id']}", full_text_started)
+        try:
+            data, source_processing = call_openai(doc, text, metrics)
+        except TimeoutError as exc:
+            reason = str(exc)
+            update_state(state, doc, "skipped_timeout", {"reason": reason, "score": score, "fullTextSeconds": round(full_text_seconds, 2)})
+            generation_seconds = log_timing(f"END full generation {doc['id']} timeout", generation_started)
+            run_log.append({"fileId": doc["id"], "name": doc["name"], "status": "skipped_timeout", "reason": reason, "seconds": round(generation_seconds, 2)})
+            return finish_without_article(args, state, run_log, metrics, run_started, reason)
         generation_ai_flags = [str(flag) for flag in data.get("confidentiality_flags", []) if str(flag).strip()]
         if generation_ai_flags or not data.get("should_generate"):
             reason = str(data.get("skip_reason") or "full article generation safety check failed")
             update_state(state, doc, "skipped", {"reason": reason, "score": score, "flags": generation_ai_flags, "sourceProcessing": source_processing})
             generation_seconds = log_timing(f"END full generation {doc['id']} skipped", generation_started)
-            write_json(args.state_path, state)
-            report = {
-                "selected": False,
-                "reason": reason,
-                "runLog": run_log,
-                "metrics": {
-                    "driveFetched": drive_fetched_count,
-                    "newDocuments": len(new_docs),
-                    "aiEvaluations": ai_evaluation_count,
-                    "articlesGenerated": 0,
-                    "executionSeconds": round(time.monotonic() - run_started, 2),
-                },
-                "officialSourceResearchExtension": official_source_extension(),
-            }
-            write_json(args.report_path, report)
-            write_output("selected", "false")
-            write_output("reason", reason)
-            write_summary_outputs(report["metrics"])
             print(f"Full generation skipped after {generation_seconds:.2f}s: {reason}")
-            return 0
+            return finish_without_article(args, state, run_log, metrics, run_started, reason)
 
         slug = normalize_slug(str(data.get("suggested_slug", "")), doc["id"])
         article = build_article(data, doc)
@@ -756,16 +841,13 @@ def main() -> int:
             "fullTextSeconds": round(full_text_seconds, 2),
             "generationSeconds": round(generation_seconds, 2),
         })
+        metrics["articlesGenerated"] = 1
+        metrics["executionSeconds"] = round(time.monotonic() - run_started, 2)
+        metrics["discoverySeconds"] = round(discovery_seconds, 2)
+        metrics["generationSeconds"] = round(generation_seconds, 2)
+        io_started = time.monotonic()
         write_json(args.state_path, state)
-        metrics = {
-            "driveFetched": drive_fetched_count,
-            "newDocuments": len(new_docs),
-            "aiEvaluations": ai_evaluation_count,
-            "articlesGenerated": 1,
-            "executionSeconds": round(time.monotonic() - run_started, 2),
-            "discoverySeconds": round(discovery_seconds, 2),
-            "generationSeconds": round(generation_seconds, 2),
-        }
+        timed_section(metrics, "fileIoSeconds", "write generated state", io_started)
         report = {
             "selected": True,
             "fileId": doc["id"],
@@ -795,21 +877,8 @@ def main() -> int:
         print(f"Generated one article draft from {doc['name']}: {slug}")
         return 0
 
-    write_json(args.state_path, state)
-    metrics = {
-        "driveFetched": drive_fetched_count,
-        "newDocuments": len(new_docs),
-        "aiEvaluations": ai_evaluation_count,
-        "articlesGenerated": 0,
-        "executionSeconds": round(time.monotonic() - run_started, 2),
-        "discoverySeconds": round(discovery_seconds, 2),
-    }
-    write_json(args.report_path, {"selected": False, "runLog": run_log, "metrics": metrics, "officialSourceResearchExtension": official_source_extension()})
-    write_output("selected", "false")
-    write_output("reason", "no eligible new or updated Google Docs document")
-    write_summary_outputs(metrics)
-    print("No eligible new or updated Google Docs document was generated.")
-    return 0
+    metrics["discoverySeconds"] = round(discovery_seconds, 2)
+    return finish_without_article(args, state, run_log, metrics, run_started, "no eligible new or updated Google Docs document")
 
 
 if __name__ == "__main__":

@@ -124,13 +124,13 @@ What it does:
 - Evaluates meeting notes, including documents under `01_MeetingNotes`, as normal article candidates unless concrete sensitive content is present.
 - Skips documents with concrete confidentiality concerns and records the reason in the run log. The heuristic targets personal information, patient identifiers, contract amounts, credentials, explicit confidentiality markers, and non-public customer names; it does not skip a document merely because it contains words such as meeting note or sales discussion.
 - Sends only the first 5,000 characters of each unprocessed candidate document for preview scoring.
-- Uses AI to score at most five documents for article suitability and E-E-A-T: Experience, Expertise, Authority, and Trust.
+- Uses AI to score at most two documents for article suitability and E-E-A-T: Experience, Expertise, Authority, and Trust.
 - Prepares official-source follow-up fields for human review: additional verification topics, official information source candidates, and claims not supported by the source document alone.
 - Fetches the full Google Docs body only for the final selected article candidate.
-- Splits and summarizes long full text only for that final selected document when it exceeds the direct article-generation threshold.
+- For long selected documents, sends only beginning, middle, and ending chunks to the final article-generation request instead of issuing multiple chunk-summary calls.
 - Generates at most one article per run.
 - Creates a Draft Pull Request only. It never publishes and never commits directly to `main`.
-- Sets a 15-minute workflow timeout and targets completion within five minutes for normal daily runs.
+- Sets an 8-minute workflow timeout, stops remaining script work after five minutes, and targets 60 seconds for no-candidate runs and 180 seconds for candidate runs.
 
 Generated files include:
 
@@ -142,7 +142,9 @@ Generated files include:
 
 Processing state is restored from and saved back to the `knowledge-base-state` branch on every workflow run, including runs that produce no article candidate. The workflow also uploads the state directory as a GitHub Actions artifact named `knowledge-base-state-<run_id>` with 30-day retention. This keeps processing state out of `main` while preserving skip logs, zero-candidate runs, processed file IDs, updated times, and the latest research-review notes.
 
-The workflow summary reports Drive取得件数, 新規文書件数, AI評価件数, 記事生成件数, and 実行時間. Logs include second-level timings for setup, Drive discovery, preview export, preview AI evaluation, full document fetch, and article generation.
+The workflow summary reports Drive取得件数, 新規件数, AI評価件数, 記事生成件数, API呼び出し回数, 入力文字数, OpenAI処理時間, Drive処理時間, GitHub処理時間, ファイルI/O時間, キャッシュ処理時間, and 総実行時間. Logs include start, finish, and second-level timings for Drive, OpenAI, GitHub, file I/O, cache, preview export, preview AI evaluation, full document fetch, and article generation.
+
+The source reader is organized around source MIME types so future support can add Google Drive PDFs, Word documents, PowerPoint files, Excel workbooks, Markdown, and text files without changing the workflow contract. Those sources are defined but disabled until extractor and safety handling are implemented. Official-source enrichment is also isolated behind the research-extension output so later implementations can check MHLW, PMDA, Consumer Affairs Agency, academic societies, government agencies, manufacturer official pages, and papers before final article drafting.
 
 The PR body includes the source Google Docs URL, updated time, E-E-A-T score, and official-source review preparation. Human review is required before changing `draft: true` to `draft: false`.
 
