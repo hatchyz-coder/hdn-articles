@@ -1,0 +1,143 @@
+name: Google Drive Knowledge Base Article PR
+
+on:
+  workflow_dispatch:
+    inputs:
+      min_score:
+        description: Minimum AI score required for drafting
+        required: true
+        default: '70'
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          npm install
+
+      - name: Collect Google Docs already used by open pull requests
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr list --state open --limit 100 --json body > /tmp/open-prs.json
+          python3 - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          payload = json.loads(Path('/tmp/open-prs.json').read_text(encoding='utf-8'))
+          tokens = set()
+          for item in payload:
+              body = item.get('body') or ''
+              for match in re.findall(r'https://docs\.google\.com/document/d/[\w-]+[^\s)]*', body):
+                  tokens.add(match.rstrip(').,]'))
+              for match in re.findall(r'Google Drive file ID:\s*([\w-]+)', body):
+                  tokens.add(match)
+          Path('/tmp/open-pr-drive-docs.txt').write_text('\n'.join(sorted(tokens)), encoding='utf-8')
+          print(f'Excluded {len(tokens)} Google Docs references from open pull requests')
+          PY
+
+      - name: Generate one Drive knowledge-base article draft
+        id: drive
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_DRIVE_KNOWLEDGE_FOLDER_ID: ${{ vars.GOOGLE_DRIVE_KNOWLEDGE_FOLDER_ID }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
+        run: |
+          python scripts/generate_from_drive_knowledge.py \
+            --folder-id "$GOOGLE_DRIVE_KNOWLEDGE_FOLDER_ID" \
+            --service-account-json "$GOOGLE_SERVICE_ACCOUNT_JSON" \
+            --exclude-file /tmp/open-pr-drive-docs.txt \
+            --min-score "${{ inputs.min_score }}"
+
+      - name: Report no eligible document
+        if: steps.drive.outputs.selected != 'true'
+        run: |
+          echo "No eligible Google Docs document was generated."
+          echo "Reason: ${{ steps.drive.outputs.reason }}"
+
+      - name: Build and validate site
+        if: steps.drive.outputs.selected == 'true'
+        env:
+          PUBLIC_SITE_URL: https://hatchyz-coder.github.io
+          BASE_PATH: /hdn-articles
+        run: npm run build
+
+      - name: Create draft pull request
+        if: steps.drive.outputs.selected == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SLUG: ${{ steps.drive.outputs.slug }}
+          FILE_ID: ${{ steps.drive.outputs.file_id }}
+          SOURCE_URL: ${{ steps.drive.outputs.source_url }}
+          SOURCE_NAME: ${{ steps.drive.outputs.source_name }}
+          MODIFIED_TIME: ${{ steps.drive.outputs.modified_time }}
+          SCORE: ${{ steps.drive.outputs.score }}
+          EEAT: ${{ steps.drive.outputs.eeat }}
+        run: |
+          branch="content/drive-knowledge-${SLUG}-${GITHUB_RUN_ID}"
+          git checkout -b "$branch"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/content/articles social outputs/en data/knowledge-base
+          git commit -m "Generate Drive knowledge article draft: ${SLUG}"
+          git push origin "$branch"
+
+          cat > /tmp/pr-body.md <<EOF
+          ## Google Drive knowledge-base article draft
+
+          - Source document: ${SOURCE_NAME}
+          - Source URL: ${SOURCE_URL}
+          - Google Drive file ID: ${FILE_ID}
+          - Source updated at: ${MODIFIED_TIME}
+          - AI score: ${SCORE}/100
+          - E-E-A-T: ${EEAT}
+
+          ## Generated files
+
+          - Article: \`src/content/articles/${SLUG}.md\`
+          - Social drafts: \`social/${SLUG}/\`
+          - English draft: \`outputs/en/${SLUG}.md\`
+          - Processing state: \`data/knowledge-base/processed-docs.json\`
+
+          ## Review checklist
+
+          - [ ] The source document URL and updated time are correct
+          - [ ] No company names, patient information, personal information, contract terms, or confidential details are included
+          - [ ] Facts come from the source document or are clearly framed as editorial guidance
+          - [ ] No unsupported medical, legal, advertising, or performance claims appear
+          - [ ] SEO title, description, headings, FAQ, reference information, update date, author, and CTA are appropriate
+          - [ ] Japanese article, English draft, Facebook, LinkedIn, and X drafts are suitable for review
+          - [ ] Keep this pull request as Draft until human approval is complete
+          - [ ] Change \`draft: true\` to \`draft: false\` only after editorial approval
+          EOF
+
+          gh pr create \
+            --draft \
+            --base main \
+            --head "$branch" \
+            --title "Drive knowledge article draft: ${SLUG}" \
+            --body-file /tmp/pr-body.md

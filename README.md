@@ -15,6 +15,7 @@ HDN Japan Knowledge Base & SEO Article Platform.
 - Automatic social copy and English draft generation
 - Automatic official-source discovery and AI ranking
 - Automatic top-candidate article pull requests
+- Google Drive 00_KnowledgeBase article candidate reader
 
 ## Staging URL
 
@@ -57,6 +58,16 @@ Optional repository variable:
 
 - `OPENAI_MODEL`: defaults to `gpt-5-mini` when not configured.
 
+For Google Drive Knowledge Base Reader, add the following configuration:
+
+1. Share the `00_KnowledgeBase` Google Drive folder with the Google Cloud service account email as viewer.
+2. Create a repository secret named `GOOGLE_SERVICE_ACCOUNT_JSON`.
+3. Paste the full service account JSON key as the secret value.
+4. Create a repository variable named `GOOGLE_DRIVE_KNOWLEDGE_FOLDER_ID`.
+5. Set the variable to the folder ID for `00_KnowledgeBase`.
+
+The service account is used with read-only Google Drive and Google Docs scopes. Do not grant edit access to the folder.
+
 ## Generate an article draft from a URL
 
 1. Open `Actions`.
@@ -96,6 +107,32 @@ Manual end-to-end test:
 4. Review the automatically created pull request.
 
 The generated article remains `draft: true`. Review source accuracy, legal and advertising risks, title, description, headings, internal links, CTA, and social copy before changing it to `draft: false`.
+
+## Generate a draft from Google Drive Knowledge Base
+
+The `Google Drive Knowledge Base Article PR` workflow can be run manually from the Actions screen.
+
+What it does:
+
+- Recursively scans the configured `00_KnowledgeBase` folder.
+- Processes Google Docs only.
+- Reads each document name, file ID, URL, updated time, and body text.
+- Skips documents already processed at the same updated time.
+- Skips source documents already used in existing articles or open pull requests.
+- Skips documents with confidentiality concerns and records the reason in the run log.
+- Uses AI to score article suitability and E-E-A-T: Experience, Expertise, Authority, and Trust.
+- Generates at most one article per run.
+- Creates a Draft Pull Request only. It never publishes and never commits directly to `main`.
+
+Generated files include:
+
+- Japanese article draft in `src/content/articles/`
+- English editorial draft in `outputs/en/`
+- Facebook, LinkedIn, and X drafts in `social/<slug>/`
+- Processing state in `data/knowledge-base/processed-docs.json`
+- Latest run summary in `data/knowledge-base/latest-run.json`
+
+The PR body includes the source Google Docs URL and updated time. Human review is required before changing `draft: true` to `draft: false`.
 
 ## Local commands
 
