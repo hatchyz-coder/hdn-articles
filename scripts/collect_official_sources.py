@@ -12,6 +12,7 @@ import re
 import socket
 import sys
 import time
+import unicodedata
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -64,12 +65,19 @@ class UnsupportedSource(CollectorError):
     """Source appears to require JavaScript or an unsupported format."""
 
 
+class EncodingError(CollectorError):
+    """HTTP body could not be decoded into usable text."""
+
+
 @dataclass
 class Metrics:
     targeted_sources: int = 0
     successful_sources: int = 0
+    no_candidate_sources: int = 0
+    skipped_sources: int = 0
     failed_sources: int = 0
     unsupported_sources: int = 0
+    encoding_error_sources: int = 0
     fetched_candidates: int = 0
     new_candidates: int = 0
     duplicate_candidates: int = 0
@@ -183,6 +191,108 @@ def infer_content_type(url: str, content_type_header: str = "") -> str:
     return "html"
 
 
+def charset_from_content_type(content_type: str) -> str:
+    match = re.search(r"charset\s*=\s*[\"']?([^;\"'\s]+)", content_type, re.IGNORECASE)
+    return normalize_encoding_name(match.group(1)) if match else ""
+
+
+def charset_from_meta(content: bytes) -> str:
+    head = content[:4096].decode("ascii", errors="ignore")
+    patterns = [
+        r"<meta[^>]+charset\s*=\s*[\"']?\s*([A-Za-z0-9._:-]+)",
+        r"<meta[^>]+content\s*=\s*[\"'][^\"']*charset\s*=\s*([A-Za-z0-9._:-]+)",
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, head, re.IGNORECASE)
+        if match:
+            encoding = normalize_encoding_name(match.group(1))
+            if encoding:
+                return encoding
+    return ""
+
+
+def normalize_encoding_name(encoding: str) -> str:
+    normalized = encoding.strip().lower().replace("_", "-")
+    aliases = {
+        "utf8": "utf-8",
+        "utf-8": "utf-8",
+        "shift-jis": "shift_jis",
+        "shift_jis": "shift_jis",
+        "sjis": "shift_jis",
+        "x-sjis": "shift_jis",
+        "windows-31j": "cp932",
+        "ms932": "cp932",
+        "cp932": "cp932",
+        "euc-jp": "euc_jp",
+        "euc_jp": "euc_jp",
+        "ujis": "euc_jp",
+    }
+    return aliases.get(normalized, normalized)
+
+
+def decode_candidates(content: bytes, response: requests.Response) -> list[str]:
+    candidates: list[str] = []
+    content_type_encoding = charset_from_content_type(response.headers.get("Content-Type", ""))
+    meta_encoding = charset_from_meta(content)
+    apparent = normalize_encoding_name(response.apparent_encoding or "")
+    for encoding in [content_type_encoding, meta_encoding, "utf-8", "cp932", "shift_jis", "euc_jp", apparent]:
+        if not encoding or encoding == "iso-8859-1" or encoding in candidates:
+            continue
+        candidates.append(encoding)
+    return candidates
+
+
+def mojibake_score(text: str) -> int:
+    if not text:
+        return 1000
+    markers = ["\ufffd", "Ã", "Â", "â€", "縺", "繧", "譁", "荳", "莨", "蜿", "髱", "驥", "邱"]
+    marker_hits = sum(text.count(marker) for marker in markers)
+    c1_controls = sum(1 for char in text if 0x80 <= ord(char) <= 0x9F)
+    return marker_hits * 20 + c1_controls * 10
+
+
+def looks_mojibake(text: str) -> bool:
+    if not text:
+        return True
+    score = mojibake_score(text)
+    return score >= 20 or (score > 0 and score / max(len(text), 1) > 0.01)
+
+
+def decode_response_text(response: requests.Response) -> str:
+    content = response.content
+    attempts: list[tuple[int, str, str]] = []
+    errors: list[str] = []
+    for encoding in decode_candidates(content, response):
+        try:
+            text = content.decode(encoding, errors="strict")
+        except (LookupError, UnicodeDecodeError) as exc:
+            errors.append(f"{encoding}: {exc}")
+            continue
+        attempts.append((mojibake_score(text), encoding, text))
+        if not looks_mojibake(text):
+            return normalize_text(text)
+    if attempts:
+        attempts.sort(key=lambda item: item[0])
+        if not looks_mojibake(attempts[0][2]):
+            return normalize_text(attempts[0][2])
+    detail = "; ".join(errors[:3]) if errors else "decoded text still appears garbled"
+    raise EncodingError(f"response decoding failed: {detail}")
+
+
+def normalize_text(text: str) -> str:
+    normalized = unicodedata.normalize("NFKC", text)
+    cleaned = "".join(
+        char
+        for char in normalized
+        if char in "\n\r\t" or (unicodedata.category(char)[0] != "C" and char not in {"\ufffd", "\ufeff"})
+    )
+    return cleaned
+
+
+def normalize_inline_text(text: str) -> str:
+    return re.sub(r"\s+", " ", normalize_text(text)).strip()
+
+
 def generate_fingerprint(source_id: str, title: str, url: str) -> str:
     normalized_url = normalize_url(url)
     payload = "\n".join([source_id, normalized_url, re.sub(r"\s+", " ", title).strip().lower()])
@@ -288,12 +398,12 @@ class OfficialSourceCollector:
         target_url = feed_url or source["official_url"]
         response = self.fetch(target_url, allowed_domains)
         content_type = infer_content_type(target_url, response.headers.get("Content-Type", ""))
-        response.encoding = response.encoding or response.apparent_encoding
+        text = decode_response_text(response)
         if feed_url or content_type == "feed":
-            raw_items = parse_feed(response.text, response.url or target_url, source)
+            raw_items = parse_feed(text, response.url or target_url, source)
         else:
-            raw_items = parse_html(response.text, response.url or target_url, source)
-        if not raw_items and looks_javascript_required(response.text):
+            raw_items = parse_html(text, response.url or target_url, source)
+        if not raw_items and looks_javascript_required(text):
             raise UnsupportedSource("JavaScript appears to be required")
         return raw_items[:MAX_PER_SOURCE]
 
@@ -328,7 +438,7 @@ def text_of(node: ET.Element, names: list[str]) -> str:
     for name in names:
         found = node.find(name)
         if found is not None and found.text:
-            return re.sub(r"\s+", " ", found.text).strip()
+            return normalize_inline_text(found.text)
     return ""
 
 
@@ -337,7 +447,7 @@ def parse_html(html: str, base_url: str, source: dict[str, Any]) -> list[dict[st
     items: list[dict[str, Any]] = []
     seen: set[str] = set()
     for anchor in soup.select("a[href]"):
-        title = re.sub(r"\s+", " ", anchor.get_text(" ", strip=True) or anchor.get("title", "")).strip()
+        title = normalize_inline_text(anchor.get_text(" ", strip=True) or anchor.get("title", ""))
         if len(title) < 4:
             continue
         item = build_candidate(source, title, anchor.get("href", ""), base_url, find_nearby_datetime(anchor))
@@ -364,13 +474,13 @@ def find_nearby_datetime(anchor: Any) -> str:
 
 def build_candidate(source: dict[str, Any], title: str, link: str, base_url: str, published_at: str = "") -> dict[str, Any] | None:
     try:
-        url = normalize_url(link, base_url)
+        url = normalize_url(normalize_inline_text(link), base_url)
     except ValueError:
         return None
     if not url_allowed(url, list(source.get("allowed_domains") or [])):
         return None
-    title = re.sub(r"\s+", " ", title).strip()
-    if not title:
+    title = normalize_inline_text(title)
+    if not title or looks_mojibake(title):
         return None
     keywords = matched_keywords(title, list(source.get("keywords") or []))
     candidate = {
@@ -443,27 +553,60 @@ def run_collection(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, 
     collector.metrics.targeted_sources = len(sources)
 
     all_candidates: list[dict[str, Any]] = []
-    for source in sources:
-        result = {"source_id": source["id"], "source_name": source["name"], "status": "success", "candidate_count": 0, "error": ""}
+    for index, source in enumerate(sources):
+        result = {
+            "source_id": source["id"],
+            "source_name": source["name"],
+            "status": "success",
+            "candidate_count": 0,
+            "reason": "",
+            "error": "",
+        }
         try:
             items = collector.collect_source(source)
             result["candidate_count"] = len(items)
-            collector.metrics.successful_sources += 1
+            if items:
+                result["reason"] = "Candidates found"
+                collector.metrics.successful_sources += 1
+            else:
+                result["status"] = "no_candidates"
+                result["reason"] = "No usable candidates found"
+                collector.metrics.no_candidate_sources += 1
             collector.metrics.fetched_candidates += len(items)
             all_candidates.extend(items)
+        except EncodingError as exc:
+            result["status"] = "encoding_error"
+            result["reason"] = str(exc)
+            result["error"] = str(exc)
+            collector.metrics.encoding_error_sources += 1
+            print(f"ENCODING_ERROR {source['id']}: {exc}", flush=True)
         except UnsupportedSource as exc:
             result["status"] = "unsupported"
+            result["reason"] = str(exc)
             result["error"] = str(exc)
             collector.metrics.unsupported_sources += 1
             print(f"UNSUPPORTED {source['id']}: {exc}", flush=True)
         except Exception as exc:
             result["status"] = "failed"
+            result["reason"] = str(exc)
             result["error"] = str(exc)
             collector.metrics.failed_sources += 1
             print(f"WARN {source['id']}: {exc}", flush=True)
         collector.metrics.source_results.append(result)
         if len(all_candidates) >= MAX_TOTAL:
             all_candidates = all_candidates[:MAX_TOTAL]
+            for skipped_source in sources[index + 1 :]:
+                collector.metrics.skipped_sources += 1
+                collector.metrics.source_results.append(
+                    {
+                        "source_id": skipped_source["id"],
+                        "source_name": skipped_source["name"],
+                        "status": "skipped",
+                        "candidate_count": 0,
+                        "reason": "Skipped after reaching MAX_TOTAL candidate limit",
+                        "error": "",
+                    }
+                )
             break
 
     all_candidates.sort(key=lambda item: (item.get("score", 0), item.get("priority", 0), item.get("published_at", "")), reverse=True)
@@ -474,12 +617,23 @@ def run_collection(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, 
     collector.metrics.duplicate_candidates = duplicates
     collector.metrics.new_candidates = len(new_candidates)
     collector.metrics.execution_seconds = round(time.monotonic() - started, 3)
+    source_status_counts = {
+        "success": collector.metrics.successful_sources,
+        "no_candidates": collector.metrics.no_candidate_sources,
+        "skipped": collector.metrics.skipped_sources,
+        "unsupported": collector.metrics.unsupported_sources,
+        "failed": collector.metrics.failed_sources,
+        "encoding_error": collector.metrics.encoding_error_sources,
+    }
+    if sum(source_status_counts.values()) != collector.metrics.targeted_sources:
+        raise CollectorError("source status counts do not match targeted source count")
 
     latest_run = {
         "generated_at": utc_now(),
         "dry_run": bool(args.dry_run),
         "source_id": args.source_id or "",
         "metrics": collector.metrics.__dict__,
+        "source_status_counts": source_status_counts,
         "top_candidates": new_candidates[:5],
     }
     candidates_payload = {
@@ -513,7 +667,9 @@ def main(argv: list[str] | None = None) -> int:
     print(
         "Official source collection finished: "
         f"sources={metrics.targeted_sources} success={metrics.successful_sources} "
-        f"failed={metrics.failed_sources} unsupported={metrics.unsupported_sources} "
+        f"no_candidates={metrics.no_candidate_sources} skipped={metrics.skipped_sources} "
+        f"unsupported={metrics.unsupported_sources} failed={metrics.failed_sources} "
+        f"encoding_error={metrics.encoding_error_sources} "
         f"new={metrics.new_candidates} duplicates={metrics.duplicate_candidates} "
         f"http={metrics.http_requests} seconds={metrics.execution_seconds}",
         flush=True,
