@@ -37,6 +37,18 @@ jobs:
           pip install -r requirements.txt
           npm install
 
+      - name: Restore persistent knowledge-base state
+        run: |
+          mkdir -p data/knowledge-base
+          if git ls-remote --exit-code --heads origin knowledge-base-state > /dev/null 2>&1; then
+            git fetch origin knowledge-base-state
+            git show origin/knowledge-base-state:data/knowledge-base/processed-docs.json > data/knowledge-base/processed-docs.json || true
+            git show origin/knowledge-base-state:data/knowledge-base/latest-run.json > data/knowledge-base/latest-run.json || true
+            echo "Restored knowledge-base state from knowledge-base-state."
+          else
+            echo "No knowledge-base-state branch exists yet."
+          fi
+
       - name: Collect Google Docs already used by open pull requests
         env:
           GH_TOKEN: ${{ github.token }}
@@ -71,7 +83,59 @@ jobs:
             --folder-id "$GOOGLE_DRIVE_KNOWLEDGE_FOLDER_ID" \
             --service-account-json "$GOOGLE_SERVICE_ACCOUNT_JSON" \
             --exclude-file /tmp/open-pr-drive-docs.txt \
-            --min-score "${{ inputs.min_score }}"
+            --min-score "${{ inputs.min_score }}" \
+            --state-path data/knowledge-base/processed-docs.json \
+            --report-path data/knowledge-base/latest-run.json
+
+      - name: Upload knowledge-base run state artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: knowledge-base-state-${{ github.run_id }}
+          path: data/knowledge-base/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Persist knowledge-base state branch
+        if: always()
+        run: |
+          if [ ! -d data/knowledge-base ]; then
+            echo "No state directory to persist."
+            exit 0
+          fi
+
+          tmpdir="$(mktemp -d)"
+          statecopy="$tmpdir/knowledge-base"
+          worktree="$tmpdir/state-worktree"
+          cp -R data/knowledge-base "$statecopy"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git ls-remote --exit-code --heads origin knowledge-base-state > /dev/null 2>&1; then
+            git fetch origin knowledge-base-state
+            git worktree add "$worktree" origin/knowledge-base-state
+            cd "$worktree"
+            git checkout -B knowledge-base-state
+          else
+            git worktree add --detach "$worktree" HEAD
+            cd "$worktree"
+            git checkout --orphan knowledge-base-state
+            git rm -r --cached . || true
+            find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          fi
+
+          mkdir -p data
+          rm -rf data/knowledge-base
+          cp -R "$statecopy" data/knowledge-base
+          git add data/knowledge-base
+
+          if git diff --cached --quiet; then
+            echo "Knowledge-base state is unchanged."
+          else
+            git commit -m "Update knowledge-base processing state [skip ci]"
+            git push origin knowledge-base-state
+          fi
 
       - name: Report no eligible document
         if: steps.drive.outputs.selected != 'true'
@@ -97,12 +161,13 @@ jobs:
           MODIFIED_TIME: ${{ steps.drive.outputs.modified_time }}
           SCORE: ${{ steps.drive.outputs.score }}
           EEAT: ${{ steps.drive.outputs.eeat }}
+          RESEARCH_REVIEW: ${{ steps.drive.outputs.research_review }}
         run: |
           branch="content/drive-knowledge-${SLUG}-${GITHUB_RUN_ID}"
           git checkout -b "$branch"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/content/articles social outputs/en data/knowledge-base
+          git add src/content/articles social outputs/en
           git commit -m "Generate Drive knowledge article draft: ${SLUG}"
           git push origin "$branch"
 
@@ -115,13 +180,14 @@ jobs:
           - Source updated at: ${MODIFIED_TIME}
           - AI score: ${SCORE}/100
           - E-E-A-T: ${EEAT}
+          - Official-source review prep: ${RESEARCH_REVIEW}
 
           ## Generated files
 
           - Article: \`src/content/articles/${SLUG}.md\`
           - Social drafts: \`social/${SLUG}/\`
           - English draft: \`outputs/en/${SLUG}.md\`
-          - Processing state: \`data/knowledge-base/processed-docs.json\`
+          - Processing state: persisted on the \`knowledge-base-state\` branch and uploaded as a workflow artifact
 
           ## Review checklist
 
@@ -130,6 +196,7 @@ jobs:
           - [ ] Facts come from the source document or are clearly framed as editorial guidance
           - [ ] No unsupported medical, legal, advertising, or performance claims appear
           - [ ] SEO title, description, headings, FAQ, reference information, update date, author, and CTA are appropriate
+          - [ ] Additional verification topics, official-source candidates, and unsupported claims have been checked
           - [ ] Japanese article, English draft, Facebook, LinkedIn, and X drafts are suitable for review
           - [ ] Keep this pull request as Draft until human approval is complete
           - [ ] Change \`draft: true\` to \`draft: false\` only after editorial approval

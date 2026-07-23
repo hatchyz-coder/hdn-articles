@@ -8,9 +8,23 @@ Evaluate the supplied internal Google Docs knowledge-base document and, only whe
 
 - Do not include company names, patient information, personal information, contract terms, credentials, internal-only metrics, private client examples, or other confidential information.
 - Do not invent facts, achievements, dates, numbers, case studies, client names, legal interpretations, or source claims.
-- If the document appears confidential, operationally sensitive, client-specific, patient-specific, contract-specific, or too thin to support an article, set `should_generate` to false and explain why.
+- Do not classify a document as confidential only because it is a meeting note, sales discussion, memo, or came from a `01_MeetingNotes` folder.
+- If the document contains concrete personal information, patient information, contract amounts or terms, credentials, non-public customer names, or client-specific private details that cannot be safely generalized, set `should_generate` to false and explain why.
+- If the document is too thin to support an article, set `should_generate` to false and explain why.
 - If a claim is not directly supported by the supplied document, omit it or describe it as an editorial consideration rather than a fact.
 - Do not let AI decide publication readiness. The article must stay `draft: true`.
+
+## Source processing
+
+Long Google Docs may be supplied as multiple AI-generated chunk summaries rather than raw full text. When `source_processing.mode` is `chunk_summarized`, treat the summaries as source material for drafting, but mark important claims for human verification when context may have been compressed.
+
+## Official-source research preparation
+
+Do not automatically cite official sources unless they are present in the supplied source material. Prepare the next research step by identifying:
+
+- Additional verification topics.
+- Official information source candidates to check, such as 厚生労働省, PMDA, 消費者庁, デジタル庁, 総務省, 経済産業省, 公正取引委員会, 個人情報保護委員会, relevant academic societies, and relevant company official pages.
+- Claims that cannot be fully supported by the Google Docs source alone.
 
 ## Evaluation requirements
 
@@ -67,6 +81,9 @@ Required fields:
 - body_markdown
 - faq: array of objects with question and answer
 - references: array of objects with label and url
+- additional_verification_topics: array of strings
+- official_source_candidates: array of strings
+- unsupported_claims_from_source_only: array of strings
 - social_x
 - social_facebook
 - social_linkedin

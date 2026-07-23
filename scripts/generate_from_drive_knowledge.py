@@ -23,6 +23,8 @@ EN_DRAFT_DIR = ROOT / "outputs" / "en"
 STATE_PATH = ROOT / "data" / "knowledge-base" / "processed-docs.json"
 PROMPT_PATH = ROOT / "prompts" / "drive-knowledge-article.md"
 REPORT_PATH = ROOT / "data" / "knowledge-base" / "latest-run.json"
+MAX_DIRECT_SOURCE_CHARS = 30000
+CHUNK_CHARS = 12000
 
 DOC_MIME = "application/vnd.google-apps.document"
 FOLDER_MIME = "application/vnd.google-apps.folder"
@@ -39,11 +41,16 @@ ALLOWED_LINKS = [
 ]
 
 SENSITIVE_PATTERNS = [
-    ("patient_or_medical_record", r"(患者氏名|カルテ番号|診察券番号|生年月日|病歴|既往歴)"),
-    ("personal_information", r"(個人情報|電話番号|メールアドレス|住所|マイナンバー)"),
-    ("contract_or_pricing", r"(契約書|契約条件|見積|請求|単価|原価|粗利|NDA|秘密保持)"),
-    ("client_specific", r"(クライアント名|顧客名|取引先|導入先|案件名|商談|議事録)"),
-    ("credentials", r"(パスワード|APIキー|秘密鍵|認証情報|トークン)"),
+    ("patient_identifier", r"(患者氏名|患者名|カルテ番号|診察券番号|患者ID|患者番号)"),
+    ("medical_record_detail", r"(既往歴|服薬歴|検査値|診断名|病歴).{0,40}(氏名|患者|個人|さん|様)"),
+    ("email_address", r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}"),
+    ("phone_number", r"(?:\+81[-\s]?)?0\d{1,4}[-\s]?\d{1,4}[-\s]?\d{3,4}"),
+    ("postal_address", r"(東京都|北海道|大阪府|京都府|.{2,3}県).{0,40}(市|区|町|村).{0,60}(丁目|番地|号)"),
+    ("national_id", r"(マイナンバー|個人番号|運転免許証番号|保険証番号)"),
+    ("contract_amount", r"(契約金額|見積金額|請求金額|月額|年額|単価|原価|粗利).{0,30}([0-9０-９,，]+|[一二三四五六七八九十百千万億]+)\s*(円|万円|億円)"),
+    ("explicit_confidentiality", r"(NDA|秘密保持契約|社外秘|部外秘|confidential|strictly confidential|do not share)"),
+    ("credential_secret", r"(パスワード|APIキー|秘密鍵|認証情報|アクセストークン|refresh_token|client_secret)\s*[:：=]"),
+    ("named_private_customer", r"(非公開|匿名化前|実名).{0,30}(顧客名|取引先名|会社名|医院名|クリニック名)"),
 ]
 
 
@@ -53,6 +60,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--service-account-json", default=os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON", ""))
     parser.add_argument("--exclude-file", type=Path)
     parser.add_argument("--min-score", type=int, default=70)
+    parser.add_argument("--state-path", type=Path, default=STATE_PATH)
+    parser.add_argument("--report-path", type=Path, default=REPORT_PATH)
     return parser.parse_args()
 
 
@@ -193,22 +202,49 @@ def normalize_slug(value: str, file_id: str) -> str:
     return slug if valid_slug(slug) else fallback_slug(file_id)
 
 
-def call_openai(doc: dict[str, Any], text: str) -> dict[str, Any]:
+def chunk_text(text: str, chunk_chars: int = CHUNK_CHARS) -> list[str]:
+    paragraphs = [line.strip() for line in text.splitlines() if line.strip()]
+    chunks: list[str] = []
+    current: list[str] = []
+    current_len = 0
+    for paragraph in paragraphs:
+        if len(paragraph) > chunk_chars:
+            if current:
+                chunks.append("\n".join(current))
+                current = []
+                current_len = 0
+            for start in range(0, len(paragraph), chunk_chars):
+                chunks.append(paragraph[start:start + chunk_chars])
+            continue
+        if current and current_len + len(paragraph) + 1 > chunk_chars:
+            chunks.append("\n".join(current))
+            current = []
+            current_len = 0
+        current.append(paragraph)
+        current_len += len(paragraph) + 1
+    if current:
+        chunks.append("\n".join(current))
+    return chunks or [text[:chunk_chars]]
+
+
+def response_text(payload: dict[str, Any]) -> str:
+    output_text = payload.get("output_text")
+    if output_text:
+        return output_text
+    chunks: list[str] = []
+    for item in payload.get("output", []):
+        if item.get("type") != "message":
+            continue
+        for content in item.get("content", []):
+            if content.get("type") == "output_text":
+                chunks.append(content.get("text", ""))
+    return "\n".join(chunks)
+
+
+def call_openai_json(instructions: str, user_input: dict[str, Any], max_output_tokens: int) -> dict[str, Any]:
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
         raise RuntimeError("OPENAI_API_KEY is not configured")
-
-    instructions = PROMPT_PATH.read_text(encoding="utf-8")
-    user_input = {
-        "document": {
-            "name": doc["name"],
-            "file_id": doc["id"],
-            "url": doc.get("webViewLink"),
-            "modified_time": doc.get("modifiedTime"),
-        },
-        "source_text": text[:30000],
-        "allowed_links": ALLOWED_LINKS,
-    }
     response = requests.post(
         "https://api.openai.com/v1/responses",
         timeout=180,
@@ -217,26 +253,104 @@ def call_openai(doc: dict[str, Any], text: str) -> dict[str, Any]:
             "model": os.getenv("OPENAI_MODEL", "gpt-5-mini"),
             "instructions": instructions,
             "input": json.dumps(user_input, ensure_ascii=False),
-            "max_output_tokens": 8000,
+            "max_output_tokens": max_output_tokens,
             "store": False,
         },
     )
     response.raise_for_status()
-    payload = response.json()
-    output_text = payload.get("output_text")
-    if not output_text:
-        chunks: list[str] = []
-        for item in payload.get("output", []):
-            if item.get("type") != "message":
-                continue
-            for content in item.get("content", []):
-                if content.get("type") == "output_text":
-                    chunks.append(content.get("text", ""))
-        output_text = "\n".join(chunks)
+    output_text = response_text(response.json())
     output_text = re.sub(r"^```(?:json)?\s*|\s*```$", "", (output_text or "").strip(), flags=re.I | re.S)
     if not output_text:
         raise RuntimeError("OpenAI response did not contain output text")
     return json.loads(output_text)
+
+
+def summarize_long_source(doc: dict[str, Any], text: str) -> tuple[str, dict[str, Any]]:
+    chunks = chunk_text(text)
+    if len(text) <= MAX_DIRECT_SOURCE_CHARS and len(chunks) == 1:
+        return text, {
+            "mode": "full_text",
+            "sourceTextCharacters": len(text),
+            "chunks": 1,
+            "note": "Full Google Docs body was sent to the article evaluator.",
+        }
+
+    instructions = (
+        "Summarize this Google Docs chunk for later Japanese article evaluation. "
+        "Preserve concrete facts, operational insights, uncertainties, safety concerns, "
+        "claims that need official-source verification, and potential confidential details. "
+        "Do not add facts. Return JSON only with summary, key_points, risks, verification_needed, unsupported_claims."
+    )
+    summaries: list[dict[str, Any]] = []
+    for index, chunk in enumerate(chunks, start=1):
+        summaries.append(call_openai_json(
+            instructions,
+            {
+                "document": {"name": doc["name"], "file_id": doc["id"]},
+                "chunk_index": index,
+                "chunk_count": len(chunks),
+                "chunk_text": chunk,
+            },
+            2500,
+        ))
+    combined = {
+        "document_name": doc["name"],
+        "source_text_was_chunk_summarized": True,
+        "source_text_characters": len(text),
+        "chunk_count": len(chunks),
+        "chunk_summaries": summaries,
+    }
+    return json.dumps(combined, ensure_ascii=False), {
+        "mode": "chunk_summarized",
+        "sourceTextCharacters": len(text),
+        "chunks": len(chunks),
+        "chunkCharacters": CHUNK_CHARS,
+        "note": (
+            "Google Docs text exceeded the direct evaluation limit. The script split it "
+            "into chunks and sent AI-generated chunk summaries to the article evaluator."
+        ),
+    }
+
+
+def call_openai(doc: dict[str, Any], text: str) -> tuple[dict[str, Any], dict[str, Any]]:
+    source_text, source_processing = summarize_long_source(doc, text)
+    instructions = PROMPT_PATH.read_text(encoding="utf-8")
+    user_input = {
+        "document": {
+            "name": doc["name"],
+            "file_id": doc["id"],
+            "url": doc.get("webViewLink"),
+            "modified_time": doc.get("modifiedTime"),
+        },
+        "source_text": source_text,
+        "source_processing": source_processing,
+        "official_source_research_extension": official_source_extension(),
+        "allowed_links": ALLOWED_LINKS,
+    }
+    return call_openai_json(instructions, user_input, 8000), source_processing
+
+
+def official_source_extension() -> dict[str, Any]:
+    return {
+        "status": "prepared_not_auto_cited",
+        "candidate_sources": [
+            "厚生労働省",
+            "PMDA",
+            "消費者庁",
+            "デジタル庁",
+            "総務省",
+            "経済産業省",
+            "公正取引委員会",
+            "個人情報保護委員会",
+            "関連学会",
+            "各企業公式情報",
+        ],
+        "required_outputs": [
+            "additional_verification_topics",
+            "official_source_candidates",
+            "unsupported_claims_from_source_only",
+        ],
+    }
 
 
 def yaml_string(value: str) -> str:
@@ -365,7 +479,7 @@ def main() -> int:
         raise RuntimeError("GOOGLE_DRIVE_KNOWLEDGE_FOLDER_ID is not configured")
 
     drive, docs = drive_docs_services(args.service_account_json)
-    state = load_json(STATE_PATH, {"documents": {}})
+    state = load_json(args.state_path, {"documents": {}})
     used_sources = existing_source_urls()
     excluded = excluded_tokens(args.exclude_file)
     run_log: list[dict[str, Any]] = []
@@ -394,16 +508,16 @@ def main() -> int:
             run_log.append({"fileId": doc["id"], "name": doc["name"], "status": "skipped_confidential", "reason": reason})
             continue
 
-        data = call_openai(doc, text)
+        data, source_processing = call_openai(doc, text)
         ai_flags = [str(flag) for flag in data.get("confidentiality_flags", []) if str(flag).strip()]
         score = int(data.get("score", 0))
         if not data.get("should_generate") or score < args.min_score or ai_flags:
             reason = str(data.get("skip_reason") or f"AI score {score} below threshold or safety flags present")
-            update_state(state, doc, "skipped", {"reason": reason, "score": score, "eeat": data.get("eeat", {}), "flags": ai_flags})
+            update_state(state, doc, "skipped", {"reason": reason, "score": score, "eeat": data.get("eeat", {}), "flags": ai_flags, "sourceProcessing": source_processing})
             run_log.append({"fileId": doc["id"], "name": doc["name"], "status": "skipped", "reason": reason, "score": score})
             continue
 
-        candidates.append({"doc": doc, "url": doc_url, "data": data, "score": score})
+        candidates.append({"doc": doc, "url": doc_url, "data": data, "score": score, "sourceProcessing": source_processing})
         run_log.append({"fileId": doc["id"], "name": doc["name"], "status": "scored", "score": score})
 
     if candidates:
@@ -412,11 +526,17 @@ def main() -> int:
         data = selected["data"]
         score = selected["score"]
         doc_url = selected["url"]
+        source_processing = selected["sourceProcessing"]
         slug = normalize_slug(str(data.get("suggested_slug", "")), doc["id"])
         article = build_article(data, doc)
         outputs = write_outputs(slug, data, article)
-        update_state(state, doc, "generated", {"slug": slug, "score": score, "eeat": data.get("eeat", {})})
-        write_json(STATE_PATH, state)
+        research_review = {
+            "additionalVerificationTopics": data.get("additional_verification_topics", []),
+            "officialSourceCandidates": data.get("official_source_candidates", []),
+            "unsupportedClaimsFromSourceOnly": data.get("unsupported_claims_from_source_only", []),
+        }
+        update_state(state, doc, "generated", {"slug": slug, "score": score, "eeat": data.get("eeat", {}), "sourceProcessing": source_processing, "researchReview": research_review})
+        write_json(args.state_path, state)
         report = {
             "selected": True,
             "fileId": doc["id"],
@@ -426,10 +546,12 @@ def main() -> int:
             "slug": slug,
             "score": score,
             "eeat": data.get("eeat", {}),
+            "sourceProcessing": source_processing,
+            "researchReview": research_review,
             "outputs": [str(path.relative_to(ROOT)) for path in outputs],
             "runLog": run_log,
         }
-        write_json(REPORT_PATH, report)
+        write_json(args.report_path, report)
         write_output("selected", "true")
         write_output("slug", slug)
         write_output("file_id", doc["id"])
@@ -438,11 +560,12 @@ def main() -> int:
         write_output("modified_time", str(doc.get("modifiedTime", "")))
         write_output("score", str(score))
         write_output("eeat", json.dumps(data.get("eeat", {}), ensure_ascii=False))
+        write_output("research_review", json.dumps(research_review, ensure_ascii=False))
         print(f"Generated one article draft from {doc['name']}: {slug}")
         return 0
 
-    write_json(STATE_PATH, state)
-    write_json(REPORT_PATH, {"selected": False, "runLog": run_log})
+    write_json(args.state_path, state)
+    write_json(args.report_path, {"selected": False, "runLog": run_log, "officialSourceResearchExtension": official_source_extension()})
     write_output("selected", "false")
     write_output("reason", "no eligible new or updated Google Docs document")
     print("No eligible new or updated Google Docs document was generated.")

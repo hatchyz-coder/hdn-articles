@@ -119,8 +119,11 @@ What it does:
 - Reads each document name, file ID, URL, updated time, and body text.
 - Skips documents already processed at the same updated time.
 - Skips source documents already used in existing articles or open pull requests.
-- Skips documents with confidentiality concerns and records the reason in the run log.
+- Evaluates meeting notes, including documents under `01_MeetingNotes`, as normal article candidates unless concrete sensitive content is present.
+- Skips documents with concrete confidentiality concerns and records the reason in the run log. The heuristic targets personal information, patient identifiers, contract amounts, credentials, explicit confidentiality markers, and non-public customer names; it does not skip a document merely because it contains words such as meeting note or sales discussion.
 - Uses AI to score article suitability and E-E-A-T: Experience, Expertise, Authority, and Trust.
+- Prepares official-source follow-up fields for human review: additional verification topics, official information source candidates, and claims not supported by the source document alone.
+- Splits long Google Docs into chunks and summarizes each chunk before article evaluation instead of relying only on the first 30,000 characters.
 - Generates at most one article per run.
 - Creates a Draft Pull Request only. It never publishes and never commits directly to `main`.
 
@@ -129,10 +132,12 @@ Generated files include:
 - Japanese article draft in `src/content/articles/`
 - English editorial draft in `outputs/en/`
 - Facebook, LinkedIn, and X drafts in `social/<slug>/`
-- Processing state in `data/knowledge-base/processed-docs.json`
-- Latest run summary in `data/knowledge-base/latest-run.json`
+- Processing state in `data/knowledge-base/processed-docs.json` on the dedicated `knowledge-base-state` branch
+- Latest run summary in `data/knowledge-base/latest-run.json` on the dedicated `knowledge-base-state` branch
 
-The PR body includes the source Google Docs URL and updated time. Human review is required before changing `draft: true` to `draft: false`.
+Processing state is restored from and saved back to the `knowledge-base-state` branch on every workflow run, including runs that produce no article candidate. The workflow also uploads the state directory as a GitHub Actions artifact named `knowledge-base-state-<run_id>` with 30-day retention. This keeps processing state out of `main` while preserving skip logs, zero-candidate runs, processed file IDs, updated times, and the latest research-review notes.
+
+The PR body includes the source Google Docs URL, updated time, E-E-A-T score, and official-source review preparation. Human review is required before changing `draft: true` to `draft: false`.
 
 ## Local commands
 
