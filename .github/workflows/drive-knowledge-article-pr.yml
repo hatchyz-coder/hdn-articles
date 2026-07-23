@@ -8,6 +8,8 @@ on:
         required: true
         default: '70'
         type: string
+  schedule:
+    - cron: '0 21 * * 0-4'
 
 permissions:
   contents: write
@@ -16,6 +18,7 @@ permissions:
 jobs:
   generate:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -27,15 +30,8 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-          npm install
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
 
       - name: Restore persistent knowledge-base state
         run: |
@@ -78,14 +74,33 @@ jobs:
           GOOGLE_DRIVE_KNOWLEDGE_FOLDER_ID: ${{ vars.GOOGLE_DRIVE_KNOWLEDGE_FOLDER_ID }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
+          MIN_SCORE: ${{ inputs.min_score || '70' }}
         run: |
           python scripts/generate_from_drive_knowledge.py \
             --folder-id "$GOOGLE_DRIVE_KNOWLEDGE_FOLDER_ID" \
             --service-account-json "$GOOGLE_SERVICE_ACCOUNT_JSON" \
             --exclude-file /tmp/open-pr-drive-docs.txt \
-            --min-score "${{ inputs.min_score }}" \
+            --min-score "$MIN_SCORE" \
             --state-path data/knowledge-base/processed-docs.json \
-            --report-path data/knowledge-base/latest-run.json
+            --report-path data/knowledge-base/latest-run.json \
+            --max-drive-files 20 \
+            --max-ai-evaluations 5 \
+            --preview-chars 5000
+
+      - name: Write workflow summary
+        if: always()
+        run: |
+          {
+            echo "## Google Drive Knowledge Base Article PR"
+            echo ""
+            echo "| Metric | Value |"
+            echo "| --- | ---: |"
+            echo "| Drive取得件数 | ${{ steps.drive.outputs.driveFetched || '0' }} |"
+            echo "| 新規文書件数 | ${{ steps.drive.outputs.newDocuments || '0' }} |"
+            echo "| AI評価件数 | ${{ steps.drive.outputs.aiEvaluations || '0' }} |"
+            echo "| 記事生成件数 | ${{ steps.drive.outputs.articlesGenerated || '0' }} |"
+            echo "| 実行時間 | ${{ steps.drive.outputs.executionSeconds || '0' }} 秒 |"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload knowledge-base run state artifact
         if: always()
@@ -142,6 +157,16 @@ jobs:
         run: |
           echo "No eligible Google Docs document was generated."
           echo "Reason: ${{ steps.drive.outputs.reason }}"
+
+      - name: Set up Node
+        if: steps.drive.outputs.selected == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install site dependencies
+        if: steps.drive.outputs.selected == 'true'
+        run: npm install
 
       - name: Build and validate site
         if: steps.drive.outputs.selected == 'true'
