@@ -110,22 +110,27 @@ The generated article remains `draft: true`. Review source accuracy, legal and a
 
 ## Generate a draft from Google Drive Knowledge Base
 
-The `Google Drive Knowledge Base Article PR` workflow can be run manually from the Actions screen.
+The `Google Drive Knowledge Base Article PR` workflow runs on weekdays and can also be run manually from the Actions screen. It is optimized for daily generation of one candidate article, not for re-reading the entire Knowledge Base.
 
 What it does:
 
-- Recursively scans the configured `00_KnowledgeBase` folder.
+- Uses change detection and the `knowledge-base-state` branch cache instead of recursively scanning the configured `00_KnowledgeBase` folder.
+- On the first run, seeds from only the 20 most recently updated Google Docs found in the cached `00_KnowledgeBase` folder set.
+- On later runs, uses the Google Drive Changes API and cached document metadata to avoid API access for unchanged documents.
 - Processes Google Docs only.
-- Reads each document name, file ID, URL, updated time, and body text.
-- Skips documents already processed at the same updated time.
+- Reads document name, file ID, URL, and updated time before any document body access.
+- Immediately skips processed document IDs.
 - Skips source documents already used in existing articles or open pull requests.
 - Evaluates meeting notes, including documents under `01_MeetingNotes`, as normal article candidates unless concrete sensitive content is present.
 - Skips documents with concrete confidentiality concerns and records the reason in the run log. The heuristic targets personal information, patient identifiers, contract amounts, credentials, explicit confidentiality markers, and non-public customer names; it does not skip a document merely because it contains words such as meeting note or sales discussion.
-- Uses AI to score article suitability and E-E-A-T: Experience, Expertise, Authority, and Trust.
+- Sends only the first 5,000 characters of each unprocessed candidate document for preview scoring.
+- Uses AI to score at most five documents for article suitability and E-E-A-T: Experience, Expertise, Authority, and Trust.
 - Prepares official-source follow-up fields for human review: additional verification topics, official information source candidates, and claims not supported by the source document alone.
-- Splits long Google Docs into chunks and summarizes each chunk before article evaluation instead of relying only on the first 30,000 characters.
+- Fetches the full Google Docs body only for the final selected article candidate.
+- Splits and summarizes long full text only for that final selected document when it exceeds the direct article-generation threshold.
 - Generates at most one article per run.
 - Creates a Draft Pull Request only. It never publishes and never commits directly to `main`.
+- Sets a 15-minute workflow timeout and targets completion within five minutes for normal daily runs.
 
 Generated files include:
 
@@ -136,6 +141,8 @@ Generated files include:
 - Latest run summary in `data/knowledge-base/latest-run.json` on the dedicated `knowledge-base-state` branch
 
 Processing state is restored from and saved back to the `knowledge-base-state` branch on every workflow run, including runs that produce no article candidate. The workflow also uploads the state directory as a GitHub Actions artifact named `knowledge-base-state-<run_id>` with 30-day retention. This keeps processing state out of `main` while preserving skip logs, zero-candidate runs, processed file IDs, updated times, and the latest research-review notes.
+
+The workflow summary reports Drive取得件数, 新規文書件数, AI評価件数, 記事生成件数, and 実行時間. Logs include second-level timings for setup, Drive discovery, preview export, preview AI evaluation, full document fetch, and article generation.
 
 The PR body includes the source Google Docs URL, updated time, E-E-A-T score, and official-source review preparation. Human review is required before changing `draft: true` to `draft: false`.
 
