@@ -1,8 +1,8 @@
 {
   "selected": false,
   "runLog": [],
-  "createdAt": "2026-07-23T21:59:08.054927+00:00",
-  "selectionMode": "bounded_seed",
+  "createdAt": "2026-07-26T21:52:29.790606+00:00",
+  "selectionMode": "changes",
   "metrics": {
     "selectedDocumentId": "",
     "selectedDocumentName": "",
@@ -13,11 +13,11 @@
     "apiCalls": 0,
     "inputCharacters": 0,
     "openaiSeconds": 0.0,
-    "driveSeconds": 0.58,
+    "driveSeconds": 0.35,
     "docsFetchSeconds": 0.0,
     "stateSaveSeconds": 0.0,
     "fileIoSeconds": 0.0,
-    "executionSeconds": 0.59,
+    "executionSeconds": 0.36,
     "exitReason": "no_candidate"
   }
 }
