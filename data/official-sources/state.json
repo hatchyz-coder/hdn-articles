@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-28T22:54:20.558546+00:00",
+  "updated_at": "2026-07-29T22:56:23.646479+00:00",
   "seen_urls": [
     "https://translation.mhlw.go.jp/LUCMHLW/ns/w1/jaen/",
     "https://translation.mhlw.go.jp/LUCMHLW/ns/w1/jako/",
@@ -25,6 +25,7 @@
     "https://www.jftc.go.jp/soshiki/profile/index.html",
     "https://www.jftc.go.jp/soshiki/recruit/index.html",
     "https://www.jftc.go.jp/soshiki/tyoutatsu/index.html",
+    "https://www.mhlw.go.jp/etsuranshien/index.html",
     "https://www.mhlw.go.jp/houdou_kouhou/sanka/index.html",
     "https://www.mhlw.go.jp/index.html",
     "https://www.mhlw.go.jp/otoiawase/index.html",
@@ -66,6 +67,7 @@
     "25319555f639f8e093c42eda13349af4f444622e1a97551b01ba76948b9213e8",
     "2969b5983df610960fd44f3a4540eddd76cb0af2ffe4da709648d76f5a8e3c58",
     "2b9b80ae2b52fef08f494305181c452df8bbc6873c28edba58aae56bd46884d2",
+    "2ca48066f66712c3c1efc70d1ae9beba23fda2d22f3752df00d3009f618d7512",
     "2d63b2567c4e36aeb157932f2e366de5646f7cb0d614b295c35591deb7243016",
     "37f34faf45f6de69eea03343d4083e4d930cbbf321651503fa3b429ee2770088",
     "55e1e287b957f58670181fe19ecd24ef35ff5b7930213dff194473c855d5ddde",
@@ -105,7 +107,7 @@
     "fc6215de00199c8cc095d5a40803cb4bcc0cb81b1e7da610e92a05997535ee38"
   ],
   "last_run": {
-    "generated_at": "2026-07-28T22:54:20.558530+00:00",
+    "generated_at": "2026-07-29T22:56:23.646465+00:00",
     "dry_run": false,
     "source_id": "",
     "metrics": {
@@ -114,10 +116,10 @@
       "failed_sources": 0,
       "unsupported_sources": 0,
       "fetched_candidates": 50,
-      "new_candidates": 0,
-      "duplicate_candidates": 50,
+      "new_candidates": 1,
+      "duplicate_candidates": 49,
       "http_requests": 6,
-      "execution_seconds": 7.907,
+      "execution_seconds": 7.524,
       "source_results": [
         {
           "source_id": "mhlw",
@@ -156,6 +158,22 @@
         }
       ]
     },
-    "top_candidates": []
+    "top_candidates": [
+      {
+        "source_id": "mhlw",
+        "source_name": "厚生労働省",
+        "category": "government",
+        "title": "(ヘルプ)",
+        "url": "https://www.mhlw.go.jp/etsuranshien/index.html",
+        "published_at": "",
+        "discovered_at": "2026-07-29T22:56:16.820392+00:00",
+        "content_type": "html",
+        "matched_keywords": [],
+        "priority": 5,
+        "status": "new",
+        "fingerprint": "2ca48066f66712c3c1efc70d1ae9beba23fda2d22f3752df00d3009f618d7512",
+        "score": 40
+      }
+    ]
   }
 }

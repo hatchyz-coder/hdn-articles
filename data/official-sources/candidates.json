@@ -1,4 +1,20 @@
 {
-  "generated_at": "2026-07-28T22:54:20.558539+00:00",
-  "candidates": []
+  "generated_at": "2026-07-29T22:56:23.646472+00:00",
+  "candidates": [
+    {
+      "source_id": "mhlw",
+      "source_name": "厚生労働省",
+      "category": "government",
+      "title": "(ヘルプ)",
+      "url": "https://www.mhlw.go.jp/etsuranshien/index.html",
+      "published_at": "",
+      "discovered_at": "2026-07-29T22:56:16.820392+00:00",
+      "content_type": "html",
+      "matched_keywords": [],
+      "priority": 5,
+      "status": "new",
+      "fingerprint": "2ca48066f66712c3c1efc70d1ae9beba23fda2d22f3752df00d3009f618d7512",
+      "score": 40
+    }
+  ]
 }
