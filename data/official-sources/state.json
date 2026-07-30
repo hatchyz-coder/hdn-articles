@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-29T22:56:23.646479+00:00",
+  "updated_at": "2026-07-30T22:59:49.963085+00:00",
   "seen_urls": [
     "https://translation.mhlw.go.jp/LUCMHLW/ns/w1/jaen/",
     "https://translation.mhlw.go.jp/LUCMHLW/ns/w1/jako/",
@@ -107,7 +107,7 @@
     "fc6215de00199c8cc095d5a40803cb4bcc0cb81b1e7da610e92a05997535ee38"
   ],
   "last_run": {
-    "generated_at": "2026-07-29T22:56:23.646465+00:00",
+    "generated_at": "2026-07-30T22:59:49.963069+00:00",
     "dry_run": false,
     "source_id": "",
     "metrics": {
@@ -116,10 +116,10 @@
       "failed_sources": 0,
       "unsupported_sources": 0,
       "fetched_candidates": 50,
-      "new_candidates": 1,
-      "duplicate_candidates": 49,
+      "new_candidates": 0,
+      "duplicate_candidates": 50,
       "http_requests": 6,
-      "execution_seconds": 7.524,
+      "execution_seconds": 8.616,
       "source_results": [
         {
           "source_id": "mhlw",
@@ -158,22 +158,6 @@
         }
       ]
     },
-    "top_candidates": [
-      {
-        "source_id": "mhlw",
-        "source_name": "厚生労働省",
-        "category": "government",
-        "title": "(ヘルプ)",
-        "url": "https://www.mhlw.go.jp/etsuranshien/index.html",
-        "published_at": "",
-        "discovered_at": "2026-07-29T22:56:16.820392+00:00",
-        "content_type": "html",
-        "matched_keywords": [],
-        "priority": 5,
-        "status": "new",
-        "fingerprint": "2ca48066f66712c3c1efc70d1ae9beba23fda2d22f3752df00d3009f618d7512",
-        "score": 40
-      }
-    ]
+    "top_candidates": []
   }
 }
