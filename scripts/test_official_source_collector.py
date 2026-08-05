@@ -14,8 +14,10 @@ import yaml
 
 from collect_official_sources import (
     CONNECT_TIMEOUT_SECONDS,
+    EncodingError,
     READ_TIMEOUT_SECONDS,
     OfficialSourceCollector,
+    decode_response_text,
     filter_duplicates,
     generate_fingerprint,
     keyword_score,
@@ -23,6 +25,7 @@ from collect_official_sources import (
     normalize_url,
     parse_feed,
     parse_html,
+    run_collection,
     url_allowed,
 )
 
@@ -39,6 +42,17 @@ def source() -> dict:
         "keywords": ["医療広告", "再生医療", "ガイドライン"],
         "allowed_domains": ["mhlw.go.jp"],
     }
+
+
+def make_response(body: bytes, content_type: str = "text/html", apparent_encoding: str | None = None) -> requests.Response:
+    response = requests.Response()
+    response.status_code = 200
+    response.url = "https://www.mhlw.go.jp/"
+    response._content = body
+    response.headers["Content-Type"] = content_type
+    if apparent_encoding is not None:
+        response.encoding = apparent_encoding
+    return response
 
 
 def test_yaml_loading() -> None:
@@ -136,6 +150,106 @@ def test_html_candidate_extraction() -> None:
     assert items[0]["published_at"].startswith("2026-07-22")
 
 
+def test_utf8_html_decoding() -> None:
+    html = '<html><a href="/news/">医療広告ガイドライン</a></html>'
+    response = make_response(html.encode("utf-8"), "text/html; charset=utf-8")
+    assert "医療広告" in decode_response_text(response)
+
+
+def test_shift_jis_html_decoding() -> None:
+    html = '<html><a href="/news/">医療広告ガイドライン</a></html>'
+    response = make_response(html.encode("shift_jis"), "text/html; charset=Shift_JIS")
+    assert "医療広告" in decode_response_text(response)
+
+
+def test_cp932_html_decoding() -> None:
+    html = '<html><a href="/news/">医療広告①ガイドライン</a></html>'
+    response = make_response(html.encode("cp932"), "text/html; charset=CP932")
+    assert "医療広告1ガイドライン" in decode_response_text(response)
+
+
+def test_unspecified_charset_html_decoding() -> None:
+    html = '<html><a href="/news/">再生医療ガイドライン</a></html>'
+    response = make_response(html.encode("utf-8"), "text/html", apparent_encoding="ISO-8859-1")
+    assert "再生医療" in decode_response_text(response)
+
+
+def test_meta_charset_html_decoding() -> None:
+    html = '<html><head><meta charset="Shift_JIS"></head><a href="/news/">医療広告</a></html>'
+    response = make_response(html.encode("shift_jis"), "text/html")
+    assert "医療広告" in decode_response_text(response)
+
+
+def test_mojibake_detection_decodes_with_fallback() -> None:
+    html = '<html><a href="/news/">医療広告ガイドライン</a></html>'
+    response = make_response(html.encode("utf-8"), "text/html; charset=Shift_JIS")
+    assert "医療広告" in decode_response_text(response)
+
+
+def test_unusable_mojibake_title_is_not_candidate() -> None:
+    html = '<a href="/news/">縺薙ｌ縺ｯ譁ｰ逕ｰ医療広告</a>'
+    assert parse_html(html, "https://www.mhlw.go.jp/", source()) == []
+
+
+def test_encoding_error_aggregation() -> None:
+    bad = b"\x80\x81\x82\x83\x84\x85"
+    response = make_response(bad, "text/html; charset=utf-8")
+    with patch("collect_official_sources.decode_candidates", return_value=["utf-8"]):
+        try:
+            decode_response_text(response)
+        except EncodingError:
+            pass
+        else:
+            raise AssertionError("invalid body did not raise EncodingError")
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = Path(tmp)
+        config_path = tmp_path / "official-sources.yaml"
+        config_path.write_text(yaml.safe_dump({"sources": [source()]}, allow_unicode=True), encoding="utf-8")
+        args = type(
+            "Args",
+            (),
+            {
+                "config": str(config_path),
+                "state_path": str(tmp_path / "state.json"),
+                "latest_run_path": str(tmp_path / "latest-run.json"),
+                "candidates_path": str(tmp_path / "candidates.json"),
+                "source_id": "",
+                "dry_run": True,
+            },
+        )()
+        with patch.object(OfficialSourceCollector, "collect_source", side_effect=EncodingError("bad encoding")):
+            _, latest_run, _, metrics = run_collection(args)
+    assert latest_run["source_status_counts"]["encoding_error"] == 1
+    assert metrics.encoding_error_sources == 1
+
+
+def test_source_status_counts_are_consistent() -> None:
+    sources = [source(), {**source(), "id": "empty", "name": "Empty"}]
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = Path(tmp)
+        config_path = tmp_path / "official-sources.yaml"
+        config_path.write_text(yaml.safe_dump({"sources": sources}, allow_unicode=True), encoding="utf-8")
+        args = type(
+            "Args",
+            (),
+            {
+                "config": str(config_path),
+                "state_path": str(tmp_path / "state.json"),
+                "latest_run_path": str(tmp_path / "latest-run.json"),
+                "candidates_path": str(tmp_path / "candidates.json"),
+                "source_id": "",
+                "dry_run": True,
+            },
+        )()
+        items = [parse_html('<a href="/news/">医療広告ガイドライン</a>', "https://www.mhlw.go.jp/", source())[0]]
+        with patch.object(OfficialSourceCollector, "collect_source", side_effect=[items, []]):
+            _, latest_run, _, metrics = run_collection(args)
+    counts = latest_run["source_status_counts"]
+    assert counts["success"] == 1
+    assert counts["no_candidates"] == 1
+    assert sum(counts.values()) == metrics.targeted_sources
+
+
 def main() -> int:
     tests = [
         test_yaml_loading,
@@ -148,6 +262,15 @@ def main() -> int:
         test_invalid_url_rejection,
         test_feed_parsing,
         test_html_candidate_extraction,
+        test_utf8_html_decoding,
+        test_shift_jis_html_decoding,
+        test_cp932_html_decoding,
+        test_unspecified_charset_html_decoding,
+        test_meta_charset_html_decoding,
+        test_mojibake_detection_decodes_with_fallback,
+        test_unusable_mojibake_title_is_not_candidate,
+        test_encoding_error_aggregation,
+        test_source_status_counts_are_consistent,
     ]
     started = time.monotonic()
     for test in tests:
