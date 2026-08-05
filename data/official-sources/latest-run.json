@@ -1,23 +1,27 @@
 {
-  "generated_at": "2026-08-04T22:57:20.048015+00:00",
+  "generated_at": "2026-08-05T22:53:23.208645+00:00",
   "dry_run": false,
   "source_id": "",
   "metrics": {
     "targeted_sources": 20,
     "successful_sources": 5,
+    "no_candidate_sources": 0,
+    "skipped_sources": 15,
     "failed_sources": 0,
     "unsupported_sources": 0,
+    "encoding_error_sources": 0,
     "fetched_candidates": 50,
-    "new_candidates": 0,
-    "duplicate_candidates": 50,
+    "new_candidates": 5,
+    "duplicate_candidates": 45,
     "http_requests": 6,
-    "execution_seconds": 7.913,
+    "execution_seconds": 7.791,
     "source_results": [
       {
         "source_id": "mhlw",
         "source_name": "厚生労働省",
         "status": "success",
         "candidate_count": 10,
+        "reason": "Candidates found",
         "error": ""
       },
       {
@@ -25,6 +29,7 @@
         "source_name": "PMDA",
         "status": "success",
         "candidate_count": 10,
+        "reason": "Candidates found",
         "error": ""
       },
       {
@@ -32,6 +37,7 @@
         "source_name": "消費者庁",
         "status": "success",
         "candidate_count": 10,
+        "reason": "Candidates found",
         "error": ""
       },
       {
@@ -39,6 +45,7 @@
         "source_name": "公正取引委員会",
         "status": "success",
         "candidate_count": 10,
+        "reason": "Candidates found",
         "error": ""
       },
       {
@@ -46,9 +53,217 @@
         "source_name": "個人情報保護委員会",
         "status": "success",
         "candidate_count": 10,
+        "reason": "Candidates found",
+        "error": ""
+      },
+      {
+        "source_id": "digital",
+        "source_name": "デジタル庁",
+        "status": "skipped",
+        "candidate_count": 0,
+        "reason": "Skipped after reaching MAX_TOTAL candidate limit",
+        "error": ""
+      },
+      {
+        "source_id": "soumu",
+        "source_name": "総務省",
+        "status": "skipped",
+        "candidate_count": 0,
+        "reason": "Skipped after reaching MAX_TOTAL candidate limit",
+        "error": ""
+      },
+      {
+        "source_id": "meti",
+        "source_name": "経済産業省",
+        "status": "skipped",
+        "candidate_count": 0,
+        "reason": "Skipped after reaching MAX_TOTAL candidate limit",
+        "error": ""
+      },
+      {
+        "source_id": "jma",
+        "source_name": "日本医師会",
+        "status": "skipped",
+        "candidate_count": 0,
+        "reason": "Skipped after reaching MAX_TOTAL candidate limit",
+        "error": ""
+      },
+      {
+        "source_id": "jda",
+        "source_name": "日本歯科医師会",
+        "status": "skipped",
+        "candidate_count": 0,
+        "reason": "Skipped after reaching MAX_TOTAL candidate limit",
+        "error": ""
+      },
+      {
+        "source_id": "jda-dermatology",
+        "source_name": "日本皮膚科学会",
+        "status": "skipped",
+        "candidate_count": 0,
+        "reason": "Skipped after reaching MAX_TOTAL candidate limit",
+        "error": ""
+      },
+      {
+        "source_id": "jsprs",
+        "source_name": "日本形成外科学会",
+        "status": "skipped",
+        "candidate_count": 0,
+        "reason": "Skipped after reaching MAX_TOTAL candidate limit",
+        "error": ""
+      },
+      {
+        "source_id": "jaam",
+        "source_name": "日本抗加齢医学会",
+        "status": "skipped",
+        "candidate_count": 0,
+        "reason": "Skipped after reaching MAX_TOTAL candidate limit",
+        "error": ""
+      },
+      {
+        "source_id": "jsrm",
+        "source_name": "日本再生医療学会",
+        "status": "skipped",
+        "candidate_count": 0,
+        "reason": "Skipped after reaching MAX_TOTAL candidate limit",
+        "error": ""
+      },
+      {
+        "source_id": "google-search-central",
+        "source_name": "Google Search Central",
+        "status": "skipped",
+        "candidate_count": 0,
+        "reason": "Skipped after reaching MAX_TOTAL candidate limit",
+        "error": ""
+      },
+      {
+        "source_id": "line-yahoo-developers",
+        "source_name": "LINEヤフー Developers",
+        "status": "skipped",
+        "candidate_count": 0,
+        "reason": "Skipped after reaching MAX_TOTAL candidate limit",
+        "error": ""
+      },
+      {
+        "source_id": "meta-developers",
+        "source_name": "Meta for Developers",
+        "status": "skipped",
+        "candidate_count": 0,
+        "reason": "Skipped after reaching MAX_TOTAL candidate limit",
+        "error": ""
+      },
+      {
+        "source_id": "github-changelog",
+        "source_name": "GitHub Changelog",
+        "status": "skipped",
+        "candidate_count": 0,
+        "reason": "Skipped after reaching MAX_TOTAL candidate limit",
+        "error": ""
+      },
+      {
+        "source_id": "openai",
+        "source_name": "OpenAI公式",
+        "status": "skipped",
+        "candidate_count": 0,
+        "reason": "Skipped after reaching MAX_TOTAL candidate limit",
+        "error": ""
+      },
+      {
+        "source_id": "google-ai",
+        "source_name": "Google AI公式",
+        "status": "skipped",
+        "candidate_count": 0,
+        "reason": "Skipped after reaching MAX_TOTAL candidate limit",
         "error": ""
       }
     ]
   },
-  "top_candidates": []
+  "source_status_counts": {
+    "success": 5,
+    "no_candidates": 0,
+    "skipped": 15,
+    "unsupported": 0,
+    "failed": 0,
+    "encoding_error": 0
+  },
+  "top_candidates": [
+    {
+      "source_id": "mhlw",
+      "source_name": "厚生労働省",
+      "category": "government",
+      "title": "健康・医療",
+      "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/index.html",
+      "published_at": "",
+      "discovered_at": "2026-08-05T22:53:16.456156+00:00",
+      "content_type": "html",
+      "matched_keywords": [
+        "医療",
+        "健康"
+      ],
+      "priority": 5,
+      "status": "new",
+      "fingerprint": "f798b17d7eac6f9b62ca0471435f9b54e1a7a95beb49a3682c87da27aa9eb178",
+      "score": 60
+    },
+    {
+      "source_id": "mhlw",
+      "source_name": "厚生労働省",
+      "category": "government",
+      "title": "テーマ別に探す",
+      "url": "https://www.mhlw.go.jp/theme/index.html",
+      "published_at": "",
+      "discovered_at": "2026-08-05T22:53:16.455723+00:00",
+      "content_type": "html",
+      "matched_keywords": [],
+      "priority": 5,
+      "status": "new",
+      "fingerprint": "93203b0e4cef08d8c39260d358c488eecad0bba5898f2a6c4ed9f9f83838819e",
+      "score": 40
+    },
+    {
+      "source_id": "mhlw",
+      "source_name": "厚生労働省",
+      "category": "government",
+      "title": "福祉・介護",
+      "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/hukushi_kaigo/index.html",
+      "published_at": "",
+      "discovered_at": "2026-08-05T22:53:16.456305+00:00",
+      "content_type": "html",
+      "matched_keywords": [],
+      "priority": 5,
+      "status": "new",
+      "fingerprint": "8297cd13b337fa78f2042a990e5c4d115523e8a83d633240e69bfc613cff255d",
+      "score": 40
+    },
+    {
+      "source_id": "pmda",
+      "source_name": "PMDA",
+      "category": "government",
+      "title": "相談業務",
+      "url": "https://www.pmda.go.jp/review-services/f2f-pre/0001.html",
+      "published_at": "",
+      "discovered_at": "2026-08-05T22:53:18.081447+00:00",
+      "content_type": "html",
+      "matched_keywords": [],
+      "priority": 5,
+      "status": "new",
+      "fingerprint": "ad755345b39c7b2f9a4a5102792d9290eb9cc9bc6cdc44cd2899461d854e398d",
+      "score": 40
+    },
+    {
+      "source_id": "pmda",
+      "source_name": "PMDA",
+      "category": "government",
+      "title": "治験関連業務",
+      "url": "https://www.pmda.go.jp/review-services/trials/0001.html",
+      "published_at": "",
+      "discovered_at": "2026-08-05T22:53:18.081606+00:00",
+      "content_type": "html",
+      "matched_keywords": [],
+      "priority": 5,
+      "status": "new",
+      "fingerprint": "701d3860b540f818fa452c5766fd8fc44e77932c30258c0ba92758ee105b3530",
+      "score": 40
+    }
+  ]
 }

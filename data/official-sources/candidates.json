@@ -1,4 +1,83 @@
 {
-  "generated_at": "2026-08-04T22:57:20.048022+00:00",
-  "candidates": []
+  "generated_at": "2026-08-05T22:53:23.208653+00:00",
+  "candidates": [
+    {
+      "source_id": "mhlw",
+      "source_name": "厚生労働省",
+      "category": "government",
+      "title": "健康・医療",
+      "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/index.html",
+      "published_at": "",
+      "discovered_at": "2026-08-05T22:53:16.456156+00:00",
+      "content_type": "html",
+      "matched_keywords": [
+        "医療",
+        "健康"
+      ],
+      "priority": 5,
+      "status": "new",
+      "fingerprint": "f798b17d7eac6f9b62ca0471435f9b54e1a7a95beb49a3682c87da27aa9eb178",
+      "score": 60
+    },
+    {
+      "source_id": "mhlw",
+      "source_name": "厚生労働省",
+      "category": "government",
+      "title": "テーマ別に探す",
+      "url": "https://www.mhlw.go.jp/theme/index.html",
+      "published_at": "",
+      "discovered_at": "2026-08-05T22:53:16.455723+00:00",
+      "content_type": "html",
+      "matched_keywords": [],
+      "priority": 5,
+      "status": "new",
+      "fingerprint": "93203b0e4cef08d8c39260d358c488eecad0bba5898f2a6c4ed9f9f83838819e",
+      "score": 40
+    },
+    {
+      "source_id": "mhlw",
+      "source_name": "厚生労働省",
+      "category": "government",
+      "title": "福祉・介護",
+      "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/hukushi_kaigo/index.html",
+      "published_at": "",
+      "discovered_at": "2026-08-05T22:53:16.456305+00:00",
+      "content_type": "html",
+      "matched_keywords": [],
+      "priority": 5,
+      "status": "new",
+      "fingerprint": "8297cd13b337fa78f2042a990e5c4d115523e8a83d633240e69bfc613cff255d",
+      "score": 40
+    },
+    {
+      "source_id": "pmda",
+      "source_name": "PMDA",
+      "category": "government",
+      "title": "相談業務",
+      "url": "https://www.pmda.go.jp/review-services/f2f-pre/0001.html",
+      "published_at": "",
+      "discovered_at": "2026-08-05T22:53:18.081447+00:00",
+      "content_type": "html",
+      "matched_keywords": [],
+      "priority": 5,
+      "status": "new",
+      "fingerprint": "ad755345b39c7b2f9a4a5102792d9290eb9cc9bc6cdc44cd2899461d854e398d",
+      "score": 40
+    },
+    {
+      "source_id": "pmda",
+      "source_name": "PMDA",
+      "category": "government",
+      "title": "治験関連業務",
+      "url": "https://www.pmda.go.jp/review-services/trials/0001.html",
+      "published_at": "",
+      "discovered_at": "2026-08-05T22:53:18.081606+00:00",
+      "content_type": "html",
+      "matched_keywords": [],
+      "priority": 5,
+      "status": "new",
+      "fingerprint": "701d3860b540f818fa452c5766fd8fc44e77932c30258c0ba92758ee105b3530",
+      "score": 40
+    }
+  ]
 }
