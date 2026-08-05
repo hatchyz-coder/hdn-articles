@@ -1,69 +1,23 @@
 {
-  "selected": true,
+  "selected": false,
   "runLog": [],
-  "createdAt": "2026-08-05T12:47:49.526436+00:00",
-  "selectionMode": "manual_document_id",
-  "fileId": "1vhtu3aW-phgZqm-cXIZ3_oYmP-8hPOaGaKsSONkrgww",
-  "name": "LH12_記事6_“声”を活かせる基盤ツール｜収録依頼と個人活動をLHubで整理 のコピー のコピー",
-  "url": "https://docs.google.com/document/d/1vhtu3aW-phgZqm-cXIZ3_oYmP-8hPOaGaKsSONkrgww/edit?usp=drivesdk",
-  "modifiedTime": "2026-07-23T03:44:09.768Z",
-  "sourceProcessing": {
-    "mode": "full_text",
-    "sourceTextCharacters": 3702,
-    "inputCharacters": 3702
-  },
-  "slug": "seiyu-narrator-lhub-shuuro-ku-ninaitotameni",
-  "score": 80,
-  "eeat": {
-    "Experience": 70,
-    "Expertise": 65,
-    "Authority": 50,
-    "Trust": 70
-  },
-  "researchReview": {
-    "additionalVerificationTopics": [
-      "LHubの具体的な支払い手段の対応状況（PayPay、コンビニ払い、口座振替、クレジットカードなど）",
-      "LHubでの継続課金（定期課金・会員制）機能の仕様と制約（試用、解約、決済周期など）",
-      "LINE公式アカウント連携におけるメッセージ配信上限や料金体系",
-      "顧客情報のセグメント管理やデータエクスポート機能の詳細",
-      "プラットフォーム利用時の個人情報保護と法令順守（特定商取引法、電子決済に関する規制など）"
-    ],
-    "officialSourceCandidates": [
-      "LHub公式ドキュメント・サポートページ（サービス提供元）",
-      "HDN Japan の LHub 製品ページ（https://hdnjapan.com/lhub.html）",
-      "LINE公式アカウント（LINE for Business）ドキュメント",
-      "個人情報保護委員会（個人情報の取り扱いに関するガイドライン）",
-      "消費者庁（電子商取引・通信販売のルール）",
-      "金融庁（電子決済・振込に関する規制）"
-    ],
-    "unsupportedClaimsFromSourceOnly": [
-      "LHubが具体的にPayPay・コンビニ決済・口座振替すべてに対応しているという点（原文で言及されているが、導入条件や決済事業者との連携状況は要確認）",
-      "管理画面の具体的なUI／UXやセグメント管理の詳細な挙動（原文は利点を示す記述だが、画面仕様は別途検証が必要）",
-      "LHubの料金や手数料、利用プランごとの機能範囲（原文では触れられていないため確認が必要）"
-    ]
-  },
-  "outputs": [
-    "src/content/articles/seiyu-narrator-lhub-shuuro-ku-ninaitotameni.md",
-    "social/seiyu-narrator-lhub-shuuro-ku-ninaitotameni/x.md",
-    "social/seiyu-narrator-lhub-shuuro-ku-ninaitotameni/facebook.md",
-    "social/seiyu-narrator-lhub-shuuro-ku-ninaitotameni/linkedin.md",
-    "outputs/en/seiyu-narrator-lhub-shuuro-ku-ninaitotameni.md"
-  ],
+  "createdAt": "2026-08-05T22:06:52.213541+00:00",
+  "selectionMode": "changes",
   "metrics": {
-    "selectedDocumentId": "1vhtu3aW-phgZqm-cXIZ3_oYmP-8hPOaGaKsSONkrgww",
-    "selectedDocumentName": "LH12_記事6_“声”を活かせる基盤ツール｜収録依頼と個人活動をLHubで整理 のコピー のコピー",
-    "driveFetched": 1,
+    "selectedDocumentId": "",
+    "selectedDocumentName": "",
+    "driveFetched": 0,
     "newDocuments": 0,
-    "aiEvaluations": 1,
-    "articlesGenerated": 1,
-    "apiCalls": 1,
-    "inputCharacters": 8927,
-    "openaiSeconds": 36.85,
-    "driveSeconds": 0.36,
-    "docsFetchSeconds": 0.51,
+    "aiEvaluations": 0,
+    "articlesGenerated": 0,
+    "apiCalls": 0,
+    "inputCharacters": 0,
+    "openaiSeconds": 0.0,
+    "driveSeconds": 0.31,
+    "docsFetchSeconds": 0.0,
     "stateSaveSeconds": 0.0,
     "fileIoSeconds": 0.0,
-    "executionSeconds": 37.73,
-    "exitReason": "generated"
+    "executionSeconds": 0.32,
+    "exitReason": "no_candidate"
   }
 }
