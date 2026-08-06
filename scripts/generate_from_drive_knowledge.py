@@ -40,6 +40,8 @@ OPENAI_TIMEOUT = (10, 45)
 MAX_SEED_FILES = 5
 MAX_INPUT_CHARS = 12000
 MAX_RETRIES = 2
+ARTICLES_FOLDER_NAME = "05_Articles"
+MAX_FOLDER_SCAN = 100
 
 SOURCE_TYPES = {
     DOC_MIME: {"kind": "google_doc", "enabled": True},
@@ -184,11 +186,21 @@ def enabled_source_mime_types() -> set[str]:
 
 
 def drive_cache(state: dict[str, Any], root_folder_id: str) -> dict[str, Any]:
+    """Return a cache bound to one approved source subtree only."""
+
     cache = state.setdefault("driveCache", {})
-    folder_ids = set(cache.get("folderIds", []))
-    folder_ids.add(root_folder_id)
-    cache["folderIds"] = sorted(folder_ids)
-    cache.setdefault("documents", {})
+    if cache.get("scopeFolderId") != root_folder_id:
+        cache = {
+            "scopeFolderId": root_folder_id,
+            "folderIds": [root_folder_id],
+            # Preserve document history so a scope migration does not retry
+            # old material merely because the traversal cache was reset.
+            "documents": cache.get("documents", {}),
+        }
+        state["driveCache"] = cache
+    else:
+        cache["folderIds"] = sorted(set(cache.get("folderIds", [])) | {root_folder_id})
+        cache.setdefault("documents", {})
     return cache
 
 
@@ -196,24 +208,109 @@ def get_start_page_token(drive: Any) -> str:
     return drive.changes().getStartPageToken(supportsAllDrives=True).execute()["startPageToken"]
 
 
-def list_recent_seed_docs(drive: Any, folder_id: str, limit: int) -> list[dict[str, Any]]:
+def resolve_article_source_folder(drive: Any, configured_folder_id: str) -> dict[str, Any]:
+    """Resolve 05_Articles, accepting either it or its KnowledgeBase parent."""
+
+    configured = drive.files().get(
+        fileId=configured_folder_id,
+        fields="id,name,mimeType,parents",
+        supportsAllDrives=True,
+    ).execute()
+    if configured.get("mimeType") != FOLDER_MIME:
+        raise RuntimeError("GOOGLE_DRIVE_KNOWLEDGE_FOLDER_ID must reference a Drive folder")
+    if str(configured.get("name", "")).strip() == ARTICLES_FOLDER_NAME:
+        return configured
+
     response = drive.files().list(
-        q=f"'{folder_id}' in parents and trashed = false and mimeType = '{DOC_MIME}'",
+        q=(
+            f"'{configured_folder_id}' in parents and trashed = false "
+            f"and mimeType = '{FOLDER_MIME}' and name = '{ARTICLES_FOLDER_NAME}'"
+        ),
         spaces="drive",
-        fields="files(id,name,mimeType,modifiedTime,webViewLink,parents)",
-        orderBy="modifiedTime desc",
-        pageSize=limit,
+        fields="files(id,name,mimeType,parents)",
+        pageSize=2,
         supportsAllDrives=True,
         includeItemsFromAllDrives=True,
     ).execute()
-    return response.get("files", [])
+    matches = response.get("files", [])
+    if len(matches) != 1:
+        raise RuntimeError(
+            f"Expected exactly one {ARTICLES_FOLDER_NAME} folder under the configured KnowledgeBase folder"
+        )
+    return matches[0]
+
+
+def list_recent_seed_docs(
+    drive: Any, folder_id: str, limit: int
+) -> tuple[list[dict[str, Any]], set[str]]:
+    """Discover Google Docs recursively under the approved source folder."""
+
+    folders = {folder_id}
+    queue = [folder_id]
+    docs: list[dict[str, Any]] = []
+    while queue:
+        current_folder = queue.pop(0)
+        if len(folders) > MAX_FOLDER_SCAN:
+            raise RuntimeError(f"Source folder scan exceeded {MAX_FOLDER_SCAN} folders")
+        page_token = None
+        while True:
+            response = drive.files().list(
+                q=(
+                    f"'{current_folder}' in parents and trashed = false and "
+                    f"(mimeType = '{DOC_MIME}' or mimeType = '{FOLDER_MIME}')"
+                ),
+                spaces="drive",
+                fields="nextPageToken,files(id,name,mimeType,modifiedTime,webViewLink,parents)",
+                orderBy="modifiedTime desc",
+                pageSize=100,
+                pageToken=page_token,
+                supportsAllDrives=True,
+                includeItemsFromAllDrives=True,
+            ).execute()
+            for item in response.get("files", []):
+                if item.get("mimeType") == FOLDER_MIME:
+                    child_id = item["id"]
+                    if child_id not in folders:
+                        folders.add(child_id)
+                        queue.append(child_id)
+                elif item.get("mimeType") == DOC_MIME:
+                    docs.append(item)
+            page_token = response.get("nextPageToken")
+            if not page_token:
+                break
+    docs.sort(key=lambda item: item.get("modifiedTime", ""), reverse=True)
+    return docs[:limit], folders
+
+
+def document_is_within_scope(drive: Any, doc: dict[str, Any], scope_folder_id: str) -> bool:
+    """Verify a manually specified Doc belongs to the approved subtree."""
+
+    pending = list(doc.get("parents", []))
+    visited: set[str] = set()
+    while pending:
+        folder_id = pending.pop()
+        if folder_id == scope_folder_id:
+            return True
+        if folder_id in visited:
+            continue
+        visited.add(folder_id)
+        folder = drive.files().get(
+            fileId=folder_id,
+            fields="id,mimeType,parents",
+            supportsAllDrives=True,
+        ).execute()
+        if folder.get("mimeType") == FOLDER_MIME:
+            pending.extend(folder.get("parents", []))
+    return False
 
 
 def list_changed_docs(drive: Any, cache: dict[str, Any], root_folder_id: str, limit: int) -> tuple[list[dict[str, Any]], str]:
     token = cache.get("changePageToken")
     if not token:
+        docs, discovered_folders = list_recent_seed_docs(drive, root_folder_id, limit)
+        cache["folderIds"] = sorted(discovered_folders)
         cache["changePageToken"] = get_start_page_token(drive)
-        return list_recent_seed_docs(drive, root_folder_id, limit), "bounded_seed"
+        return docs, "bounded_seed"
 
     folder_ids = set(cache.get("folderIds", [root_folder_id]))
     enabled_mimes = enabled_source_mime_types()
@@ -285,13 +382,17 @@ def is_unprocessed_or_updated(state: dict[str, Any], doc: dict[str, Any]) -> boo
 
 def select_target_doc(drive: Any, state: dict[str, Any], folder_id: str, args: argparse.Namespace, timer: RunTimer) -> tuple[dict[str, Any] | None, str]:
     with timer.section("driveSeconds", "Drive select target document"):
+        source_folder = resolve_article_source_folder(drive, folder_id)
+        source_folder_id = source_folder["id"]
         if args.document_id:
             doc = get_doc_metadata(drive, args.document_id)
+            if not document_is_within_scope(drive, doc, source_folder_id):
+                raise RuntimeError("Manual document_id is outside the approved 05_Articles source subtree")
             timer.metrics["driveFetched"] = 1
             return doc, "manual_document_id"
 
-        cache = drive_cache(state, folder_id)
-        docs, mode = list_changed_docs(drive, cache, folder_id, min(args.max_drive_files, MAX_SEED_FILES))
+        cache = drive_cache(state, source_folder_id)
+        docs, mode = list_changed_docs(drive, cache, source_folder_id, min(args.max_drive_files, MAX_SEED_FILES))
         timer.metrics["driveFetched"] = len(docs)
         for doc in docs:
             cache.setdefault("documents", {})[doc["id"]] = {
@@ -567,8 +668,8 @@ def main() -> int:
     timer = RunTimer()
     state = load_json(args.state_path, {"documents": {}})
     report: dict[str, Any] = {"selected": False, "runLog": [], "createdAt": now_iso()}
-    if not args.folder_id and not args.document_id:
-        raise RuntimeError("GOOGLE_DRIVE_KNOWLEDGE_FOLDER_ID or --document-id is required")
+    if not args.folder_id:
+        raise RuntimeError("GOOGLE_DRIVE_KNOWLEDGE_FOLDER_ID is required to enforce the approved 05_Articles source scope")
 
     with timer.section("driveSeconds", "Google API client setup"):
         drive, docs = google_services(args.service_account_json)
