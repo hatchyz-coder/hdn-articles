@@ -1,23 +1,32 @@
 {
   "selected": false,
   "runLog": [],
-  "createdAt": "2026-08-06T03:15:16.618771+00:00",
-  "selectionMode": "changes",
+  "createdAt": "2026-08-07T01:00:03.217560+00:00",
+  "selectionMode": "bounded_seed",
+  "fileId": "1K19gL4HlWkk1wAuOHPX8q73ZNypGGVHo2AFfRWbHnl0",
+  "name": "LH12_記事5_着付け・出張ヘアメイクの繁忙期に｜負担を減らすLHubの実力 のコピー のコピー",
+  "url": "https://docs.google.com/document/d/1K19gL4HlWkk1wAuOHPX8q73ZNypGGVHo2AFfRWbHnl0/edit?usp=drivesdk",
+  "modifiedTime": "2026-07-23T03:44:09.768Z",
+  "sourceProcessing": {
+    "mode": "full_text",
+    "sourceTextCharacters": 3869,
+    "inputCharacters": 3869
+  },
   "metrics": {
-    "selectedDocumentId": "",
-    "selectedDocumentName": "",
-    "driveFetched": 0,
-    "newDocuments": 0,
-    "aiEvaluations": 0,
+    "selectedDocumentId": "1K19gL4HlWkk1wAuOHPX8q73ZNypGGVHo2AFfRWbHnl0",
+    "selectedDocumentName": "LH12_記事5_着付け・出張ヘアメイクの繁忙期に｜負担を減らすLHubの実力 のコピー のコピー",
+    "driveFetched": 5,
+    "newDocuments": 4,
+    "aiEvaluations": 1,
     "articlesGenerated": 0,
-    "apiCalls": 0,
-    "inputCharacters": 0,
-    "openaiSeconds": 0.0,
-    "driveSeconds": 0.44,
-    "docsFetchSeconds": 0.0,
+    "apiCalls": 1,
+    "inputCharacters": 9093,
+    "openaiSeconds": 45.06,
+    "driveSeconds": 2.81,
+    "docsFetchSeconds": 0.85,
     "stateSaveSeconds": 0.0,
     "fileIoSeconds": 0.0,
-    "executionSeconds": 0.44,
-    "exitReason": "no_candidate"
+    "executionSeconds": 48.73,
+    "exitReason": "api_timeout"
   }
 }

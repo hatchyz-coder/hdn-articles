@@ -603,14 +603,82 @@
           "顧客データの保存方法・暗号化や外部連携時のセキュリティ詳細（ドキュメントには記載なし）"
         ]
       }
+    },
+    "1K19gL4HlWkk1wAuOHPX8q73ZNypGGVHo2AFfRWbHnl0": {
+      "name": "LH12_記事5_着付け・出張ヘアメイクの繁忙期に｜負担を減らすLHubの実力 のコピー のコピー",
+      "url": "https://docs.google.com/document/d/1K19gL4HlWkk1wAuOHPX8q73ZNypGGVHo2AFfRWbHnl0/edit?usp=drivesdk",
+      "modifiedTime": "2026-07-23T03:44:09.768Z",
+      "status": "api_timeout",
+      "startedAt": "2026-08-07T01:00:06.029180+00:00",
+      "retry_count": 1,
+      "finishedAt": "2026-08-07T01:00:51.942564+00:00",
+      "reason": "OpenAI API timed out after connect/read timeout",
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3869,
+        "inputCharacters": 3869
+      }
     }
   },
-  "updatedAt": "2026-08-05T12:48:27.253305+00:00",
+  "updatedAt": "2026-08-07T01:00:51.942570+00:00",
   "driveCache": {
+    "scopeFolderId": "1UKRBujwOOHFwR-32i0WfDXoG48rl1Ggo",
     "folderIds": [
-      "1fVwT7I0i06SUFQmrHgtAF_sEQzteHwgy"
+      "1J5c9myiTqsoQRZmdPTEZzEtbLXdn4snE",
+      "1R8K22La-iytMBhwhGTj8qhHyl3Zd9FXz",
+      "1UKRBujwOOHFwR-32i0WfDXoG48rl1Ggo",
+      "1UgB4d0fYHYvzdJfDl1432sMoJeBKgUFs",
+      "1lJEMjSfLHaSI_WopRFmyK51Tp104_FXt",
+      "1pKWOuVv864bolKSN_JeYC6P-7DxTraJ9",
+      "1sHbfVUgNZv_pMquRpo4umNVJDkHgK1U_"
     ],
-    "documents": {},
-    "changePageToken": "259"
+    "documents": {
+      "1K19gL4HlWkk1wAuOHPX8q73ZNypGGVHo2AFfRWbHnl0": {
+        "name": "LH12_記事5_着付け・出張ヘアメイクの繁忙期に｜負担を減らすLHubの実力 のコピー のコピー",
+        "modifiedTime": "2026-07-23T03:44:09.768Z",
+        "url": "https://docs.google.com/document/d/1K19gL4HlWkk1wAuOHPX8q73ZNypGGVHo2AFfRWbHnl0/edit?usp=drivesdk",
+        "parents": [
+          "1R8K22La-iytMBhwhGTj8qhHyl3Zd9FXz"
+        ],
+        "seenAt": "2026-08-07T01:00:06.028422+00:00"
+      },
+      "1IiKzog4fS2_86yplg35Yj3b7g0dpraQWt4Ehu0mT_Kc": {
+        "name": "LH12_記事4_アロマセラピスト・ハーブ製品販売者に朗報｜施術・物販・ワークショップを一元化 のコピー のコピー",
+        "modifiedTime": "2026-07-23T03:44:09.768Z",
+        "url": "https://docs.google.com/document/d/1IiKzog4fS2_86yplg35Yj3b7g0dpraQWt4Ehu0mT_Kc/edit?usp=drivesdk",
+        "parents": [
+          "1R8K22La-iytMBhwhGTj8qhHyl3Zd9FXz"
+        ],
+        "seenAt": "2026-08-07T01:00:06.028444+00:00"
+      },
+      "1vhtu3aW-phgZqm-cXIZ3_oYmP-8hPOaGaKsSONkrgww": {
+        "name": "LH12_記事6_“声”を活かせる基盤ツール｜収録依頼と個人活動をLHubで整理 のコピー のコピー",
+        "modifiedTime": "2026-07-23T03:44:09.768Z",
+        "url": "https://docs.google.com/document/d/1vhtu3aW-phgZqm-cXIZ3_oYmP-8hPOaGaKsSONkrgww/edit?usp=drivesdk",
+        "parents": [
+          "1R8K22La-iytMBhwhGTj8qhHyl3Zd9FXz"
+        ],
+        "seenAt": "2026-08-07T01:00:06.028447+00:00"
+      },
+      "1R6ugJhPWzRTP80Fk7rrK-Ab1RxlgvLbRRprqTBwEn6M": {
+        "name": "LH12_記事3_出張シェフ・フードコーディネーターの管理課題に｜LHubでリピーター施策 のコピー のコピー",
+        "modifiedTime": "2026-07-23T03:44:09.768Z",
+        "url": "https://docs.google.com/document/d/1R6ugJhPWzRTP80Fk7rrK-Ab1RxlgvLbRRprqTBwEn6M/edit?usp=drivesdk",
+        "parents": [
+          "1R8K22La-iytMBhwhGTj8qhHyl3Zd9FXz"
+        ],
+        "seenAt": "2026-08-07T01:00:06.028450+00:00"
+      },
+      "1vDb-co_8OWbJoYPotGnCBJ42fs7I_K148U3tWO0gJ9M": {
+        "name": "LH12_記事2_フリーランスのウェディング運営を支援｜見積・日程・受注管理にLHub のコピー のコピー",
+        "modifiedTime": "2026-07-23T03:44:08.643Z",
+        "url": "https://docs.google.com/document/d/1vDb-co_8OWbJoYPotGnCBJ42fs7I_K148U3tWO0gJ9M/edit?usp=drivesdk",
+        "parents": [
+          "1R8K22La-iytMBhwhGTj8qhHyl3Zd9FXz"
+        ],
+        "seenAt": "2026-08-07T01:00:06.028453+00:00"
+      }
+    },
+    "changePageToken": "285"
   }
 }
