@@ -57,6 +57,8 @@ ALLOWED_LINKS = [
     {"label": "HDN Japan", "url": "https://hdnjapan.com/"},
     {"label": "自由診療導入支援", "url": "https://hdnjapan.com/self-pay.html"},
     {"label": "LHub", "url": "https://hdnjapan.com/lhub.html"},
+    {"label": "医療SNS・YouTube戦略", "url": "https://hdnjapan.com/medical-sns.html"},
+    {"label": "羽田野剛士プロフィール", "url": "https://hdnjapan.com/tsuyoshi-hadano.html"},
     {"label": "無料相談", "url": "https://forms.gle/148jgfSnDgDZ2HsEA"},
 ]
 
@@ -193,8 +195,6 @@ def drive_cache(state: dict[str, Any], root_folder_id: str) -> dict[str, Any]:
         cache = {
             "scopeFolderId": root_folder_id,
             "folderIds": [root_folder_id],
-            # Preserve document history so a scope migration does not retry
-            # old material merely because the traversal cache was reset.
             "documents": cache.get("documents", {}),
         }
         state["driveCache"] = cache
