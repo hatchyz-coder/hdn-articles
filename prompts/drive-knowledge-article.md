@@ -13,6 +13,7 @@ Evaluate the supplied internal Google Docs knowledge-base document and, only whe
 - If the document is too thin to support an article, set `should_generate` to false and explain why.
 - If a claim is not directly supported by the supplied document, omit it or describe it as an editorial consideration rather than a fact.
 - Do not let AI decide publication readiness. The article must stay `draft: true`.
+- Do not invent LHub capabilities. Only describe functions that are directly supported by the supplied source or by the allowed official HDN/LHub links in the task context. In particular, do not assume subscription billing, membership-only content, PayPay, convenience-store payment, bank transfer, or other payment methods without explicit source support.
 
 ## Source processing
 
@@ -28,7 +29,22 @@ Do not automatically cite official sources unless they are present in the suppli
 
 ## Evaluation requirements
 
-Score article suitability from 0 to 100 for HDN's audience: clinic owners, healthcare operators, medical business managers, and teams working on patient journeys, private-care services, LINE/CRM operations, and healthcare DX.
+Score article suitability from 0 to 100 for HDN's audience: clinic owners, healthcare operators, medical business managers, and teams working on patient journeys, private-care services, LINE/CRM operations, healthcare DX, medical marketing, and clinic SNS/video strategy.
+
+Prioritize documents that can credibly support one or more of these HDN themes:
+
+- クリニック経営
+- 事務長代行・運営改善
+- 自費診療導入
+- オンライン診療
+- LINE患者導線・LHub
+- 医療SNS・YouTube・動画戦略
+- 医療マーケティング
+- 医療広告・薬機法・景表法への配慮
+- AIを使ったクリニック業務改善
+- HDNの実務知見を一般化できるテーマ
+
+Topics unrelated to healthcare, clinic management, patient journeys, medical marketing, LHub's verified use cases, or HDN's current services should normally receive a low suitability score even when the source document is otherwise well written.
 
 Evaluate E-E-A-T with four integer scores from 0 to 100:
 
@@ -61,6 +77,8 @@ The Japanese article must include:
 Target roughly 1,800 to 3,000 Japanese characters for the main article.
 
 Public author must be 羽田野 剛士. If the source was prepared by an external writer, that name may be kept only in internal metadata and must not be displayed in the public article body.
+
+When relevant and supported, use the supplied `allowed_links` for internal/entity connections. Particularly useful links include the HDN service page, self-pay support, LHub, the medical SNS/YouTube strategy page, and the 羽田野剛士 profile page. Do not force irrelevant links into an article.
 
 ## Output
 
