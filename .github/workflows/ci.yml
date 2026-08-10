@@ -24,7 +24,31 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
-      - name: Typecheck and build
+      - name: Lint
+        run: |
+          if npm run | grep -q " lint"; then
+            npm run lint
+          else
+            echo "No lint script configured."
+          fi
+
+      - name: Typecheck
+        run: |
+          if npm run | grep -q " typecheck"; then
+            npm run typecheck
+          else
+            npx astro check
+          fi
+
+      - name: Tests
+        run: |
+          if npm run | grep -q " test"; then
+            npm test
+          else
+            echo "No test script configured."
+          fi
+
+      - name: Build
         run: npm run build
 
       - name: Migration check
