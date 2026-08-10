@@ -14,6 +14,10 @@ concurrency:
   group: pages
   cancel-in-progress: true
 
+env:
+  ARTICLES_SITE_URL: ${{ vars.ARTICLES_SITE_URL || 'https://hatchyz-coder.github.io' }}
+  ARTICLES_BASE_PATH: ${{ vars.ARTICLES_BASE_PATH || '/hdn-articles' }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -33,10 +37,15 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build staging site
+      - name: Show deployment target
+        run: |
+          echo "PUBLIC_SITE_URL=${ARTICLES_SITE_URL}"
+          echo "BASE_PATH=${ARTICLES_BASE_PATH}"
+
+      - name: Build article site
         env:
-          PUBLIC_SITE_URL: https://hatchyz-coder.github.io
-          BASE_PATH: /hdn-articles
+          PUBLIC_SITE_URL: ${{ env.ARTICLES_SITE_URL }}
+          BASE_PATH: ${{ env.ARTICLES_BASE_PATH }}
         run: npm run build
 
       - name: Verify generated article is in build output
