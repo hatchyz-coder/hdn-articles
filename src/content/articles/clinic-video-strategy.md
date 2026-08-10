@@ -12,7 +12,7 @@ tags:
   - "患者導線"
   - "LHub"
 author: "羽田野 剛士"
-draft: false
+draft: true
 featured: false
 cta: consultation
 ---
