@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Lint
+        run: |
+          if npm run | grep -q " lint"; then
+            npm run lint
+          else
+            echo "No lint script configured."
+          fi
+
+      - name: Typecheck
+        run: |
+          if npm run | grep -q " typecheck"; then
+            npm run typecheck
+          else
+            npx astro check
+          fi
+
+      - name: Tests
+        run: |
+          if npm run | grep -q " test"; then
+            npm test
+          else
+            echo "No test script configured."
+          fi
+
+      - name: Build
+        run: npm run build
+
+      - name: Migration check
+        run: |
+          if npm run | grep -q "migration:check"; then
+            npm run migration:check
+          else
+            echo "No migration:check script; repository has no migration workflow to validate."
+          fi
