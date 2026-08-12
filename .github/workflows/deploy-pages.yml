@@ -14,10 +14,6 @@ concurrency:
   group: pages
   cancel-in-progress: true
 
-env:
-  ARTICLES_SITE_URL: ${{ vars.ARTICLES_SITE_URL || 'https://hatchyz-coder.github.io' }}
-  ARTICLES_BASE_PATH: ${{ vars.ARTICLES_BASE_PATH || '/hdn-articles' }}
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -37,15 +33,26 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Show deployment target
+      - name: Resolve deployment target
+        env:
+          PAGES_BASE_URL: ${{ steps.pages.outputs.base_url }}
         run: |
-          echo "PUBLIC_SITE_URL=${ARTICLES_SITE_URL}"
-          echo "BASE_PATH=${ARTICLES_BASE_PATH}"
+          node <<'NODE'
+          const fs = require('fs');
+          const target = new URL(process.env.PAGES_BASE_URL);
+          const trimmedPath = target.pathname.replace(/\/+$/, '');
+          const basePath = trimmedPath || '/';
+
+          fs.appendFileSync(
+            process.env.GITHUB_ENV,
+            `PUBLIC_SITE_URL=${target.origin}\nBASE_PATH=${basePath}\n`,
+          );
+
+          console.log(`PUBLIC_SITE_URL=${target.origin}`);
+          console.log(`BASE_PATH=${basePath}`);
+          NODE
 
       - name: Build article site
-        env:
-          PUBLIC_SITE_URL: ${{ env.ARTICLES_SITE_URL }}
-          BASE_PATH: ${{ env.ARTICLES_BASE_PATH }}
         run: npm run build
 
       - name: Verify generated article is in build output
