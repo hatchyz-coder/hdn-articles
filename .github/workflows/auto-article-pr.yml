@@ -12,6 +12,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  pages: read
 
 jobs:
   generate:
@@ -21,6 +22,10 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Configure GitHub Pages
+        id: pages
+        uses: actions/configure-pages@v5
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -36,6 +41,20 @@ jobs:
         run: |
           pip install -r requirements.txt
           npm install
+
+      - name: Resolve deployment target
+        env:
+          PAGES_BASE_URL: ${{ steps.pages.outputs.base_url }}
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const target = new URL(process.env.PAGES_BASE_URL);
+          const trimmedPath = target.pathname.replace(/\/+$/, '');
+          const basePath = trimmedPath || '/';
+          fs.appendFileSync(process.env.GITHUB_ENV, `PUBLIC_SITE_URL=${target.origin}\nBASE_PATH=${basePath}\n`);
+          console.log(`PUBLIC_SITE_URL=${target.origin}`);
+          console.log(`BASE_PATH=${basePath}`);
+          NODE
 
       - name: Collect source URLs already used by open pull requests
         env:
@@ -87,9 +106,6 @@ jobs:
 
       - name: Build and validate site
         if: steps.pick.outputs.selected == 'true'
-        env:
-          PUBLIC_SITE_URL: https://hatchyz-coder.github.io
-          BASE_PATH: /hdn-articles
         run: npm run build
 
       - name: Create review pull request
