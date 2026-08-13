@@ -35,6 +35,8 @@ SENSITIVE_REPLACEMENTS = [
     (re.compile(r"(?:\+81[-\s]?)?0\d{1,4}[-\s]?\d{1,4}[-\s]?\d{3,4}"), "[phone omitted]"),
     (re.compile(r"(契約金額|見積金額|請求金額|月額|年額|単価|原価|粗利)\s*[:：]?\s*[0-9０-９,，]+\s*(円|万円|億円)"), "[commercial amount omitted]"),
     (re.compile(r"(パスワード|APIキー|秘密鍵|アクセストークン|refresh_token|client_secret)\s*[:：=]\s*\S+", re.I), "[credential omitted]"),
+    (re.compile(r"[一-龠々ぁ-んァ-ヶーA-Za-z0-9・ー]{2,30}(クリニック|医院|病院|歯科|株式会社|合同会社)"), "[organization omitted]"),
+    (re.compile(r"[一-龠々ぁ-んァ-ヶー]{2,12}(先生|様|さん)"), "[person omitted]"),
 ]
 
 PRIVATE_NAME_HINTS = re.compile(r"(議事録|定例|MTG|ミーティング|アジェンダ|見積|提案書|運用マニュアル|プロジェクト|進捗報告)", re.I)
@@ -145,13 +147,22 @@ def _tokens(text: str) -> set[str]:
 
 
 def _rank_documents(items: list[dict[str, Any]], query: str, role: str) -> list[dict[str, Any]]:
+    query_lower = query.lower()
     query_tokens = _tokens(query)
 
     def score(item: dict[str, Any]) -> tuple[int, str]:
         name = str(item.get("name", ""))
-        overlap = len(query_tokens & _tokens(name))
+        name_lower = name.lower()
+        name_tokens = _tokens(name)
+        overlap = 0
+        for token in name_tokens:
+            if token in query_lower:
+                overlap += 1
+                continue
+            if any(token in query_token or query_token in token for query_token in query_tokens):
+                overlap += 1
         role_bonus = 0
-        if role == "lhub_archive" and "lhub" in name.lower():
+        if role == "lhub_archive" and "lhub" in name_lower:
             role_bonus = 3
         if role == "internal_operations" and PRIVATE_NAME_HINTS.search(name):
             role_bonus = 1
