@@ -28,7 +28,7 @@ const cta = {
 }[article.data.cta];
 ---
 <BaseLayout title={`${article.data.title} | HDN Articles`} description={article.data.description} canonical={articleUrl} type="article">
-  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   <main class="wrap article">
     <p class="meta">{article.data.category}｜{article.data.publishedAt.toLocaleDateString('ja-JP')}｜{article.data.author}</p>
     <h1>{article.data.title}</h1>
