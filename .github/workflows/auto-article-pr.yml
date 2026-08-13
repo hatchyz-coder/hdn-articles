@@ -96,7 +96,10 @@ jobs:
         if: steps.pick.outputs.selected == 'true'
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: gpt-5-mini
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_DRIVE_INTERNAL_REFERENCE_FOLDER_ID: ${{ vars.GOOGLE_DRIVE_INTERNAL_REFERENCE_FOLDER_ID }}
+          GOOGLE_DRIVE_LHUB_ARCHIVE_FOLDER_ID: ${{ vars.GOOGLE_DRIVE_LHUB_ARCHIVE_FOLDER_ID }}
         run: |
           python scripts/generate_content.py \
             --url "${{ steps.pick.outputs.url }}" \
@@ -150,6 +153,7 @@ jobs:
           - [ ] Facts accurately reflect the primary source
           - [ ] HDN commentary is clearly separated from sourced facts
           - [ ] No unsupported medical, legal, or advertising claims appear
+          - [ ] No private Drive client identifiers or confidential details appear
           - [ ] Search intent, title, headings, and description are aligned
           - [ ] Internal links and CTA are useful rather than forced
           - [ ] Social copy is suitable for each platform
