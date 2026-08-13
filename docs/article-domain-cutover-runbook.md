@@ -2,13 +2,13 @@
 
 ## Current state
 
-- Existing production reader URL: `https://article.hdnjapan.com/` (legacy WordPress)
-- New Astro staging URL: `https://hatchyz-coder.github.io/hdn-articles/`
+- Production reader URL: `https://article.hdnjapan.com/`
 - GitHub Pages source: GitHub Actions workflow
-- Current Pages custom domain (`cname`): none
+- Current Pages custom domain (`cname`): `article.hdnjapan.com`
 - HTTPS enforcement: enabled
-- Staging deployment smoke test: passing
-- Published Astro article currently expected on staging: `【無難な動画では、患者は動かない】`
+- TLS certificate: approved
+- DNS: `article CNAME hatchyz-coder.github.io`
+- Published Astro article expected on production: `【無難な動画では、患者は動かない】`
 
 ## Preconditions
 
@@ -22,51 +22,52 @@ Before changing DNS or the GitHub Pages custom domain, confirm all of the follow
 6. Legacy WordPress DNS/hosting settings are recorded so rollback is possible.
 7. TTL for the existing `article.hdnjapan.com` DNS record is reduced in advance where practical.
 
-## Production variables
+## Production build target
 
-Set repository variables before the production rebuild:
+The deployment workflow derives the Astro build target from the GitHub Pages `base_url` returned by `actions/configure-pages`.
 
-```text
-ARTICLES_SITE_URL=https://article.hdnjapan.com
-ARTICLES_BASE_PATH=/
-```
+Expected production result:
 
-Expected result:
-
+- `PUBLIC_SITE_URL=https://article.hdnjapan.com`
+- `BASE_PATH=/`
 - canonical URLs use `https://article.hdnjapan.com/`
 - sitemap URLs use the production domain
 - site assets and internal routes are built for root `/`
 
 ## GitHub Pages custom domain
 
-Configure the repository's GitHub Pages custom domain as:
+Configured custom domain:
 
 ```text
 article.hdnjapan.com
 ```
 
-Do not remove the legacy WordPress hosting first. Keep it available until the new domain is verified.
-
 ## DNS cutover
 
-For a subdomain, point `article.hdnjapan.com` to the GitHub Pages hostname used by this repository/account according to the DNS provider's supported record type and GitHub Pages requirements.
-
-Before saving the DNS change, capture the old DNS record value in the change log below.
-
-### Change log
+Production DNS:
 
 ```text
-Cutover time:
-Operator:
-Old DNS record/type/value:
-New DNS record/type/value:
-Old TTL:
-New TTL:
+article CNAME hatchyz-coder.github.io
+```
+
+The legacy Lolipop homepage assignment for `article.hdnjapan.com` is disabled.
+
+## Cutover execution log
+
+```text
+Cutover date: 2026-08-13 JST
+Operator: hatchyz-coder / HDN
+Old hosting: Lolipop WordPress
+New DNS record/type/value: article / CNAME / hatchyz-coder.github.io
+GitHub Pages DNS check: successful
+TLS certificate: approved
+Enforce HTTPS: enabled
+Final production rebuild: triggered after cutover to rebuild for root custom-domain base URL
 ```
 
 ## Post-cutover checks
 
-Run immediately after DNS begins resolving to the new site:
+Run immediately after the production rebuild:
 
 ```text
 https://article.hdnjapan.com/
@@ -92,6 +93,7 @@ After the production domain is stable:
 2. Confirm robots directives do not block indexing.
 3. Confirm RSS/feed URLs, if used by downstream SNS automation, resolve on the production domain.
 4. Keep the GitHub Pages staging hostname out of promotional links once production is live.
+5. Expect legacy WordPress URLs to remain temporarily visible in search-engine indexes until recrawled or redirected.
 
 ## Rollback trigger
 
@@ -105,17 +107,9 @@ Rollback immediately if any of the following persists after a short propagation 
 
 ## Rollback procedure
 
-1. Restore the previous DNS record for `article.hdnjapan.com`.
-2. Keep the new Astro deployment available at `https://hatchyz-coder.github.io/hdn-articles/` for diagnosis.
-3. Restore repository variables to staging values if necessary:
-
-```text
-ARTICLES_SITE_URL=https://hatchyz-coder.github.io
-ARTICLES_BASE_PATH=/hdn-articles
-```
-
-4. Remove or suspend the GitHub Pages custom domain only if it interferes with returning traffic to WordPress.
-5. Re-run the Pages deployment and staging smoke test after any fix.
+1. Restore the previous DNS record/hosting assignment for `article.hdnjapan.com`.
+2. Remove or suspend the GitHub Pages custom domain only if it interferes with returning traffic to WordPress.
+3. Re-run the Pages deployment and smoke test after any fix.
 
 ## Safe publication order
 
