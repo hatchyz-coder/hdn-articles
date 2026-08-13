@@ -12,6 +12,7 @@ from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 LATEST_PATH = ROOT / "data" / "candidates" / "latest.json"
+OPPORTUNITIES_PATH = ROOT / "data" / "opportunities" / "latest.json"
 ARTICLE_DIR = ROOT / "src" / "content" / "articles"
 
 
@@ -62,21 +63,51 @@ def write_output(name: str, value: str) -> None:
         print(f"{name}={value}")
 
 
+def load_ranked_candidates() -> tuple[list[dict], str]:
+    """Prefer the business/editorial opportunity gate over raw discovery scores."""
+
+    if OPPORTUNITIES_PATH.exists():
+        payload = json.loads(OPPORTUNITIES_PATH.read_text(encoding="utf-8"))
+        opportunities = payload.get("opportunities", [])
+        if opportunities:
+            return opportunities, "opportunity"
+
+    if LATEST_PATH.exists():
+        payload = json.loads(LATEST_PATH.read_text(encoding="utf-8"))
+        return payload.get("candidates", []), "discovery_fallback"
+
+    return [], "missing"
+
+
+def candidate_score(candidate: dict, mode: str) -> int:
+    if mode == "opportunity":
+        return int(candidate.get("total_score", 0))
+    return int(candidate.get("ai_score", 0))
+
+
+def is_article_candidate(candidate: dict, mode: str) -> bool:
+    if mode != "opportunity":
+        return True
+    return str(candidate.get("recommended_action", "")).strip() == "article"
+
+
 def main() -> int:
     args = parse_args()
-    if not LATEST_PATH.exists():
+    candidates, mode = load_ranked_candidates()
+    if not candidates:
         write_output("selected", "false")
         write_output("reason", "candidate queue does not exist")
         return 0
 
-    payload = json.loads(LATEST_PATH.read_text(encoding="utf-8"))
     blocked_urls = existing_source_urls() | excluded_urls(args.exclude_file)
 
-    for candidate in payload.get("candidates", []):
+    for candidate in candidates:
         url = str(candidate.get("url", "")).strip()
-        score = int(candidate.get("ai_score", 0))
+        score = candidate_score(candidate, mode)
         parsed = urlparse(url)
         if score < args.min_score:
+            continue
+        if not is_article_candidate(candidate, mode):
             continue
         if not url or parsed.scheme not in {"http", "https"}:
             continue
@@ -90,10 +121,11 @@ def main() -> int:
             slug = fallback_slug(candidate)
 
         category = str(candidate.get("suggested_category", "医療経営")).strip() or "医療経営"
-        cta = str(candidate.get("suggested_cta", "consultation")).strip()
+        cta = str(candidate.get("recommended_cta") or candidate.get("suggested_cta", "consultation")).strip()
         if cta not in {"consultation", "lhub", "self-pay"}:
             cta = "consultation"
 
+        rationale = str(candidate.get("rationale") or candidate.get("reason", "")).replace("\n", " ")
         write_output("selected", "true")
         write_output("url", url)
         write_output("slug", slug)
@@ -101,11 +133,13 @@ def main() -> int:
         write_output("cta", cta)
         write_output("score", str(score))
         write_output("title", str(candidate.get("title", "")).replace("\n", " "))
-        write_output("reason", str(candidate.get("reason", "")).replace("\n", " "))
+        write_output("reason", rationale)
+        write_output("selection_mode", mode)
         return 0
 
     write_output("selected", "false")
-    write_output("reason", "no eligible candidate")
+    write_output("reason", f"no eligible candidate after {mode} gate")
+    write_output("selection_mode", mode)
     return 0
 
 
