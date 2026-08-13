@@ -15,6 +15,8 @@ from typing import Any
 import requests
 from bs4 import BeautifulSoup
 
+from drive_reference_context import load_reference_context
+
 ROOT = Path(__file__).resolve().parents[1]
 ARTICLE_DIR = ROOT / "src" / "content" / "articles"
 SOCIAL_DIR = ROOT / "social"
@@ -67,7 +69,31 @@ def fetch_source(url: str) -> tuple[str, str]:
     return title[:300], text[:30000]
 
 
-def call_openai(source_url: str, source_title: str, source_text: str, category: str, cta: str) -> dict[str, Any]:
+def private_reference_context(source_title: str, source_text: str, category: str) -> dict[str, Any]:
+    query = f"{source_title}\n{category}\n{source_text[:3000]}"
+    try:
+        context = load_reference_context(query)
+    except Exception as exc:
+        # Reference context is supplementary. Never fail primary-source generation because Drive is unavailable.
+        print(f"WARN: private Drive reference context unavailable ({type(exc).__name__})", file=sys.stderr)
+        return {"internal_operations": [], "lhub_archive": [], "available": False}
+    print(
+        "Private Drive reference context: "
+        f"internal={len(context.get('internal_operations', []))}, "
+        f"lhub_archive={len(context.get('lhub_archive', []))}",
+        file=sys.stderr,
+    )
+    return context
+
+
+def call_openai(
+    source_url: str,
+    source_title: str,
+    source_text: str,
+    category: str,
+    cta: str,
+    reference_context: dict[str, Any],
+) -> dict[str, Any]:
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
         raise RuntimeError("OPENAI_API_KEY is not configured in GitHub Actions secrets")
@@ -81,6 +107,10 @@ def call_openai(source_url: str, source_title: str, source_text: str, category: 
         "requested_category": category,
         "cta_type": cta,
         "allowed_links": ALLOWED_LINKS,
+        "private_editorial_reference": {
+            "internal_operations": reference_context.get("internal_operations", []),
+            "lhub_archive": reference_context.get("lhub_archive", []),
+        },
     }
 
     response = requests.post(
@@ -228,7 +258,15 @@ def main() -> int:
         raise FileExistsError(f"Article already exists: {target}")
 
     source_title, source_text = fetch_source(args.url)
-    data = call_openai(args.url, source_title, source_text, args.category, args.cta)
+    reference_context = private_reference_context(source_title, source_text, args.category)
+    data = call_openai(
+        args.url,
+        source_title,
+        source_text,
+        args.category,
+        args.cta,
+        reference_context,
+    )
     article = build_article(data, args.url, args.category, args.cta)
     outputs = write_outputs(slug, data, article)
 

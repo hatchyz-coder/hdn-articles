@@ -78,6 +78,9 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_DRIVE_INTERNAL_REFERENCE_FOLDER_ID: ${{ vars.GOOGLE_DRIVE_INTERNAL_REFERENCE_FOLDER_ID }}
+          GOOGLE_DRIVE_LHUB_ARCHIVE_FOLDER_ID: ${{ vars.GOOGLE_DRIVE_LHUB_ARCHIVE_FOLDER_ID }}
         run: |
           python scripts/generate_content.py \
             --url "${{ inputs.source_url }}" \
@@ -105,4 +108,4 @@ jobs:
             --base main \
             --head "$branch" \
             --title "Article draft: ${SLUG}" \
-            --body "## Generated content\n\n- Source: ${SOURCE_URL}\n- Article: src/content/articles/${SLUG}.md\n- Social drafts: social/${SLUG}/\n- English draft: outputs/en/${SLUG}.md\n\n## Review checklist\n\n- [ ] Source facts are accurate\n- [ ] No unsupported medical, legal, or advertising claims\n- [ ] Title and description match search intent\n- [ ] Internal links and CTA are appropriate\n- [ ] Social posts are suitable for each platform\n- [ ] Change draft: true to draft: false before publication"
+            --body "## Generated content\n\n- Source: ${SOURCE_URL}\n- Article: src/content/articles/${SLUG}.md\n- Social drafts: social/${SLUG}/\n- English draft: outputs/en/${SLUG}.md\n\n## Review checklist\n\n- [ ] Source facts are accurate\n- [ ] No unsupported medical, legal, or advertising claims\n- [ ] No private Drive client identifiers or confidential details appear\n- [ ] Title and description match search intent\n- [ ] Internal links and CTA are appropriate\n- [ ] Social posts are suitable for each platform\n- [ ] Change draft: true to draft: false before publication"
