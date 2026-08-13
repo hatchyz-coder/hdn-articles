@@ -2,13 +2,13 @@
   "sources": [
     {
       "name": "厚生労働省",
-      "url": "https://www.mhlw.go.jp/stf/newpage_00001.html",
+      "url": "https://www.mhlw.go.jp/stf/new-info/",
       "domains": ["mhlw.go.jp"],
       "priority": 5
     },
     {
       "name": "PMDA",
-      "url": "https://www.pmda.go.jp/news/index.html",
+      "url": "https://www.pmda.go.jp/0017.html",
       "domains": ["pmda.go.jp"],
       "priority": 5
     },
