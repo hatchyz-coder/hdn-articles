@@ -19,6 +19,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  pages: read
 
 concurrency:
   group: hdn-growth-pipeline
@@ -32,6 +33,10 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Configure GitHub Pages
+        id: pages
+        uses: actions/configure-pages@v5
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -47,6 +52,20 @@ jobs:
         run: |
           pip install -r requirements.txt
           npm install
+
+      - name: Resolve deployment target
+        env:
+          PAGES_BASE_URL: ${{ steps.pages.outputs.base_url }}
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const target = new URL(process.env.PAGES_BASE_URL);
+          const trimmedPath = target.pathname.replace(/\/+$/, '');
+          const basePath = trimmedPath || '/';
+          fs.appendFileSync(process.env.GITHUB_ENV, `PUBLIC_SITE_URL=${target.origin}\nBASE_PATH=${basePath}\n`);
+          console.log(`PUBLIC_SITE_URL=${target.origin}`);
+          console.log(`BASE_PATH=${basePath}`);
+          NODE
 
       - name: Audit existing WordPress URLs
         if: github.event_name == 'workflow_dispatch' && inputs.audit_wordpress == true
@@ -126,9 +145,6 @@ jobs:
 
       - name: Build and validate site
         if: steps.pick.outputs.selected == 'true'
-        env:
-          PUBLIC_SITE_URL: https://hatchyz-coder.github.io
-          BASE_PATH: /hdn-articles
         run: npm run build
 
       - name: Create review pull request
@@ -195,4 +211,5 @@ jobs:
             echo "- Reason: ${{ steps.pick.outputs.reason || 'not available' }}"
             echo "- Score: ${{ steps.pick.outputs.score || 'n/a' }}"
             echo "- Source: ${{ steps.pick.outputs.url || 'n/a' }}"
+            echo "- Production URL: ${PUBLIC_SITE_URL}${BASE_PATH}"
           } >> "$GITHUB_STEP_SUMMARY"
