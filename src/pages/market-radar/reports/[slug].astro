@@ -1,0 +1,54 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const reports = await getCollection('radarReports', ({ data }) =>
+    data.product === 'market-radar' && !data.draft
+  );
+
+  return reports.map((report) => ({
+    params: { slug: report.id.split('/').at(-1) },
+    props: { report },
+  }));
+}
+
+type Props = {
+  report: CollectionEntry<'radarReports'>;
+};
+
+const { report } = Astro.props as Props;
+const { Content } = await render(report);
+const canonical = report.data.canonical ?? `${import.meta.env.BASE_URL}market-radar/reports/${report.id.split('/').at(-1)}/`;
+---
+
+<BaseLayout
+  title={`${report.data.title} | MarketRadar`}
+  description={report.data.description}
+  canonical={canonical}
+  type="article"
+>
+  <main class="wrap article radar-report">
+    <header class="report-header">
+      <p class="eyebrow">MarketRadar Report</p>
+      <h1>{report.data.title}</h1>
+      <p class="lead">{report.data.description}</p>
+      <dl class="report-meta-grid">
+        <div><dt>公開日</dt><dd>{report.data.publishedAt.toLocaleDateString('ja-JP')}</dd></div>
+        <div><dt>カテゴリ</dt><dd>{report.data.category}</dd></div>
+        <div><dt>データ基準日</dt><dd>{report.data.dataAsOf?.toLocaleDateString('ja-JP') ?? '確認中'}</dd></div>
+        <div><dt>レビュー</dt><dd>{report.data.legalReview === 'completed' ? '確認済み' : '確認中'}</dd></div>
+      </dl>
+    </header>
+
+    <article class="report-body">
+      <Content />
+    </article>
+
+    <aside class="cta">
+      <h2>市場データを、自社の比較軸と商機に変える</h2>
+      <p>MarketRadarの分析結果を、記事、LP、営業資料、提案書へ落とし込むための整理を支援します。</p>
+      <a class="button" href="https://hdnjapan.com/">HDNへ相談する</a>
+    </aside>
+  </main>
+</BaseLayout>
