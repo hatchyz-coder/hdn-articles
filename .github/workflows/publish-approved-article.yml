@@ -1,0 +1,179 @@
+name: Publish approved article
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: publish-approved-article-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: >-
+      github.event.issue.pull_request &&
+      github.event.comment.body == '/publish' &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Resolve pull request
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json state,baseRefName,headRefName,headRepositoryOwner,headRepository,title > /tmp/pr.json
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          data = json.loads(Path('/tmp/pr.json').read_text())
+          if data['state'] != 'OPEN':
+              raise SystemExit('PR is not open')
+          if data['baseRefName'] != 'main':
+              raise SystemExit('PR does not target main')
+          owner = data['headRepositoryOwner']['login']
+          repo = data['headRepository']['name']
+          expected = os.environ['REPOSITORY']
+          if f'{owner}/{repo}' != expected:
+              raise SystemExit('Fork PRs cannot be auto-published')
+          out = Path(os.environ['GITHUB_OUTPUT'])
+          out.write_text(
+              f"head_ref={data['headRefName']}\n"
+              f"title={data['title']}\n",
+              encoding='utf-8'
+          )
+          PY
+
+      - name: Checkout article branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.pr.outputs.head_ref }}
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Identify single article draft
+        id: article
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          mapfile -t articles < <(git diff --name-only origin/main...HEAD -- 'src/content/articles/*.md')
+          if [ "${#articles[@]}" -ne 1 ]; then
+            echo "Expected exactly one changed article, found ${#articles[@]}" >&2
+            printf '%s\n' "${articles[@]}" >&2
+            exit 1
+          fi
+          article="${articles[0]}"
+          if ! grep -q '^draft: true$' "$article"; then
+            echo "Article is not an unpublished draft: $article" >&2
+            exit 1
+          fi
+          echo "path=$article" >> "$GITHUB_OUTPUT"
+
+      - name: Mark article for publication
+        env:
+          ARTICLE_PATH: ${{ steps.article.outputs.path }}
+        run: |
+          python3 - <<'PY'
+          import os, re
+          from datetime import datetime, timezone, timedelta
+          from pathlib import Path
+
+          path = Path(os.environ['ARTICLE_PATH'])
+          text = path.read_text(encoding='utf-8')
+          text, count = re.subn(r'(?m)^draft: true$', 'draft: false', text, count=1)
+          if count != 1:
+              raise SystemExit('Could not flip draft flag exactly once')
+
+          jst = timezone(timedelta(hours=9))
+          publish_date = datetime.now(jst).date().isoformat()
+          text, count = re.subn(r'(?m)^publishedAt: .*$', f'publishedAt: {publish_date}', text, count=1)
+          if count != 1:
+              raise SystemExit('Could not update publishedAt exactly once')
+          path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Lint
+        run: |
+          if npm run | grep -q " lint"; then
+            npm run lint
+          else
+            echo "No lint script configured."
+          fi
+
+      - name: Typecheck
+        run: |
+          if npm run | grep -q " typecheck"; then
+            npm run typecheck
+          else
+            npx astro check
+          fi
+
+      - name: Tests
+        run: |
+          if npm run | grep -q " test"; then
+            npm test
+          elif [ -d tests ]; then
+            python -m unittest discover -s tests -v
+          else
+            echo "No tests configured."
+          fi
+
+      - name: Build
+        run: npm run build
+
+      - name: Migration check
+        run: |
+          if npm run | grep -q "migration:check"; then
+            npm run migration:check
+          else
+            echo "No migration:check script; repository has no migration workflow to validate."
+          fi
+
+      - name: Commit publication flag
+        env:
+          HEAD_REF: ${{ steps.pr.outputs.head_ref }}
+          ARTICLE_PATH: ${{ steps.article.outputs.path }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$ARTICLE_PATH"
+          git commit -m "Publish approved article"
+          git push origin "HEAD:$HEAD_REF"
+
+      - name: Merge approved article
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          gh pr merge "$PR_NUMBER" --repo "$REPOSITORY" --squash --delete-branch
+
+      - name: Confirm publication queued
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          gh pr comment "$PR_NUMBER" --repo "$REPOSITORY" --body "✅ 公開承認を反映しました。draft解除・検証・mainへのmergeまで完了し、GitHub Pagesの本番デプロイを開始します。"
