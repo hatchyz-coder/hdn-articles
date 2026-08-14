@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate an HDN article draft and social copy from a source URL."""
+"""Generate HDN Japanese/English article drafts and social copy from a source URL."""
 
 from __future__ import annotations
 
@@ -19,8 +19,8 @@ from drive_reference_context import load_reference_context
 
 ROOT = Path(__file__).resolve().parents[1]
 ARTICLE_DIR = ROOT / "src" / "content" / "articles"
+EN_ARTICLE_DIR = ROOT / "src" / "content" / "articles-en"
 SOCIAL_DIR = ROOT / "social"
-EN_DRAFT_DIR = ROOT / "outputs" / "en"
 PROMPT_PATH = ROOT / "prompts" / "article-system.md"
 
 ALLOWED_LINKS = [
@@ -74,7 +74,6 @@ def private_reference_context(source_title: str, source_text: str, category: str
     try:
         context = load_reference_context(query)
     except Exception as exc:
-        # Reference context is supplementary. Never fail primary-source generation because Drive is unavailable.
         print(f"WARN: private Drive reference context unavailable ({type(exc).__name__})", file=sys.stderr)
         return {"internal_operations": [], "lhub_archive": [], "available": False}
     print(
@@ -124,7 +123,7 @@ def call_openai(
             "model": model,
             "instructions": instructions,
             "input": json.dumps(user_input, ensure_ascii=False),
-            "max_output_tokens": 7000,
+            "max_output_tokens": 10000,
             "store": False,
         },
     )
@@ -212,16 +211,68 @@ def build_article(data: dict[str, Any], source_url: str, category: str, cta: str
     return "\n".join(lines)
 
 
-def write_outputs(slug: str, data: dict[str, Any], article: str) -> list[Path]:
+def build_english_article(data: dict[str, Any], source_url: str, category: str, cta: str) -> str:
+    description = str(data["english_description"]).strip()
+    if not 50 <= len(description) <= 180:
+        raise ValueError(f"english_description must be 50-180 characters; got {len(description)}")
+
+    tags = [str(tag).strip() for tag in data.get("tags", []) if str(tag).strip()]
+    faq = data.get("english_faq", [])
+    body = str(data.get("english_body_markdown", "")).strip()
+    if len(body) < 800:
+        raise ValueError("english_body_markdown is too short for a publishable companion article")
+
+    lines = [
+        "---",
+        f"title: {yaml_string(str(data['english_title']).strip())}",
+        f"description: {yaml_string(description)}",
+        f"publishedAt: {date.today().isoformat()}",
+        f"category: {yaml_string(str(data.get('category') or category))}",
+        "tags:",
+    ]
+    lines.extend(f"  - {yaml_string(tag)}" for tag in tags)
+    lines.extend([
+        'author: "Tsuyoshi Hadano"',
+        "draft: true",
+        f"sourceUrl: {yaml_string(source_url)}",
+        f"cta: {cta}",
+        "---",
+        "",
+        str(data.get("english_summary", "")).strip(),
+        "",
+        body,
+        "",
+        "## Frequently Asked Questions",
+        "",
+    ])
+
+    for item in faq[:5]:
+        lines.extend([
+            f"### {str(item.get('question', '')).strip()}",
+            "",
+            str(item.get("answer", "")).strip(),
+            "",
+        ])
+
+    lines.extend([
+        "> This article is an HDN practical interpretation of publicly available information. Individual medical, legal, regulatory, and advertising decisions should be confirmed against applicable rules and qualified professional advice.",
+        "",
+    ])
+    return "\n".join(lines)
+
+
+def write_outputs(slug: str, data: dict[str, Any], article: str, english_article: str) -> list[Path]:
     ARTICLE_DIR.mkdir(parents=True, exist_ok=True)
+    EN_ARTICLE_DIR.mkdir(parents=True, exist_ok=True)
     social_path = SOCIAL_DIR / slug
     social_path.mkdir(parents=True, exist_ok=True)
-    EN_DRAFT_DIR.mkdir(parents=True, exist_ok=True)
 
     article_path = ARTICLE_DIR / f"{slug}.md"
     article_path.write_text(article, encoding="utf-8")
+    en_path = EN_ARTICLE_DIR / f"{slug}.md"
+    en_path.write_text(english_article, encoding="utf-8")
 
-    outputs = [article_path]
+    outputs = [article_path, en_path]
     social_map = {
         "x.md": data.get("social_x", ""),
         "facebook.md": data.get("social_facebook", ""),
@@ -231,22 +282,6 @@ def write_outputs(slug: str, data: dict[str, Any], article: str) -> list[Path]:
         path = social_path / filename
         path.write_text(str(text).strip() + "\n", encoding="utf-8")
         outputs.append(path)
-
-    en_path = EN_DRAFT_DIR / f"{slug}.md"
-    en_path.write_text(
-        "\n".join([
-            f"# {str(data.get('english_title', '')).strip()}",
-            "",
-            str(data.get("english_description", "")).strip(),
-            "",
-            str(data.get("english_summary", "")).strip(),
-            "",
-            "> English draft for editorial review. Not published automatically.",
-            "",
-        ]),
-        encoding="utf-8",
-    )
-    outputs.append(en_path)
     return outputs
 
 
@@ -254,8 +289,9 @@ def main() -> int:
     args = parse_args()
     slug = validate_slug(args.slug)
     target = ARTICLE_DIR / f"{slug}.md"
-    if target.exists():
-        raise FileExistsError(f"Article already exists: {target}")
+    en_target = EN_ARTICLE_DIR / f"{slug}.md"
+    if target.exists() or en_target.exists():
+        raise FileExistsError(f"Article already exists for slug: {slug}")
 
     source_title, source_text = fetch_source(args.url)
     reference_context = private_reference_context(source_title, source_text, args.category)
@@ -268,7 +304,8 @@ def main() -> int:
         reference_context,
     )
     article = build_article(data, args.url, args.category, args.cta)
-    outputs = write_outputs(slug, data, article)
+    english_article = build_english_article(data, args.url, args.category, args.cta)
+    outputs = write_outputs(slug, data, article, english_article)
 
     print("Generated files:")
     for path in outputs:

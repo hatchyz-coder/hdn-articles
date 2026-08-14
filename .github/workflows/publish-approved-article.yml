@@ -69,45 +69,65 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Identify single article draft
+      - name: Identify paired article drafts
         id: article
         run: |
           set -euo pipefail
           git fetch origin main
           mapfile -t articles < <(git diff --name-only origin/main...HEAD -- 'src/content/articles/*.md')
+          mapfile -t english_articles < <(git diff --name-only origin/main...HEAD -- 'src/content/articles-en/*.md')
           if [ "${#articles[@]}" -ne 1 ]; then
             echo "Expected exactly one changed article, found ${#articles[@]}" >&2
             printf '%s\n' "${articles[@]}" >&2
             exit 1
           fi
+          if [ "${#english_articles[@]}" -ne 1 ]; then
+            echo "Expected exactly one changed English article, found ${#english_articles[@]}" >&2
+            printf '%s\n' "${english_articles[@]}" >&2
+            exit 1
+          fi
           article="${articles[0]}"
+          english_article="${english_articles[0]}"
+          slug=$(basename "$article" .md)
+          english_slug=$(basename "$english_article" .md)
+          if [ "$slug" != "$english_slug" ]; then
+            echo "Japanese/English article slugs do not match: $slug vs $english_slug" >&2
+            exit 1
+          fi
           if ! grep -q '^draft: true$' "$article"; then
             echo "Article is not an unpublished draft: $article" >&2
             exit 1
           fi
+          if ! grep -q '^draft: true$' "$english_article"; then
+            echo "English article is not an unpublished draft: $english_article" >&2
+            exit 1
+          fi
           echo "path=$article" >> "$GITHUB_OUTPUT"
+          echo "english_path=$english_article" >> "$GITHUB_OUTPUT"
+          echo "slug=$slug" >> "$GITHUB_OUTPUT"
 
-      - name: Mark article for publication
+      - name: Mark paired articles for publication
         env:
           ARTICLE_PATH: ${{ steps.article.outputs.path }}
+          ENGLISH_ARTICLE_PATH: ${{ steps.article.outputs.english_path }}
         run: |
           python3 - <<'PY'
           import os, re
           from datetime import datetime, timezone, timedelta
           from pathlib import Path
 
-          path = Path(os.environ['ARTICLE_PATH'])
-          text = path.read_text(encoding='utf-8')
-          text, count = re.subn(r'(?m)^draft: true$', 'draft: false', text, count=1)
-          if count != 1:
-              raise SystemExit('Could not flip draft flag exactly once')
-
           jst = timezone(timedelta(hours=9))
           publish_date = datetime.now(jst).date().isoformat()
-          text, count = re.subn(r'(?m)^publishedAt: .*$', f'publishedAt: {publish_date}', text, count=1)
-          if count != 1:
-              raise SystemExit('Could not update publishedAt exactly once')
-          path.write_text(text, encoding='utf-8')
+          for env_name in ('ARTICLE_PATH', 'ENGLISH_ARTICLE_PATH'):
+              path = Path(os.environ[env_name])
+              text = path.read_text(encoding='utf-8')
+              text, count = re.subn(r'(?m)^draft: true$', 'draft: false', text, count=1)
+              if count != 1:
+                  raise SystemExit(f'Could not flip draft flag exactly once: {path}')
+              text, count = re.subn(r'(?m)^publishedAt: .*$', f'publishedAt: {publish_date}', text, count=1)
+              if count != 1:
+                  raise SystemExit(f'Could not update publishedAt exactly once: {path}')
+              path.write_text(text, encoding='utf-8')
           PY
 
       - name: Finalize X post with production article URL
@@ -159,14 +179,15 @@ jobs:
         env:
           HEAD_REF: ${{ steps.pr.outputs.head_ref }}
           ARTICLE_PATH: ${{ steps.article.outputs.path }}
+          ENGLISH_ARTICLE_PATH: ${{ steps.article.outputs.english_path }}
         run: |
           set -euo pipefail
           slug=$(basename "$ARTICLE_PATH" .md)
           x_path="social/$slug/x.md"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "$ARTICLE_PATH" "$x_path"
-          git commit -m "Publish approved article"
+          git add "$ARTICLE_PATH" "$ENGLISH_ARTICLE_PATH" "$x_path"
+          git commit -m "Publish approved Japanese and English articles"
           git push origin "HEAD:$HEAD_REF"
 
       - name: Merge approved article
@@ -217,5 +238,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.issue.number }}
           REPOSITORY: ${{ github.repository }}
+          SLUG: ${{ steps.article.outputs.slug }}
         run: |
-          gh pr comment "$PR_NUMBER" --repo "$REPOSITORY" --body "✅ 公開完了しました。draft解除・X投稿文への公開URL反映・全検証・mainへのmerge・GitHub Pages deploy・smoke testまで成功しています。"
+          ja_url="https://article.hdnjapan.com/articles/$SLUG/"
+          en_url="https://article.hdnjapan.com/en/articles/$SLUG/"
+          gh pr comment "$PR_NUMBER" --repo "$REPOSITORY" --body "✅ 日英同時公開が完了しました。draft解除・X投稿文への公開URL反映・全検証・mainへのmerge・GitHub Pages deploy・smoke testまで成功しています。\n\n日本語: $ja_url\nEnglish: $en_url"
