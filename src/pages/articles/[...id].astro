@@ -62,11 +62,38 @@ const jsonLd = {
     },
   ],
 };
-const cta = {
-  consultation: ['この記事を自院の運用へ当てはめて整理する', 'https://forms.gle/148jgfSnDgDZ2HsEA'],
-  lhub: ['LHubの導入・運用を相談する', 'https://hdnjapan.com/lhub.html'],
-  'self-pay': ['自由診療の導入を相談する', 'https://hdnjapan.com/self-pay.html'],
-}[article.data.cta];
+
+const looksLikeSnsArticle =
+  article.data.tags.some((tag) => ['医療SNS', 'YouTube', 'SNS', '動画'].includes(tag)) ||
+  /SNS|YouTube|動画/.test(article.data.category) ||
+  /SNS|YouTube|動画/.test(article.data.title);
+const resolvedCtaKey = article.data.cta === 'consultation' && looksLikeSnsArticle ? 'sns' : article.data.cta;
+const ctaConfig = {
+  consultation: {
+    title: '自院の患者導線を一度、整理してみる',
+    copy: 'LINE、予約、問診、決済、診療後フォローまで、現在どこで患者が止まっているかを確認します。',
+    label: '無料相談・患者導線診断を見る',
+    href: 'https://hdnjapan.com/consultation.html',
+  },
+  lhub: {
+    title: 'LINEの先まで、患者導線をつなげる',
+    copy: '予約・問診・決済・患者管理・フォローを分断せずに設計したい場合は、LHubの考え方と支援範囲をご覧ください。',
+    label: 'LHubを見る',
+    href: 'https://hdnjapan.com/lhub.html',
+  },
+  'self-pay': {
+    title: '自費診療を「メニュー追加」で終わらせない',
+    copy: '診療設計、患者導線、院内運用、継続フォローまで含めた自費診療導入支援の考え方をまとめています。',
+    label: '自費診療導入支援を見る',
+    href: 'https://hdnjapan.com/self-pay.html',
+  },
+  sns: {
+    title: 'SNS・動画を、予約までつながる導線にする',
+    copy: '再生数や投稿本数だけではなく、患者の不安解消からLINE・予約・受診までを一つの導線として設計します。',
+    label: '医療SNS・動画戦略を見る',
+    href: 'https://hdnjapan.com/medical-sns.html',
+  },
+}[resolvedCtaKey];
 ---
 <BaseLayout
   title={`${article.data.title} | HDN Articles`}
@@ -97,7 +124,7 @@ const cta = {
         <h2 id="author-heading">羽田野 剛士</h2>
         <p class="author-role">株式会社HDN 代表｜クリニック経営・AI活用</p>
         <p>クリニックの自由診療導入、業務改善、LINEを活用した予約・問診・決済導線、AI活用などを実務面から支援。制度やニュースの紹介だけでなく、「現場ではどう運用するか」まで落とし込んだ情報発信を行っています。</p>
-        <a class="text-link" href="https://hdnjapan.com/">株式会社HDNについて <span>→</span></a>
+        <a class="text-link" href="https://hdnjapan.com/tsuyoshi-hadano.html">代表者・支援領域を見る <span>→</span></a>
       </div>
     </aside>
 
@@ -117,10 +144,13 @@ const cta = {
       </section>
     )}
 
-    <aside class="cta">
-      <h2>記事を読んで終わらせず、実際の導線へ。</h2>
-      <p>クリニックごとに、患者が止まる場所とスタッフ負荷は異なります。現在の運用を確認したうえで、必要な場合だけ次の進め方をご提案します。</p>
-      <a class="button" href={cta[1]}>{cta[0]}</a>
+    <aside class="cta" data-contextual-service-cta={resolvedCtaKey}>
+      <h2>{ctaConfig.title}</h2>
+      <p>{ctaConfig.copy}</p>
+      <a class="button" href={ctaConfig.href}>{ctaConfig.label}</a>
+      {resolvedCtaKey !== 'consultation' && (
+        <p><a class="text-link" href="https://hdnjapan.com/consultation.html">まず患者導線を整理したい場合はこちら <span>→</span></a></p>
+      )}
     </aside>
   </main>
 </BaseLayout>

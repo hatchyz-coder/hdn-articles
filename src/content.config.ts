@@ -1,7 +1,7 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
-const ctaSchema = z.enum(['consultation', 'lhub', 'self-pay']).default('consultation');
+const ctaSchema = z.enum(['consultation', 'lhub', 'self-pay', 'sns']).default('consultation');
 
 const articles = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/articles' }),

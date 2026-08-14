@@ -61,11 +61,37 @@ const jsonLd = {
   ],
 };
 
-const cta = {
-  consultation: ['Discuss how this applies to your clinic', 'https://forms.gle/148jgfSnDgDZ2HsEA'],
-  lhub: ['Ask about LHub implementation', 'https://hdnjapan.com/lhub.html'],
-  'self-pay': ['Ask about private-pay service implementation', 'https://hdnjapan.com/self-pay.html'],
-}[article.data.cta];
+const looksLikeSnsArticle =
+  article.data.tags.some((tag) => ['Healthcare Social Media', 'YouTube', 'Social Media', 'Video'].includes(tag)) ||
+  /social|YouTube|video/i.test(article.data.category) ||
+  /social|YouTube|video/i.test(article.data.title);
+const resolvedCtaKey = article.data.cta === 'consultation' && looksLikeSnsArticle ? 'sns' : article.data.cta;
+const ctaConfig = {
+  consultation: {
+    title: 'Map the patient journey before changing tools',
+    copy: 'Review where patients stop across LINE, booking, questionnaires, payment, consultation, and follow-up, then prioritize only the changes that matter.',
+    label: 'See the consultation and patient-journey review',
+    href: 'https://hdnjapan.com/consultation.html',
+  },
+  lhub: {
+    title: 'Connect what happens after a patient joins LINE',
+    copy: 'See how HDN approaches booking, questionnaires, payment, patient management, and follow-up as one operating journey with LHub.',
+    label: 'Explore LHub',
+    href: 'https://hdnjapan.com/lhub.html',
+  },
+  'self-pay': {
+    title: 'Build private-pay care as an operating model',
+    copy: 'Review HDN’s approach to service design, patient journeys, clinic operations, and follow-up rather than treating private-pay care as a menu addition.',
+    label: 'Explore private-pay implementation support',
+    href: 'https://hdnjapan.com/self-pay.html',
+  },
+  sns: {
+    title: 'Connect social and video content to the next patient action',
+    copy: 'HDN designs healthcare social and video content around patient uncertainty, LINE registration, booking, and consultation—not views alone.',
+    label: 'Explore healthcare social and video strategy',
+    href: 'https://hdnjapan.com/medical-sns.html',
+  },
+}[resolvedCtaKey];
 ---
 <BaseLayout
   title={`${article.data.title} | HDN Articles`}
@@ -97,7 +123,7 @@ const cta = {
         <h2 id="author-heading">Tsuyoshi Hadano</h2>
         <p class="author-role">Founder, HDN Inc. | Clinic Management & AI</p>
         <p>Tsuyoshi Hadano works on private-pay service implementation, clinic operations, LINE-based patient journeys, and practical AI adoption. HDN Articles focuses on what healthcare operators should actually review and implement, not only on reporting policy or industry news.</p>
-        <a class="text-link" href="https://hdnjapan.com/">About HDN Inc. <span>→</span></a>
+        <a class="text-link" href="https://hdnjapan.com/tsuyoshi-hadano.html">Founder profile and support areas <span>→</span></a>
       </div>
     </aside>
 
@@ -117,10 +143,13 @@ const cta = {
       </section>
     )}
 
-    <aside class="cta">
-      <h2>Turn the insight into an operating decision.</h2>
-      <p>Patient journeys, staffing constraints, and implementation risks vary by clinic. We review the current operating model first and suggest a next step only where it is useful.</p>
-      <a class="button" href={cta[1]}>{cta[0]}</a>
+    <aside class="cta" data-contextual-service-cta={resolvedCtaKey}>
+      <h2>{ctaConfig.title}</h2>
+      <p>{ctaConfig.copy}</p>
+      <a class="button" href={ctaConfig.href}>{ctaConfig.label}</a>
+      {resolvedCtaKey !== 'consultation' && (
+        <p><a class="text-link" href="https://hdnjapan.com/consultation.html">Prefer to map the current patient journey first? <span>→</span></a></p>
+      )}
     </aside>
   </main>
 </BaseLayout>
