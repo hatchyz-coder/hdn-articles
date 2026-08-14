@@ -1,0 +1,97 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { knowledgeTopics, matchesTopic, topicHref } from '../../lib/topics';
+
+const articles = (await getCollection('articlesEn', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf(),
+);
+const [featured, ...rest] = articles;
+const latest = rest.slice(0, 6);
+const articleHref = (id: string) => `${import.meta.env.BASE_URL}en/articles/${id}/`;
+const topicSummaries = knowledgeTopics.map((topic) => {
+  const matched = articles.filter((article) => matchesTopic(article, topic, 'en'));
+  return { topic, count: matched.length, latest: matched[0] };
+});
+const siteUrl = Astro.site ?? new URL('https://article.hdnjapan.com');
+const enUrl = new URL(`${import.meta.env.BASE_URL}en/`, siteUrl);
+const jaUrl = new URL(import.meta.env.BASE_URL, siteUrl);
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'HDN Articles',
+  url: enUrl.toString(),
+  inLanguage: 'en',
+  description: 'Practical knowledge for clinic management, private-pay care, patient journeys, healthcare marketing, digital operations, and compliance in Japan.',
+  publisher: { '@type': 'Organization', name: 'HDN Inc.', url: 'https://hdnjapan.com/' },
+};
+---
+<BaseLayout
+  title="HDN Articles | Practical Knowledge for Clinic Management in Japan"
+  description="Practical insights on clinic management, private-pay care, patient journeys, LINE and LHub, healthcare social media, AI, and compliance in Japan."
+  lang="en"
+  canonical={enUrl}
+  alternateJa={jaUrl}
+  alternateEn={enUrl}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+  <main>
+    <section class="home-hero" aria-labelledby="home-title">
+      <div class="wrap hero-layout">
+        <div class="hero-copy">
+          <p class="eyebrow">HDN KNOWLEDGE FOR CLINIC MANAGEMENT</p>
+          <h1 id="home-title">Turn healthcare information into <span>operating decisions.</span></h1>
+          <p class="hero-lead">HDN Articles translates policy changes, patient-journey design, private-pay care, digital operations, and healthcare marketing into practical questions for clinic operators in Japan.</p>
+          <div class="hero-actions">
+            <a class="button" href="#topics">Browse by topic</a>
+            <a class="text-link" href={jaUrl.pathname}>日本語版 <span aria-hidden="true">→</span></a>
+          </div>
+          <ul class="trust-list" aria-label="Editorial principles">
+            <li>Primary sources first</li>
+            <li>Operational implications</li>
+            <li>No blanket legal or medical claims</li>
+          </ul>
+        </div>
+        <aside class="hero-panel" aria-label="What we cover">
+          <p class="panel-kicker">PRACTICAL FOCUS</p>
+          <h2>Where policy, management, and implementation meet.</h2>
+          <div class="focus-grid">
+            <span>Clinic Management</span><span>Private-pay Care</span><span>Patient Journey</span><span>LINE / LHub</span><span>Healthcare Marketing</span><span>Compliance</span>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="topics" class="topic-hub wrap" aria-labelledby="topic-hub-title">
+      <div class="section-heading"><div><p class="eyebrow">KNOWLEDGE MAP</p><h2 id="topic-hub-title">Browse by practical topic</h2></div><p class="section-note">Five durable areas for clinic operators.</p></div>
+      <div class="knowledge-grid">
+        {topicSummaries.map(({ topic, count, latest }) => (
+          <a class="knowledge-card" href={topicHref(topic.slug, import.meta.env.BASE_URL, 'en')}>
+            <div class="knowledge-card-top"><span>{topic.en.shortLabel}</span><strong>{count}</strong></div>
+            <h3>{topic.en.label}</h3>
+            <p>{topic.en.description}</p>
+            <small>{latest ? `Latest: ${latest.data.title}` : 'Articles will appear here as they are published.'}</small>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    {featured && (
+      <section class="wrap featured-section" aria-labelledby="featured-title">
+        <div class="section-heading"><div><p class="eyebrow">EDITOR'S PICK</p><h2 id="featured-title">Latest insight</h2></div><a class="section-link" href="#latest">More articles <span aria-hidden="true">↓</span></a></div>
+        <article class="featured-card"><div class="featured-accent" aria-hidden="true"><span>HDN</span><strong>Insight</strong></div><div class="featured-body"><p class="article-meta"><span>{featured.data.category}</span><time datetime={featured.data.publishedAt.toISOString()}>{featured.data.publishedAt.toLocaleDateString('en-US')}</time></p><h3><a href={articleHref(featured.id)}>{featured.data.title}</a></h3><p>{featured.data.description}</p><a class="read-more" href={articleHref(featured.id)}>Read article <span aria-hidden="true">→</span></a></div></article>
+      </section>
+    )}
+
+    <section id="latest" class="wrap latest-section" aria-labelledby="latest-title">
+      <div class="section-heading"><div><p class="eyebrow">LATEST ARTICLES</p><h2 id="latest-title">Recent articles</h2></div><p class="section-note">Management, operations, policy, and patient journeys.</p></div>
+      <div class="article-grid">
+        {(latest.length ? latest : articles).map((article, index) => (
+          <article class="article-card"><div class="card-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</div><p class="article-meta"><span>{article.data.category}</span><time datetime={article.data.publishedAt.toISOString()}>{article.data.publishedAt.toLocaleDateString('en-US')}</time></p><h3><a href={articleHref(article.id)}>{article.data.title}</a></h3><p>{article.data.description}</p><a class="read-more" href={articleHref(article.id)}>Read more <span aria-hidden="true">→</span></a></article>
+        ))}
+      </div>
+    </section>
+
+    <section class="wrap home-cta" aria-labelledby="cta-title"><div><p class="eyebrow">FROM KNOWLEDGE TO ACTION</p><h2 id="cta-title">Need to apply the issue to an actual clinic operation?</h2><p>HDN supports patient-journey design, private-pay implementation, LINE/LHub operations, workflow improvement, and healthcare communication.</p></div><div class="cta-actions"><a class="button" href="https://hdnjapan.com/en/index.html">View HDN services</a><a class="text-link" href="https://hdnjapan.com/en/lhub.html">View LHub <span aria-hidden="true">→</span></a></div></section>
+  </main>
+</BaseLayout>

@@ -1,0 +1,77 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { knowledgeTopics, matchesTopic } from '../../../lib/topics';
+
+export async function getStaticPaths() {
+  const articles = await getCollection('articlesEn', ({ data }) => !data.draft);
+  return knowledgeTopics.map((topic) => ({
+    params: { slug: topic.slug },
+    props: {
+      topic,
+      articles: articles
+        .filter((article) => matchesTopic(article, topic, 'en'))
+        .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf()),
+    },
+  }));
+}
+
+const { topic, articles } = Astro.props;
+const siteUrl = Astro.site ?? new URL('https://article.hdnjapan.com');
+const canonical = new URL(`${import.meta.env.BASE_URL}en/topics/${topic.slug}/`, siteUrl);
+const jaAlternate = new URL(`${import.meta.env.BASE_URL}topics/${topic.slug}/`, siteUrl);
+const enAlternate = canonical;
+const articleHref = (id: string) => `${import.meta.env.BASE_URL}en/articles/${id}/`;
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: `${topic.en.label} | HDN Articles`,
+  description: topic.en.description,
+  url: canonical.toString(),
+  inLanguage: 'en',
+  mainEntity: {
+    '@type': 'ItemList',
+    numberOfItems: articles.length,
+    itemListElement: articles.map((article, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: article.data.title,
+      url: new URL(articleHref(article.id), siteUrl).toString(),
+    })),
+  },
+};
+---
+<BaseLayout
+  title={`${topic.en.label} | HDN Articles`}
+  description={topic.en.description}
+  lang="en"
+  canonical={canonical}
+  alternateJa={jaAlternate}
+  alternateEn={enAlternate}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+  <main class="wrap topic-page">
+    <nav class="breadcrumbs" aria-label="Breadcrumb"><a href={`${import.meta.env.BASE_URL}en/`}>HDN Articles</a><span>›</span><span>{topic.en.shortLabel}</span></nav>
+    <header class="topic-page-header">
+      <p class="eyebrow">KNOWLEDGE TOPIC</p>
+      <h1>{topic.en.label}</h1>
+      <p>{topic.en.description}</p>
+      <div class="topic-page-meta"><strong>{articles.length}</strong><span>published {articles.length === 1 ? 'article' : 'articles'}</span></div>
+    </header>
+
+    {articles.length > 0 ? (
+      <section aria-labelledby="topic-articles-title">
+        <div class="section-heading"><div><p class="eyebrow">ARTICLES</p><h2 id="topic-articles-title">Articles in this topic</h2></div><a class="section-link" href={`${import.meta.env.BASE_URL}en/`}>All topics <span aria-hidden="true">→</span></a></div>
+        <div class="article-grid">
+          {articles.map((article, index) => (
+            <article class="article-card"><div class="card-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</div><p class="article-meta"><span>{article.data.category}</span><time datetime={article.data.publishedAt.toISOString()}>{article.data.publishedAt.toLocaleDateString('en-US')}</time></p><h3><a href={articleHref(article.id)}>{article.data.title}</a></h3><p>{article.data.description}</p><a class="read-more" href={articleHref(article.id)}>Read article <span aria-hidden="true">→</span></a></article>
+          ))}
+        </div>
+      </section>
+    ) : (
+      <section class="topic-empty"><p>There are no published English articles in this topic yet. New articles will appear here automatically.</p><a class="text-link" href={`${import.meta.env.BASE_URL}en/`}>Return to all English articles <span>→</span></a></section>
+    )}
+
+    <section class="home-cta topic-cta" aria-labelledby="topic-cta-title"><div><p class="eyebrow">APPLY THE INSIGHT</p><h2 id="topic-cta-title">Need to review this topic in the context of your clinic?</h2><p>HDN reviews the current patient journey and operating model first, then identifies what should actually change.</p></div><div class="cta-actions"><a class="button" href="https://hdnjapan.com/en/index.html">View HDN services</a></div></section>
+  </main>
+</BaseLayout>
