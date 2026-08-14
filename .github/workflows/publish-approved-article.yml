@@ -130,7 +130,7 @@ jobs:
               path.write_text(text, encoding='utf-8')
           PY
 
-      - name: Finalize X post with production article URL
+      - name: Finalize social posts with production article URL
         env:
           ARTICLE_PATH: ${{ steps.article.outputs.path }}
         run: python scripts/finalize_social_posts.py --article-path "$ARTICLE_PATH"
@@ -183,10 +183,9 @@ jobs:
         run: |
           set -euo pipefail
           slug=$(basename "$ARTICLE_PATH" .md)
-          x_path="social/$slug/x.md"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "$ARTICLE_PATH" "$ENGLISH_ARTICLE_PATH" "$x_path"
+          git add "$ARTICLE_PATH" "$ENGLISH_ARTICLE_PATH" "social/$slug/x.md" "social/$slug/linkedin.md" "social/$slug/facebook.md"
           git commit -m "Publish approved Japanese and English articles"
           git push origin "HEAD:$HEAD_REF"
 
@@ -233,13 +232,48 @@ jobs:
           echo "Watching Pages deployment run $run_id"
           gh run watch "$run_id" --repo "$REPOSITORY" --exit-status
 
-      - name: Confirm publication
+      - name: Confirm publication and provide social copy
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.issue.number }}
           REPOSITORY: ${{ github.repository }}
           SLUG: ${{ steps.article.outputs.slug }}
         run: |
-          ja_url="https://article.hdnjapan.com/articles/$SLUG/"
-          en_url="https://article.hdnjapan.com/en/articles/$SLUG/"
-          gh pr comment "$PR_NUMBER" --repo "$REPOSITORY" --body "✅ 日英同時公開が完了しました。draft解除・X投稿文への公開URL反映・全検証・mainへのmerge・GitHub Pages deploy・smoke testまで成功しています。\n\n日本語: $ja_url\nEnglish: $en_url"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          slug = os.environ['SLUG']
+          article_url = f"https://article.hdnjapan.com/articles/{slug}/"
+          english_url = f"https://article.hdnjapan.com/en/articles/{slug}/"
+          social = Path('social') / slug
+          x = (social / 'x.md').read_text(encoding='utf-8').strip()
+          linkedin = (social / 'linkedin.md').read_text(encoding='utf-8').strip()
+          facebook = (social / 'facebook.md').read_text(encoding='utf-8').strip()
+
+          body = f'''✅ 日英同時公開が完了しました。draft解除・3媒体の投稿文への公開URL反映・全検証・mainへのmerge・GitHub Pages deploy・smoke testまで成功しています。
+
+日本語記事: {article_url}
+English: {english_url}
+
+### X
+```text
+{x}
+```
+**X用リンク:** {article_url}
+
+### LinkedIn
+```text
+{linkedin}
+```
+**LinkedIn用リンク:** {article_url}
+
+### Facebook
+```text
+{facebook}
+```
+**Facebook用リンク:** {article_url}
+'''
+          Path('/tmp/publication-comment.md').write_text(body, encoding='utf-8')
+          PY
+          gh pr comment "$PR_NUMBER" --repo "$REPOSITORY" --body-file /tmp/publication-comment.md
