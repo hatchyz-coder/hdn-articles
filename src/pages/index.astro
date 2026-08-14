@@ -1,19 +1,17 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { knowledgeTopics, matchesTopic, topicHref } from '../lib/topics';
 
 const articles = (await getCollection('articles', ({ data }) => !data.draft)).sort(
   (a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf(),
 );
 const [featured, ...rest] = articles;
 const latest = rest.slice(0, 6);
-const categoryCounts = [...articles.reduce((map, article) => {
-  const category = article.data.category;
-  map.set(category, (map.get(category) ?? 0) + 1);
-  return map;
-}, new Map<string, number>()).entries()]
-  .sort((a, b) => b[1] - a[1])
-  .slice(0, 6);
+const topicSummaries = knowledgeTopics.map((topic) => {
+  const matching = articles.filter((article) => matchesTopic(article, topic));
+  return { topic, count: matching.length, recent: matching.slice(0, 2) };
+});
 const articleHref = (id: string) => `${import.meta.env.BASE_URL}articles/${id}/`;
 const siteUrl = Astro.site ?? new URL('https://article.hdnjapan.com');
 const structuredData = {
@@ -43,8 +41,8 @@ const structuredData = {
           <h1 id="home-title">クリニック経営の判断を、<br /><span>現場で使える知識</span>に。</h1>
           <p class="hero-lead">自由診療、患者導線、LINE・AI活用、医療広告。制度やニュースを紹介するだけでなく、「結局、現場では何を確認し、どう動くか」まで整理します。</p>
           <div class="hero-actions">
-            <a class="button" href="#latest">最新記事を読む</a>
-            <a class="text-link" href="https://hdnjapan.com/">HDNについて <span aria-hidden="true">→</span></a>
+            <a class="button" href="#knowledge-map">テーマから探す</a>
+            <a class="text-link" href="#latest">最新記事を見る <span aria-hidden="true">↓</span></a>
           </div>
           <ul class="trust-list" aria-label="HDN Articlesの編集方針">
             <li>一次情報を重視</li>
@@ -53,15 +51,14 @@ const structuredData = {
           </ul>
         </div>
         <aside class="hero-panel" aria-label="扱うテーマ">
-          <p class="panel-kicker">PRACTICAL FOCUS</p>
-          <h2>経営と現場の間にある<br />「実装の壁」を解く。</h2>
-          <div class="focus-grid">
-            <span>クリニック経営</span>
-            <span>自由診療</span>
-            <span>患者導線</span>
-            <span>LINE / LHub</span>
-            <span>医療DX・AI</span>
-            <span>広告・法令対応</span>
+          <p class="panel-kicker">KNOWLEDGE MAP</p>
+          <h2>知りたいテーマから、<br />実務記事へ。</h2>
+          <div class="focus-grid knowledge-focus-grid">
+            {topicSummaries.map(({ topic, count }) => (
+              <a href={topicHref(topic.slug, import.meta.env.BASE_URL)}>
+                <span>{topic.shortLabel}</span><small>{count}</small>
+              </a>
+            ))}
           </div>
         </aside>
       </div>
@@ -88,22 +85,35 @@ const structuredData = {
       </section>
     )}
 
-    {categoryCounts.length > 0 && (
-      <section class="topic-band" aria-labelledby="topics-title">
-        <div class="wrap topic-inner">
-          <div class="topic-copy">
-            <p class="eyebrow">TOPICS</p>
-            <h2 id="topics-title">実務テーマから探す</h2>
-            <p>経営課題から制度対応まで、クリニック運営に直結するテーマを横断して扱います。</p>
+    <section id="knowledge-map" class="topic-band knowledge-map" aria-labelledby="topics-title">
+      <div class="wrap">
+        <div class="knowledge-map-head">
+          <div>
+            <p class="eyebrow">KNOWLEDGE MAP</p>
+            <h2 id="topics-title">5つの実務テーマから探す</h2>
           </div>
-          <div class="topic-list">
-            {categoryCounts.map(([category, count]) => (
-              <div class="topic-chip"><span>{category}</span><small>{count} articles</small></div>
-            ))}
-          </div>
+          <p>元の記事カテゴリに依存せず、HDNが扱う実務領域で横断分類しています。1つの記事が複数テーマに入る場合があります。</p>
         </div>
-      </section>
-    )}
+        <div class="knowledge-map-grid">
+          {topicSummaries.map(({ topic, count, recent }, index) => (
+            <article class="knowledge-topic-card">
+              <div class="knowledge-topic-number">{String(index + 1).padStart(2, '0')}</div>
+              <div class="knowledge-topic-head">
+                <h3><a href={topicHref(topic.slug, import.meta.env.BASE_URL)}>{topic.label}</a></h3>
+                <span>{count}件</span>
+              </div>
+              <p>{topic.description}</p>
+              {recent.length > 0 && (
+                <ul class="knowledge-topic-recent">
+                  {recent.map((article) => <li><a href={articleHref(article.id)}>{article.data.title}</a></li>)}
+                </ul>
+              )}
+              <a class="knowledge-topic-link" href={topicHref(topic.slug, import.meta.env.BASE_URL)}>このテーマの記事を見る <span aria-hidden="true">→</span></a>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
 
     <section id="latest" class="wrap latest-section" aria-labelledby="latest-title">
       <div class="section-heading">
@@ -147,8 +157,8 @@ const structuredData = {
         <p>自由診療導入、患者導線、LINE活用、業務改善など、クリニックごとの状況に合わせて整理します。</p>
       </div>
       <div class="cta-actions">
-        <a class="button" href="https://hdnjapan.com/">HDNの支援内容を見る</a>
-        <a class="text-link" href="https://hdnjapan.com/lhub.html">LHubを見る <span aria-hidden="true">→</span></a>
+        <a class="button" href="https://hdnjapan.com/consultation.html">無料相談・患者導線診断</a>
+        <a class="text-link" href="https://hdnjapan.com/">HDNについて <span aria-hidden="true">→</span></a>
       </div>
     </section>
   </main>
