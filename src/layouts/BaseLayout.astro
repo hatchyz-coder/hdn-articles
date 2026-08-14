@@ -17,6 +17,9 @@ const imageUrl = image ? new URL(image, siteUrl) : undefined;
 const jaUrl = alternateJa ? new URL(alternateJa, siteUrl) : undefined;
 const enUrl = alternateEn ? new URL(alternateEn, siteUrl) : undefined;
 const ogLocale = lang === 'en' ? 'en_US' : 'ja_JP';
+const homeHref = lang === 'en' ? `${import.meta.env.BASE_URL}en/` : import.meta.env.BASE_URL;
+const corporateHref = lang === 'en' ? 'https://hdnjapan.com/en/index.html' : 'https://hdnjapan.com/';
+const lhubHref = lang === 'en' ? 'https://hdnjapan.com/en/lhub.html' : 'https://hdnjapan.com/lhub.html';
 ---
 <!doctype html>
 <html lang={lang}>
@@ -55,11 +58,11 @@ const ogLocale = lang === 'en' ? 'en_US' : 'ja_JP';
   <body>
     <header class="site-header">
       <div class="wrap header-inner">
-        <a class="brand" href={import.meta.env.BASE_URL}>HDN Articles</a>
+        <a class="brand" href={homeHref}>HDN Articles</a>
         <nav class="nav" aria-label={lang === 'en' ? 'Primary navigation' : '主要ナビゲーション'}>
-          <a href={import.meta.env.BASE_URL}>{lang === 'en' ? 'Articles' : '記事一覧'}</a>
-          <a href="https://hdnjapan.com/lhub.html">LHub</a>
-          <a href="https://hdnjapan.com/">HDN Japan</a>
+          <a href={homeHref}>{lang === 'en' ? 'Articles' : '記事一覧'}</a>
+          <a href={lhubHref}>LHub</a>
+          <a href={corporateHref}>HDN Japan</a>
         </nav>
       </div>
     </header>
