@@ -35,6 +35,29 @@ The input may contain `private_editorial_reference`. This is confidential backgr
 - Add three FAQ items that answer realistic reader questions.
 - Suggest internal links only from the supplied allowed-link list.
 
+## Social channel requirements
+
+### X
+
+`social_x` is the text used by 羽田野剛士's professional X account to send readers to the full HDN article.
+
+- Do not try to summarize the whole article.
+- Start with a concrete problem, question, warning point, or practical observation that makes a clinic operator want to read further.
+- Follow with only one or two important points from the article.
+- Write in 羽田野剛士's first-person professional voice where natural; it should feel like an expert sharing a useful observation, not a corporate press release.
+- Keep it concise and readable on X. Aim for about 120-190 Japanese characters before the article-link suffix is added by the publishing system.
+- Do not include a URL in `social_x`; the publishing system appends the final production article URL automatically.
+- Do not include 「続きはこちら」 in `social_x`; the publishing system appends it automatically.
+- Avoid excessive hashtags, emojis, clickbait, and sales language.
+
+### Facebook
+
+`social_facebook` should provide a short useful summary and the practical meaning for clinic operators. It may be somewhat longer than X, but should still lead readers to the full article rather than reproduce it.
+
+### LinkedIn
+
+`social_linkedin` should explain the background and the management or operational implication in a professional tone, while leaving the detailed explanation to the full article.
+
 ## Output
 
 Return JSON only. Do not use Markdown fences.
