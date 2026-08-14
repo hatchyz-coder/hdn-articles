@@ -4,22 +4,56 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
 export async function getStaticPaths() {
   const articles = await getCollection('articles', ({ data }) => !data.draft);
-  return articles.map((article) => ({ params: { id: article.id }, props: { article } }));
+  return articles.map((article) => ({ params: { id: article.id }, props: { article, articles } }));
 }
 
-const { article } = Astro.props;
+const { article, articles } = Astro.props;
 const { Content } = await render(article);
 const articleUrl = new URL(`${import.meta.env.BASE_URL}articles/${article.id}/`, Astro.site);
+const tagSet = new Set(article.data.tags);
+const relatedArticles = articles
+  .filter((candidate) => candidate.id !== article.id)
+  .map((candidate) => ({
+    article: candidate,
+    score:
+      (candidate.data.category === article.data.category ? 4 : 0) +
+      candidate.data.tags.filter((tag) => tagSet.has(tag)).length * 2,
+  }))
+  .sort((a, b) => b.score - a.score || b.article.data.publishedAt.valueOf() - a.article.data.publishedAt.valueOf())
+  .slice(0, 3)
+  .map(({ article }) => article);
+
+const author = {
+  '@type': 'Person',
+  name: article.data.author,
+  jobTitle: '株式会社HDN 代表 / クリニック経営・AI活用',
+  worksFor: { '@type': 'Organization', name: '株式会社HDN', url: 'https://hdnjapan.com/' },
+  knowsAbout: ['クリニック経営', '自由診療', '医療DX', 'LINE活用', 'AI活用'],
+};
 const jsonLd = {
   '@context': 'https://schema.org',
-  '@type': 'Article',
-  headline: article.data.title,
-  description: article.data.description,
-  datePublished: article.data.publishedAt.toISOString(),
-  dateModified: (article.data.updatedAt ?? article.data.publishedAt).toISOString(),
-  author: { '@type': 'Person', name: article.data.author },
-  publisher: { '@type': 'Organization', name: '株式会社HDN', url: 'https://hdnjapan.com/' },
-  mainEntityOfPage: articleUrl.toString(),
+  '@graph': [
+    {
+      '@type': 'Article',
+      headline: article.data.title,
+      description: article.data.description,
+      datePublished: article.data.publishedAt.toISOString(),
+      dateModified: (article.data.updatedAt ?? article.data.publishedAt).toISOString(),
+      articleSection: article.data.category,
+      keywords: article.data.tags.join(', '),
+      author,
+      publisher: { '@type': 'Organization', name: '株式会社HDN', url: 'https://hdnjapan.com/' },
+      mainEntityOfPage: articleUrl.toString(),
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'HDN Articles', item: new URL(import.meta.env.BASE_URL, Astro.site).toString() },
+        { '@type': 'ListItem', position: 2, name: article.data.category },
+        { '@type': 'ListItem', position: 3, name: article.data.title, item: articleUrl.toString() },
+      ],
+    },
+  ],
 };
 const cta = {
   consultation: ['この記事を自院の運用へ当てはめて整理する', 'https://forms.gle/148jgfSnDgDZ2HsEA'],
@@ -30,10 +64,44 @@ const cta = {
 <BaseLayout title={`${article.data.title} | HDN Articles`} description={article.data.description} canonical={articleUrl} type="article">
   <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   <main class="wrap article">
-    <p class="meta">{article.data.category}｜{article.data.publishedAt.toLocaleDateString('ja-JP')}｜{article.data.author}</p>
-    <h1>{article.data.title}</h1>
-    <p>{article.data.description}</p>
+    <nav class="breadcrumbs" aria-label="パンくずリスト">
+      <a href={import.meta.env.BASE_URL}>HDN Articles</a><span>›</span><span>{article.data.category}</span>
+    </nav>
+    <header class="article-header">
+      <p class="meta">{article.data.category}｜{article.data.publishedAt.toLocaleDateString('ja-JP')}｜{article.data.author}</p>
+      <h1>{article.data.title}</h1>
+      <p class="article-description">{article.data.description}</p>
+      {article.data.updatedAt && <p class="article-updated">最終更新：{article.data.updatedAt.toLocaleDateString('ja-JP')}</p>}
+    </header>
     <Content />
+
+    <aside class="author-box" aria-labelledby="author-heading">
+      <div class="author-mark" aria-hidden="true">TH</div>
+      <div>
+        <p class="eyebrow">AUTHOR</p>
+        <h2 id="author-heading">羽田野 剛士</h2>
+        <p class="author-role">株式会社HDN 代表｜クリニック経営・AI活用</p>
+        <p>クリニックの自由診療導入、業務改善、LINEを活用した予約・問診・決済導線、AI活用などを実務面から支援。制度やニュースの紹介だけでなく、「現場ではどう運用するか」まで落とし込んだ情報発信を行っています。</p>
+        <a class="text-link" href="https://hdnjapan.com/">株式会社HDNについて <span>→</span></a>
+      </div>
+    </aside>
+
+    {relatedArticles.length > 0 && (
+      <section class="related-section" aria-labelledby="related-heading">
+        <p class="eyebrow">RELATED INSIGHTS</p>
+        <h2 id="related-heading">あわせて読みたい記事</h2>
+        <div class="related-grid">
+          {relatedArticles.map((item) => (
+            <article class="related-card">
+              <p class="article-meta"><span>{item.data.category}</span>{item.data.publishedAt.toLocaleDateString('ja-JP')}</p>
+              <h3><a href={`${import.meta.env.BASE_URL}articles/${item.id}/`}>{item.data.title}</a></h3>
+              <p>{item.data.description}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+    )}
+
     <aside class="cta">
       <h2>記事を読んで終わらせず、実際の導線へ。</h2>
       <p>クリニックごとに、患者が止まる場所とスタッフ負荷は異なります。現在の運用を確認したうえで、必要な場合だけ次の進め方をご提案します。</p>
