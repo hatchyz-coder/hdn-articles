@@ -4,12 +4,18 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
 export async function getStaticPaths() {
   const articles = await getCollection('articles', ({ data }) => !data.draft);
-  return articles.map((article) => ({ params: { id: article.id }, props: { article, articles } }));
+  const englishArticles = await getCollection('articlesEn', ({ data }) => !data.draft);
+  const englishIds = new Set(englishArticles.map((item) => item.id));
+  return articles.map((article) => ({
+    params: { id: article.id },
+    props: { article, articles, hasEnglish: englishIds.has(article.id) },
+  }));
 }
 
-const { article, articles } = Astro.props;
+const { article, articles, hasEnglish } = Astro.props;
 const { Content } = await render(article);
 const articleUrl = new URL(`${import.meta.env.BASE_URL}articles/${article.id}/`, Astro.site);
+const englishUrl = hasEnglish ? new URL(`${import.meta.env.BASE_URL}en/articles/${article.id}/`, Astro.site) : undefined;
 const tagSet = new Set(article.data.tags);
 const relatedArticles = articles
   .filter((candidate) => candidate.id !== article.id)
@@ -41,6 +47,7 @@ const jsonLd = {
       dateModified: (article.data.updatedAt ?? article.data.publishedAt).toISOString(),
       articleSection: article.data.category,
       keywords: article.data.tags.join(', '),
+      inLanguage: 'ja',
       author,
       publisher: { '@type': 'Organization', name: '株式会社HDN', url: 'https://hdnjapan.com/' },
       mainEntityOfPage: articleUrl.toString(),
@@ -61,7 +68,14 @@ const cta = {
   'self-pay': ['自由診療の導入を相談する', 'https://hdnjapan.com/self-pay.html'],
 }[article.data.cta];
 ---
-<BaseLayout title={`${article.data.title} | HDN Articles`} description={article.data.description} canonical={articleUrl} type="article">
+<BaseLayout
+  title={`${article.data.title} | HDN Articles`}
+  description={article.data.description}
+  canonical={articleUrl}
+  type="article"
+  alternateJa={articleUrl}
+  alternateEn={englishUrl}
+>
   <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   <main class="wrap article">
     <nav class="breadcrumbs" aria-label="パンくずリスト">
@@ -72,6 +86,7 @@ const cta = {
       <h1>{article.data.title}</h1>
       <p class="article-description">{article.data.description}</p>
       {article.data.updatedAt && <p class="article-updated">最終更新：{article.data.updatedAt.toLocaleDateString('ja-JP')}</p>}
+      {englishUrl && <p class="language-switch"><a href={englishUrl.pathname}>Read this article in English →</a></p>}
     </header>
     <Content />
 
