@@ -33,10 +33,16 @@ class PublishWorkflowGuardrailTests(unittest.TestCase):
         self.assertIn('gh run watch', text)
         self.assertIn('--exit-status', text)
 
-    def test_publication_confirmation_includes_both_urls(self):
+    def test_publication_confirmation_includes_both_urls_and_three_social_channels(self):
         text = WORKFLOW.read_text(encoding='utf-8')
-        self.assertIn('https://article.hdnjapan.com/articles/$SLUG/', text)
-        self.assertIn('https://article.hdnjapan.com/en/articles/$SLUG/', text)
+        self.assertIn('https://article.hdnjapan.com/articles/{slug}/', text)
+        self.assertIn('https://article.hdnjapan.com/en/articles/{slug}/', text)
+        for label in ['### X', '### LinkedIn', '### Facebook']:
+            self.assertIn(label, text)
+        for filename in ['x.md', 'linkedin.md', 'facebook.md']:
+            self.assertIn(filename, text)
+        for label in ['X用リンク', 'LinkedIn用リンク', 'Facebook用リンク']:
+            self.assertIn(label, text)
 
 
 if __name__ == '__main__':
