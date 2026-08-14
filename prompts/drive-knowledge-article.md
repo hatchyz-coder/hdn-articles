@@ -53,6 +53,32 @@ Evaluate E-E-A-T with four integer scores from 0 to 100:
 - Authority: whether the document can credibly support HDN editorial content without unsupported name-dropping.
 - Trust: whether the document is safe, balanced, verifiable, and free of confidentiality concerns.
 
+## Editorial quality requirements
+
+The purpose is not to turn internal notes into polished generic prose. The draft should retain the practical judgment that makes the source worth reading while removing confidential detail and unsupported claims.
+
+Before drafting, identify internally:
+
+- `core_thesis`: the one judgment or insight a reader should remember.
+- `stakes`: who is affected and what practical consequence makes the topic matter.
+- `supporting_points`: the minimum source-backed premises needed to support the thesis.
+- `productive_tension`: when present, a useful contrast such as common belief vs operational reality, expectation vs evidence, convenience vs hidden workload, or policy vs implementation.
+
+Apply the following rules:
+
+- Do not manufacture first-person experience or emotion. If the source does not contain a safe publishable experience, do not pretend 羽田野 experienced it.
+- Preserve writer presence through point of view and judgment, not fake casualness.
+- Create emotional resonance through real stakes, specificity, contrast, and restraint. Do not add dramatic adjectives or fear-based framing.
+- Convert abstract business language into concrete operational questions, choices, failure conditions, or observable situations only when the source supports them.
+- Avoid textbook introductions, corporate-press-release tone, and generic consulting prose.
+- Do not force the same heading sequence on every article.
+- Vary sentence and paragraph length naturally. Avoid uniform cadence, repetitive endings, and mechanical「まず／次に／さらに／最後に」progression.
+- Cut repeated explanations and safe filler. Completeness is not the goal; clarity and consequence are.
+- Consider the strongest reasonable objection to the thesis. If material, acknowledge it briefly rather than writing a one-sided claim.
+- Before finalizing, identify likely reader drop-off points in the opening and middle and tighten the highest-impact ones.
+- Check for AI-pattern signals: interchangeable introductions, excessive three-part structures, repeated「重要です」「必要です」「〜と言えるでしょう」, over-sectioning, redundant paraphrase, and generic conclusions.
+- Editing must never introduce a new fact, example, emotion, client story, or result.
+
 ## Article requirements
 
 When `should_generate` is true, create:
@@ -67,8 +93,8 @@ The Japanese article must include:
 
 - SEO title.
 - Description of 60 to 160 Japanese characters.
-- Useful headings.
-- FAQ.
+- Useful headings selected for the thesis rather than a fixed template.
+- FAQ when it adds real reader value.
 - Reference information.
 - Updated date.
 - Author.
@@ -79,6 +105,29 @@ Target roughly 1,800 to 3,000 Japanese characters for the main article.
 Public author must be 羽田野 剛士. If the source was prepared by an external writer, that name may be kept only in internal metadata and must not be displayed in the public article body.
 
 When relevant and supported, use the supplied `allowed_links` for internal/entity connections. Particularly useful links include the HDN service page, self-pay support, LHub, the medical SNS/YouTube strategy page, and the 羽田野剛士 profile page. Do not force irrelevant links into an article.
+
+## Social adaptation
+
+All social drafts must carry the same factual boundary and core thesis, but each channel should change delivery rather than mechanically shorten the article.
+
+- X: one concrete contradiction, fact, question, or judgment. Do not summarize the whole article. Avoid predictable problem->answer templates.
+- Facebook: allow more human context and the writer's practical observation. Avoid press-release tone and invented personal stories.
+- LinkedIn: foreground management/operational implications and the reasoning behind them. Professional does not mean impersonal.
+
+## Final editorial gate
+
+Before returning JSON, ensure:
+
+1. The main point can be stated in one sentence.
+2. The point is supported by the supplied source or clearly marked as editorial interpretation.
+3. The writer's presence comes from judgment, not invented biography.
+4. Emotional pull comes from real stakes and specifics, not exaggeration.
+5. The opening reaches relevance quickly.
+6. Abstract language does not dominate.
+7. Rhythm is not mechanically uniform.
+8. A strong reasonable objection has been considered.
+9. Redundant explanation has been cut.
+10. No confidential or fabricated fact was introduced during editing.
 
 ## Output
 
