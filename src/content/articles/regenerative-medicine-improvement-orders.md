@@ -10,7 +10,7 @@ tags:
   - "クリニック運営"
   - "コンプライアンス"
 author: "羽田野 剛士"
-draft: true
+draft: false
 featured: false
 sourceUrl: "https://www.mhlw.go.jp/stf/newpage_74981.html"
 cta: consultation
