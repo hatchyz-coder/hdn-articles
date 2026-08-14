@@ -23,6 +23,13 @@ class PublishWorkflowGuardrailTests(unittest.TestCase):
         for label in ['Lint', 'Typecheck', 'Tests', 'Build', 'Migration check']:
             self.assertIn(f'- name: {label}', text)
 
+    def test_publish_workflow_dispatches_and_waits_for_pages(self):
+        text = WORKFLOW.read_text(encoding='utf-8')
+        self.assertIn('actions: write', text)
+        self.assertIn('gh workflow run deploy-pages.yml', text)
+        self.assertIn('gh run watch', text)
+        self.assertIn('--exit-status', text)
+
 
 if __name__ == '__main__':
     unittest.main()
