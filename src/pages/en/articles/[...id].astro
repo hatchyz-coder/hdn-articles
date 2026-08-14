@@ -1,0 +1,126 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const articles = await getCollection('articlesEn', ({ data }) => !data.draft);
+  const japaneseArticles = await getCollection('articles', ({ data }) => !data.draft);
+  const japaneseIds = new Set(japaneseArticles.map((item) => item.id));
+  return articles.map((article) => ({
+    params: { id: article.id },
+    props: { article, articles, hasJapanese: japaneseIds.has(article.id) },
+  }));
+}
+
+const { article, articles, hasJapanese } = Astro.props;
+const { Content } = await render(article);
+const articleUrl = new URL(`${import.meta.env.BASE_URL}en/articles/${article.id}/`, Astro.site);
+const japaneseUrl = hasJapanese ? new URL(`${import.meta.env.BASE_URL}articles/${article.id}/`, Astro.site) : undefined;
+const tagSet = new Set(article.data.tags);
+const relatedArticles = articles
+  .filter((candidate) => candidate.id !== article.id)
+  .map((candidate) => ({
+    article: candidate,
+    score:
+      (candidate.data.category === article.data.category ? 4 : 0) +
+      candidate.data.tags.filter((tag) => tagSet.has(tag)).length * 2,
+  }))
+  .sort((a, b) => b.score - a.score || b.article.data.publishedAt.valueOf() - a.article.data.publishedAt.valueOf())
+  .slice(0, 3)
+  .map(({ article }) => article);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Article',
+      headline: article.data.title,
+      description: article.data.description,
+      datePublished: article.data.publishedAt.toISOString(),
+      dateModified: (article.data.updatedAt ?? article.data.publishedAt).toISOString(),
+      articleSection: article.data.category,
+      keywords: article.data.tags.join(', '),
+      inLanguage: 'en',
+      author: {
+        '@type': 'Person',
+        name: 'Tsuyoshi Hadano',
+        jobTitle: 'Founder, HDN Inc. / Clinic Management & AI',
+        worksFor: { '@type': 'Organization', name: 'HDN Inc.', url: 'https://hdnjapan.com/' },
+      },
+      publisher: { '@type': 'Organization', name: 'HDN Inc.', url: 'https://hdnjapan.com/' },
+      mainEntityOfPage: articleUrl.toString(),
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'HDN Articles', item: new URL(import.meta.env.BASE_URL, Astro.site).toString() },
+        { '@type': 'ListItem', position: 2, name: 'English' },
+        { '@type': 'ListItem', position: 3, name: article.data.title, item: articleUrl.toString() },
+      ],
+    },
+  ],
+};
+
+const cta = {
+  consultation: ['Discuss how this applies to your clinic', 'https://forms.gle/148jgfSnDgDZ2HsEA'],
+  lhub: ['Ask about LHub implementation', 'https://hdnjapan.com/lhub.html'],
+  'self-pay': ['Ask about private-pay service implementation', 'https://hdnjapan.com/self-pay.html'],
+}[article.data.cta];
+---
+<BaseLayout
+  title={`${article.data.title} | HDN Articles`}
+  description={article.data.description}
+  canonical={articleUrl}
+  type="article"
+  lang="en"
+  alternateJa={japaneseUrl}
+  alternateEn={articleUrl}
+>
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  <main class="wrap article">
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <a href={import.meta.env.BASE_URL}>HDN Articles</a><span>›</span><span>English</span>
+    </nav>
+    <header class="article-header">
+      <p class="meta">{article.data.category} | {article.data.publishedAt.toLocaleDateString('en-US')} | Tsuyoshi Hadano</p>
+      <h1>{article.data.title}</h1>
+      <p class="article-description">{article.data.description}</p>
+      {article.data.updatedAt && <p class="article-updated">Last updated: {article.data.updatedAt.toLocaleDateString('en-US')}</p>}
+      {japaneseUrl && <p class="language-switch"><a href={japaneseUrl.pathname}>日本語版を読む →</a></p>}
+    </header>
+    <Content />
+
+    <aside class="author-box" aria-labelledby="author-heading">
+      <div class="author-mark" aria-hidden="true">TH</div>
+      <div>
+        <p class="eyebrow">AUTHOR</p>
+        <h2 id="author-heading">Tsuyoshi Hadano</h2>
+        <p class="author-role">Founder, HDN Inc. | Clinic Management & AI</p>
+        <p>Tsuyoshi Hadano works on private-pay service implementation, clinic operations, LINE-based patient journeys, and practical AI adoption. HDN Articles focuses on what healthcare operators should actually review and implement, not only on reporting policy or industry news.</p>
+        <a class="text-link" href="https://hdnjapan.com/">About HDN Inc. <span>→</span></a>
+      </div>
+    </aside>
+
+    {relatedArticles.length > 0 && (
+      <section class="related-section" aria-labelledby="related-heading">
+        <p class="eyebrow">RELATED INSIGHTS</p>
+        <h2 id="related-heading">Related articles</h2>
+        <div class="related-grid">
+          {relatedArticles.map((item) => (
+            <article class="related-card">
+              <p class="article-meta"><span>{item.data.category}</span>{item.data.publishedAt.toLocaleDateString('en-US')}</p>
+              <h3><a href={`${import.meta.env.BASE_URL}en/articles/${item.id}/`}>{item.data.title}</a></h3>
+              <p>{item.data.description}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <aside class="cta">
+      <h2>Turn the insight into an operating decision.</h2>
+      <p>Patient journeys, staffing constraints, and implementation risks vary by clinic. We review the current operating model first and suggest a next step only where it is useful.</p>
+      <a class="button" href={cta[1]}>{cta[0]}</a>
+    </aside>
+  </main>
+</BaseLayout>
