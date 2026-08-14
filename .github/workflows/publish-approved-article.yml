@@ -5,6 +5,7 @@ on:
     types: [created]
 
 permissions:
+  actions: write
   contents: write
   pull-requests: write
   issues: write
@@ -170,10 +171,44 @@ jobs:
           set -euo pipefail
           gh pr merge "$PR_NUMBER" --repo "$REPOSITORY" --squash --delete-branch
 
-      - name: Confirm publication queued
+      - name: Deploy published article
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          main_sha=$(gh api "repos/$REPOSITORY/commits/main" --jq .sha)
+          gh workflow run deploy-pages.yml --repo "$REPOSITORY" --ref main
+
+          run_id=""
+          for attempt in $(seq 1 20); do
+            run_id=$(gh run list \
+              --repo "$REPOSITORY" \
+              --workflow deploy-pages.yml \
+              --event workflow_dispatch \
+              --branch main \
+              --limit 20 \
+              --json databaseId,headSha \
+              --jq ".[] | select(.headSha == \"$main_sha\") | .databaseId" \
+              | head -n 1)
+            if [ -n "$run_id" ]; then
+              break
+            fi
+            sleep 3
+          done
+
+          if [ -z "$run_id" ]; then
+            echo "Could not locate the Pages workflow_dispatch run for $main_sha" >&2
+            exit 1
+          fi
+
+          echo "Watching Pages deployment run $run_id"
+          gh run watch "$run_id" --repo "$REPOSITORY" --exit-status
+
+      - name: Confirm publication
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.issue.number }}
           REPOSITORY: ${{ github.repository }}
         run: |
-          gh pr comment "$PR_NUMBER" --repo "$REPOSITORY" --body "✅ 公開承認を反映しました。draft解除・検証・mainへのmergeまで完了し、GitHub Pagesの本番デプロイを開始します。"
+          gh pr comment "$PR_NUMBER" --repo "$REPOSITORY" --body "✅ 公開完了しました。draft解除・全検証・mainへのmerge・GitHub Pages deploy・smoke testまで成功しています。"
