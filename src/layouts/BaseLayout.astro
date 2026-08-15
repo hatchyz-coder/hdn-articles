@@ -53,6 +53,36 @@ const lhubHref = lang === 'en' ? 'https://hdnjapan.com/en/lhub.html' : 'https://
       }
       gtag('js', new Date());
       gtag('config', 'G-687Y8YTR90');
+
+      document.addEventListener('click', (event) => {
+        const target = event.target;
+        const link = target instanceof Element ? target.closest('a[href]') : null;
+        if (!link) return;
+
+        const destination = new URL(link.href, window.location.href);
+        if (destination.hostname !== 'hdnjapan.com') return;
+
+        const pathname = destination.pathname;
+        const destinationKey = pathname.includes('consultation')
+          ? 'consultation'
+          : pathname.includes('lhub')
+            ? 'lhub'
+            : pathname.includes('self-pay')
+              ? 'self-pay'
+              : pathname.includes('medical-sns')
+                ? 'medical-sns'
+                : 'corporate';
+        const cta = link.closest('[data-contextual-service-cta]');
+
+        gtag('event', 'article_to_hdn_click', {
+          article_path: window.location.pathname,
+          destination_key: destinationKey,
+          cta_context: cta?.getAttribute('data-contextual-service-cta') || 'navigation',
+          link_url: destination.href,
+          link_text: (link.textContent || '').trim().slice(0, 100),
+          content_language: document.documentElement.lang || 'ja',
+        });
+      });
     </script>
   </head>
   <body>
