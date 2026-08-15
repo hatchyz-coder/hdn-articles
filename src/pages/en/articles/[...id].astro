@@ -16,6 +16,7 @@ const { article, articles, hasJapanese } = Astro.props;
 const { Content } = await render(article);
 const articleUrl = new URL(`${import.meta.env.BASE_URL}en/articles/${article.id}/`, Astro.site);
 const japaneseUrl = hasJapanese ? new URL(`${import.meta.env.BASE_URL}articles/${article.id}/`, Astro.site) : undefined;
+const ogImage = new URL(`${import.meta.env.BASE_URL}og/en/${article.id}.png`, Astro.site);
 const tagSet = new Set(article.data.tags);
 const relatedArticles = articles
   .filter((candidate) => candidate.id !== article.id)
@@ -41,6 +42,7 @@ const jsonLd = {
       articleSection: article.data.category,
       keywords: article.data.tags.join(', '),
       inLanguage: 'en',
+      image: ogImage.toString(),
       author: {
         '@type': 'Person',
         name: 'Tsuyoshi Hadano',
@@ -98,6 +100,7 @@ const ctaConfig = {
   description={article.data.description}
   canonical={articleUrl}
   type="article"
+  image={ogImage}
   lang="en"
   alternateJa={japaneseUrl}
   alternateEn={articleUrl}
@@ -105,7 +108,7 @@ const ctaConfig = {
   <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   <main class="wrap article">
     <nav class="breadcrumbs" aria-label="Breadcrumb">
-      <a href={import.meta.env.BASE_URL}>HDN Articles</a><span>›</span><span>English</span>
+      <a href={`${import.meta.env.BASE_URL}en/`}>HDN Articles</a><span>›</span><span>English</span>
     </nav>
     <header class="article-header">
       <p class="meta">{article.data.category} | {article.data.publishedAt.toLocaleDateString('en-US')} | Tsuyoshi Hadano</p>
