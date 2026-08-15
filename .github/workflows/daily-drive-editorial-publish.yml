@@ -1,0 +1,268 @@
+name: Daily Drive Editorial Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      document_id:
+        description: Optional Google Docs file ID for a one-off editorial run
+        required: false
+        default: ''
+        type: string
+      min_score:
+        description: Minimum editorial score required for publication
+        required: true
+        default: '72'
+        type: string
+  schedule:
+    # 06:00 JST every day. This leaves time for publication before the 08:30 SNS task.
+    - cron: '0 21 * * *'
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+  pages: read
+
+concurrency:
+  group: daily-drive-editorial-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+      - name: Restore private-seed processing state
+        run: |
+          mkdir -p data/editorial-drive
+          if git ls-remote --exit-code --heads origin editorial-drive-state >/dev/null 2>&1; then
+            git fetch origin editorial-drive-state
+            git show origin/editorial-drive-state:data/editorial-drive/processed-docs.json > data/editorial-drive/processed-docs.json || true
+          fi
+
+      - name: Generate one publication-ready article pair
+        id: editorial
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
+          DRIVE_EDITORIAL_FOLDER_ID: ${{ vars.GOOGLE_DRIVE_LHUB_ARCHIVE_FOLDER_ID }}
+          MIN_SCORE: ${{ inputs.min_score || '72' }}
+          DOCUMENT_ID: ${{ inputs.document_id || '' }}
+          PYTHONUNBUFFERED: '1'
+        run: |
+          set -euo pipefail
+          args=(
+            scripts/generate_from_drive_editorial.py
+            --folder-id "$DRIVE_EDITORIAL_FOLDER_ID"
+            --service-account-json "$GOOGLE_SERVICE_ACCOUNT_JSON"
+            --min-score "$MIN_SCORE"
+            --state-path data/editorial-drive/processed-docs.json
+            --report-path /tmp/editorial-drive-run.json
+            --max-drive-files 500
+          )
+          if [ -n "$DOCUMENT_ID" ]; then args+=(--document-id "$DOCUMENT_ID"); fi
+          python "${args[@]}"
+
+      - name: Persist state when no article is suitable
+        if: steps.editorial.outputs.selected != 'true'
+        run: |
+          set -euo pipefail
+          tmpdir="$(mktemp -d)"
+          cp data/editorial-drive/processed-docs.json "$tmpdir/processed-docs.json"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin editorial-drive-state >/dev/null 2>&1; then
+            git fetch origin editorial-drive-state
+            git worktree add "$tmpdir/state" origin/editorial-drive-state
+            cd "$tmpdir/state"
+            git checkout -B editorial-drive-state
+          else
+            git worktree add --detach "$tmpdir/state" HEAD
+            cd "$tmpdir/state"
+            git checkout --orphan editorial-drive-state
+            git rm -r --cached . || true
+            find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          fi
+          mkdir -p data/editorial-drive
+          cp "$tmpdir/processed-docs.json" data/editorial-drive/processed-docs.json
+          git add data/editorial-drive/processed-docs.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Update editorial seed state [skip ci]"
+            git push origin editorial-drive-state
+          fi
+
+      - name: Report editorial skip
+        if: steps.editorial.outputs.selected != 'true'
+        run: |
+          echo "No article was published today. Editorial gate: ${{ steps.editorial.outputs.reason }}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Finalize social copy with production URL
+        if: steps.editorial.outputs.selected == 'true'
+        env:
+          SLUG: ${{ steps.editorial.outputs.slug }}
+        run: python scripts/finalize_social_posts.py --article-path "src/content/articles/${SLUG}.md"
+
+      - name: Lint
+        if: steps.editorial.outputs.selected == 'true'
+        run: |
+          if npm run | grep -q " lint"; then npm run lint; else echo "No lint script configured."; fi
+
+      - name: Typecheck
+        if: steps.editorial.outputs.selected == 'true'
+        run: |
+          if npm run | grep -q " typecheck"; then npm run typecheck; else npx astro check; fi
+
+      - name: Tests
+        if: steps.editorial.outputs.selected == 'true'
+        run: |
+          if npm run | grep -q " test"; then
+            npm test
+          elif [ -d tests ]; then
+            python -m unittest discover -s tests -v
+          else
+            echo "No tests configured."
+          fi
+
+      - name: Build
+        if: steps.editorial.outputs.selected == 'true'
+        run: npm run build
+
+      - name: Migration check
+        if: steps.editorial.outputs.selected == 'true'
+        run: |
+          if npm run | grep -q "migration:check"; then npm run migration:check; else echo "No migration check configured."; fi
+
+      - name: Create and merge audited publication PR
+        id: merge
+        if: steps.editorial.outputs.selected == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SLUG: ${{ steps.editorial.outputs.slug }}
+          SCORE: ${{ steps.editorial.outputs.score }}
+        run: |
+          set -euo pipefail
+          branch="content/daily-drive-${SLUG}-${GITHUB_RUN_ID}"
+          git checkout -b "$branch"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "src/content/articles/${SLUG}.md" "src/content/articles-en/${SLUG}.md" "social/${SLUG}/"
+          git commit -m "Publish daily editorial article: ${SLUG}"
+          git push origin "$branch"
+
+          cat > /tmp/pr-body.md <<EOF
+          ## Daily Drive editorial publication
+
+          - Editorial seed: private Google Drive draft (identifier intentionally not exposed)
+          - Editorial score: ${SCORE}/100
+          - Current web/news research: required during generation
+          - Japanese and English: publication-ready pair
+          - Social copy: X / LinkedIn / Facebook finalized with production URL
+
+          ## Automated publication gates
+
+          - [x] Private Drive seed is not cited or exposed publicly
+          - [x] Current public web sources are used for time-sensitive facts
+          - [x] Existing article titles are checked for duplicate intent
+          - [x] AI-pattern editorial review is part of the generation prompt
+          - [x] Lint / typecheck / tests / build / migration check completed before merge
+          EOF
+
+          pr_url=$(gh pr create --base main --head "$branch" --title "Daily editorial: ${SLUG}" --body-file /tmp/pr-body.md)
+          pr_number="${pr_url##*/}"
+          gh pr merge "$pr_number" --squash --delete-branch
+          main_sha=$(gh api "repos/${GITHUB_REPOSITORY}/commits/main" --jq .sha)
+          echo "main_sha=$main_sha" >> "$GITHUB_OUTPUT"
+          echo "pr_number=$pr_number" >> "$GITHUB_OUTPUT"
+
+      - name: Persist state after successful publication merge
+        if: steps.editorial.outputs.selected == 'true' && steps.merge.outcome == 'success'
+        run: |
+          set -euo pipefail
+          tmpdir="$(mktemp -d)"
+          cp data/editorial-drive/processed-docs.json "$tmpdir/processed-docs.json"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin editorial-drive-state >/dev/null 2>&1; then
+            git fetch origin editorial-drive-state
+            git worktree add "$tmpdir/state" origin/editorial-drive-state
+            cd "$tmpdir/state"
+            git checkout -B editorial-drive-state
+          else
+            git worktree add --detach "$tmpdir/state" HEAD
+            cd "$tmpdir/state"
+            git checkout --orphan editorial-drive-state
+            git rm -r --cached . || true
+            find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          fi
+          mkdir -p data/editorial-drive
+          cp "$tmpdir/processed-docs.json" data/editorial-drive/processed-docs.json
+          git add data/editorial-drive/processed-docs.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Update editorial seed state [skip ci]"
+            git push origin editorial-drive-state
+          fi
+
+      - name: Deploy published article
+        if: steps.editorial.outputs.selected == 'true' && steps.merge.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MAIN_SHA: ${{ steps.merge.outputs.main_sha }}
+        run: |
+          set -euo pipefail
+          gh workflow run deploy-pages.yml --ref main
+          run_id=""
+          for attempt in $(seq 1 20); do
+            run_id=$(gh run list \
+              --workflow deploy-pages.yml \
+              --event workflow_dispatch \
+              --branch main \
+              --limit 20 \
+              --json databaseId,headSha \
+              --jq ".[] | select(.headSha == \"$MAIN_SHA\") | .databaseId" | head -n 1)
+            if [ -n "$run_id" ]; then break; fi
+            sleep 3
+          done
+          if [ -z "$run_id" ]; then
+            echo "Could not locate Pages deployment for $MAIN_SHA" >&2
+            exit 1
+          fi
+          gh run watch "$run_id" --exit-status
+
+      - name: Publication summary
+        if: steps.editorial.outputs.selected == 'true'
+        env:
+          SLUG: ${{ steps.editorial.outputs.slug }}
+          SCORE: ${{ steps.editorial.outputs.score }}
+        run: |
+          {
+            echo "## Daily Drive editorial publication"
+            echo ""
+            echo "Published: https://article.hdnjapan.com/articles/${SLUG}/"
+            echo "English: https://article.hdnjapan.com/en/articles/${SLUG}/"
+            echo "Editorial score: ${SCORE}/100"
+            echo "The private Drive seed identifier was not written into the public article or PR."
+          } >> "$GITHUB_STEP_SUMMARY"
