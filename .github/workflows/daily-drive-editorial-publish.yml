@@ -31,6 +31,8 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      TZ: Asia/Tokyo
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
