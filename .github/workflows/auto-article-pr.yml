@@ -8,6 +8,9 @@ on:
         required: true
         default: '70'
         type: string
+  schedule:
+    # 07:30 JST Tuesday and Thursday, after the weekday official-source discovery run.
+    - cron: '30 22 * * 1,3'
 
 permissions:
   contents: write
@@ -80,7 +83,7 @@ jobs:
       - name: Select highest-value eligible candidate
         id: pick
         env:
-          MIN_SCORE: ${{ inputs.min_score }}
+          MIN_SCORE: ${{ inputs.min_score || '70' }}
         run: |
           python scripts/select_top_candidate.py \
             --min-score "$MIN_SCORE" \
@@ -127,12 +130,12 @@ jobs:
           git checkout -b "$branch"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/content/articles social outputs/en
+          git add src/content/articles src/content/articles-en social outputs/en
           git commit -m "Generate discovered article draft: ${SLUG}"
           git push origin "$branch"
 
           cat > /tmp/pr-body.md <<EOF
-          ## AI-selected article candidate
+          ## AI-selected official-source article candidate
 
           - Source: ${SOURCE_URL}
           - Source title: ${SOURCE_TITLE}
@@ -143,9 +146,9 @@ jobs:
 
           ## Generated files
 
-          - Article: \`src/content/articles/${SLUG}.md\`
+          - Japanese article draft: \`src/content/articles/${SLUG}.md\`
+          - English companion: \`src/content/articles-en/${SLUG}.md\` when generated
           - Social drafts: \`social/${SLUG}/\`
-          - English draft: \`outputs/en/${SLUG}.md\`
 
           ## Review checklist
 
@@ -163,5 +166,5 @@ jobs:
           gh pr create \
             --base main \
             --head "$branch" \
-            --title "AI-selected article draft: ${SLUG}" \
+            --title "Official-source article draft: ${SLUG}" \
             --body-file /tmp/pr-body.md

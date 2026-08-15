@@ -2,6 +2,9 @@ name: Discover article candidates
 
 on:
   workflow_dispatch:
+  schedule:
+    # 05:30 JST Monday-Friday. Refresh the MHLW / PMDA / CAA candidate queue before editorial selection.
+    - cron: '30 20 * * 0-4'
 
 permissions:
   contents: write
