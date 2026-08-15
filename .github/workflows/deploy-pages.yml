@@ -30,8 +30,36 @@ jobs:
         with:
           node-version: 22
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - name: Install dependencies
         run: npm install
+
+      - name: Install OGP generator dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          python -m pip install --disable-pip-version-check pillow
+
+      - name: Generate article OGP images
+        run: |
+          python scripts/generate_og_images.py
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+
+          files = sorted(Path('public/og').glob('*/*.png'))
+          if not files:
+              raise SystemExit('No OGP images were generated')
+          for path in files:
+              with Image.open(path) as image:
+                  if image.size != (1200, 630):
+                      raise SystemExit(f'Unexpected OGP dimensions for {path}: {image.size}')
+          print(f'Verified {len(files)} OGP images at 1200x630')
+          PY
 
       - name: Resolve deployment target
         env:
@@ -59,6 +87,10 @@ jobs:
         run: |
           grep -R -F "無難な動画では、患者は動かない" dist >/dev/null
           test -f dist/sitemap-index.xml || test -f dist/sitemap-0.xml || test -f dist/sitemap.xml
+          test -f dist/og/ja/clinic-video-strategy.png
+          test -f dist/og/en/clinic-video-strategy.png
+          grep -R -F "og/ja/clinic-video-strategy.png" dist/articles/clinic-video-strategy/index.html >/dev/null
+          grep -R -F "og/en/clinic-video-strategy.png" dist/en/articles/clinic-video-strategy/index.html >/dev/null
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -98,6 +130,11 @@ jobs:
             echo "Published article is not visible on the deployed index."
             exit 1
           }
+
+          curl --fail --silent --show-error --location --max-time 20 "${PAGE_URL}og/ja/clinic-video-strategy.png" -o /tmp/og-ja.png
+          curl --fail --silent --show-error --location --max-time 20 "${PAGE_URL}og/en/clinic-video-strategy.png" -o /tmp/og-en.png
+          test -s /tmp/og-ja.png
+          test -s /tmp/og-en.png
 
           for sitemap in sitemap-index.xml sitemap-0.xml sitemap.xml; do
             if curl --fail --silent --show-error --location --max-time 20 "${PAGE_URL}${sitemap}" -o /tmp/sitemap.xml; then
