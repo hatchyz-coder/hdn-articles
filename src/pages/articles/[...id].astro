@@ -16,6 +16,7 @@ const { article, articles, hasEnglish } = Astro.props;
 const { Content } = await render(article);
 const articleUrl = new URL(`${import.meta.env.BASE_URL}articles/${article.id}/`, Astro.site);
 const englishUrl = hasEnglish ? new URL(`${import.meta.env.BASE_URL}en/articles/${article.id}/`, Astro.site) : undefined;
+const ogImage = new URL(`${import.meta.env.BASE_URL}og/ja/${article.id}.png`, Astro.site);
 const tagSet = new Set(article.data.tags);
 const relatedArticles = articles
   .filter((candidate) => candidate.id !== article.id)
@@ -48,6 +49,7 @@ const jsonLd = {
       articleSection: article.data.category,
       keywords: article.data.tags.join(', '),
       inLanguage: 'ja',
+      image: ogImage.toString(),
       author,
       publisher: { '@type': 'Organization', name: '株式会社HDN', url: 'https://hdnjapan.com/' },
       mainEntityOfPage: articleUrl.toString(),
@@ -100,6 +102,7 @@ const ctaConfig = {
   description={article.data.description}
   canonical={articleUrl}
   type="article"
+  image={ogImage}
   alternateJa={articleUrl}
   alternateEn={englishUrl}
 >
