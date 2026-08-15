@@ -1,5 +1,5 @@
-import importlib.util
 import sys
+import types
 import unittest
 from pathlib import Path
 
@@ -7,6 +7,12 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
+
+# The repository CI intentionally does not install Python runtime dependencies before
+# unit tests. These tests only exercise pure editorial helpers, so a lightweight module
+# stub is sufficient for import-time validation.
+if "requests" not in sys.modules:
+    sys.modules["requests"] = types.ModuleType("requests")
 
 import generate_from_drive_editorial as editorial
 
