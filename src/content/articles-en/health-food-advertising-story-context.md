@@ -20,11 +20,11 @@ In health-food advertising, a common assumption is that a message becomes safe i
 
 That is too narrow a way to review an advertisement.
 
-In practice, the key question is often **what impression the advertisement creates as a whole**.
+In practice, the key question is often what impression the advertisement creates as a whole.
 
 If an ad spends substantial time describing a person's frustration, fatigue, or other everyday difficulty, introduces a health-food product, and then presents a positive change afterward, consumers may understand the story as implying that the product produced that change even when no single sentence says so directly.
 
-The practical issue is therefore not only the strength of individual words. It is **how strongly the problem and the product are connected within the advertising story**.
+The practical issue is therefore not only the strength of individual words. It is how strongly the problem and the product are connected within the advertising story.
 
 ## “We never said it directly” is not a sufficient defense
 
@@ -45,7 +45,7 @@ Consider the combination of:
 
 The question is what efficacy or performance claim these elements communicate together.
 
-**Not writing “this works” is not the same as avoiding an overall impression that it works.**
+Not writing “this works” is not the same as avoiding an overall impression that it works.
 
 ## In lifestyle storytelling, examine the distance from problem to product to change
 
@@ -61,7 +61,7 @@ A lifestyle story can communicate something different when the role of the produ
 
 This is why an expanding list of prohibited words is not enough.
 
-Review **the copy, story, visuals, testimonials, and product presentation as one continuous message**.
+Review the copy, story, visuals, testimonials, and product presentation as one continuous message.
 
 ## A testimonial is not neutral simply because it is labeled personal experience
 
@@ -71,7 +71,7 @@ The Consumer Affairs Agency explains that when consumer testimonials are submitt
 
 A collection of favorable comments from purchasers therefore does not ordinarily become objective proof of efficacy merely because the comments are genuine.
 
-From an advertising-design perspective, there is another issue as well: a testimonial can function as **the bridge that connects the consumer's problem to the product**.
+From an advertising-design perspective, there is another issue as well: a testimonial can function as the bridge that connects the consumer's problem to the product.
 
 Even when the main copy avoids a direct claim, a testimonial may complete the implied story that “I used this product and the problem improved.” That can materially strengthen the overall impression.
 
@@ -79,7 +79,7 @@ Even when the main copy avoids a direct claim, a testimonial may complete the im
 
 Evidence is another area where overconfidence creates risk.
 
-Japan's substantiation rule allows the Consumer Affairs Agency to request materials showing a reasonable basis for representations concerning a product's efficacy or performance. For materials to constitute a reasonable basis, they must not only be objectively substantiated; **the content demonstrated by the evidence must also appropriately correspond to the efficacy or performance represented in the advertisement**.
+Japan's substantiation rule allows the Consumer Affairs Agency to request materials showing a reasonable basis for representations concerning a product's efficacy or performance. For materials to constitute a reasonable basis, they must not only be objectively substantiated; the content demonstrated by the evidence must also appropriately correspond to the efficacy or performance represented in the advertisement.
 
 The existence of a research paper is therefore not the same as substantiation of the specific advertising claim.
 
@@ -87,7 +87,7 @@ Advertisers need to examine factors such as the study population, dose, duration
 
 The more useful practical question is not simply “Do we have evidence?” It is:
 
-**“Exactly how much of this representation can this evidence support?”**
+“Exactly how much of this representation can this evidence support?”
 
 ## Health-food advertising involves more than one legal framework
 
@@ -103,12 +103,12 @@ The product classification, actual representation, medium, supporting evidence, 
 
 For practical reviews of health-food advertising, I find the following sequence more useful than starting with word-by-word editing:
 
-1. **What problem is being presented?**
-2. **Where does that problem become connected to the product?**
-3. **What change is shown after the product appears?**
-4. **Do testimonials or visuals strengthen an implied causal relationship?**
-5. **What efficacy or performance does an ordinary reader take away, and what evidence supports it?**
-6. **Does the advertorial become stronger when read together with the landing page?**
+1. What problem is being presented?
+2. Where does that problem become connected to the product?
+3. What change is shown after the product appears?
+4. Do testimonials or visuals strengthen an implied causal relationship?
+5. What efficacy or performance does an ordinary reader take away, and what evidence supports it?
+6. Does the advertorial become stronger when read together with the landing page?
 
 This approach helps move the discussion away from questions such as “If we delete this one sentence, is everything safe?”
 
@@ -116,13 +116,13 @@ This approach helps move the discussion away from questions such as “If we del
 
 The greatest advertising risk is not always an obviously aggressive phrase.
 
-A series of moderate statements can still combine into a clear message of **problem → product → improvement**.
+A series of moderate statements can still combine into a clear message of problem → product → improvement.
 
 That is why review should focus not only on the strength of individual wording but also on the connections between the elements of the advertisement.
 
 If the structure communicates efficacy or performance, the next question is whether the advertiser has evidence that appropriately corresponds to that representation.
 
-**Advertising should be evaluated not only by what each sentence says, but by what remains in the consumer's mind after the entire message is read.**
+Advertising should be evaluated not only by what each sentence says, but by what remains in the consumer's mind after the entire message is read.
 
 That perspective makes lifestyle stories and testimonials much easier to assess consistently.
 
