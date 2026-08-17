@@ -43,7 +43,7 @@ Even when certain tasks are outsourced, a clinic should confirm that medical dec
 
 The MHLW materials state that some medical records did not sufficiently document the patient's chief complaint, symptoms, or how the patient met the selection and exclusion criteria in the treatment plan.
 
-Operationally, a third party reviewing the record later should be able to understand **why the clinician judged that this regenerative medicine was appropriate for that patient**.
+Operationally, a third party reviewing the record later should be able to understand why the clinician judged that this regenerative medicine was appropriate for that patient.
 
 ### 3. Does the adverse-event reporting workflow actually function?
 
@@ -78,7 +78,7 @@ These are practical review points derived from the MHLW publication. They should
 
 ## HDN's perspective: focus on who is actually making the decision
 
-One of the most important implications of the publication is that the issue is not limited to whether policies, forms, and SOPs exist. The actual operation matters: **who selects the patient, who determines the treatment, and who confirms manufacturing conditions**.
+One of the most important implications of the publication is that the issue is not limited to whether policies, forms, and SOPs exist. The actual operation matters: who selects the patient, who determines the treatment, and who confirms manufacturing conditions.
 
 When reviewing a clinic's system, it can be more useful to map the real patient journey, medical decisions, and interactions with outsourced providers in chronological order than simply to add more policies. This often makes unclear responsibilities easier to identify.
 
