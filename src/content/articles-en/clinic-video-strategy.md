@@ -18,7 +18,7 @@ cta: consultation
 
 When a clinic starts using social media or YouTube, it is easy to make the activity itself the goal: film a clinic tour, explain treatment menus, or simply increase the number of posts.
 
-Patients, however, are not watching because they want to receive whatever information the clinic happens to publish. They are watching to **reduce uncertainty and decide whether they feel comfortable taking the next step**.
+Patients, however, are not watching because they want to receive whatever information the clinic happens to publish. They are watching to reduce uncertainty and decide whether they feel comfortable taking the next step.
 
 When I design a clinic's social media and video strategy, I look first at what patients are worried about and what information would help them move forward. Production quality comes after that.
 
@@ -36,7 +36,7 @@ Before a first visit, patients care about much more than the treatment itself.
 
 These concerns are especially relevant in areas such as erectile dysfunction, hair-loss treatment, self-pay care, and telemedicine. A patient may want treatment while also worrying about embarrassment, inconvenience, or whether someone else might find out.
 
-That is why the first priority is not a polished promotional film. It is a set of **videos that remove one uncertainty at a time before the patient books**.
+That is why the first priority is not a polished promotional film. It is a set of videos that remove one uncertainty at a time before the patient books.
 
 ## Then build content that improves treatment understanding
 
@@ -46,7 +46,7 @@ For example, with ED or AGA care, it is more useful to explain not only that the
 
 The same applies to weight management, sleep, menopause-related care, testing, and infusion services.
 
-A message such as "We offer this treatment" does not help a patient judge whether it fits their situation. Explain **who may consider the service, what the process looks like, and what is reviewed before a treatment plan is chosen**.
+A message such as "We offer this treatment" does not help a patient judge whether it fits their situation. Explain who may consider the service, what the process looks like, and what is reviewed before a treatment plan is chosen.
 
 ## Attention-building content should challenge assumptions, not chase outrage
 
@@ -65,7 +65,7 @@ Possible angles include:
 
 The point is not to use strong language for its own sake. The value comes from a physician responding professionally to a real misunderstanding or concern.
 
-**Do not disappear into safe, generic content. But do not incite fear either.**
+Do not disappear into safe, generic content. But do not incite fear either.
 
 Designing that boundary is one of the most important parts of healthcare social media.
 
@@ -73,7 +73,7 @@ Designing that boundary is one of the most important parts of healthcare social 
 
 YouTube Studio provides metrics such as views, impressions, click-through rate, average view duration, and watch time. YouTube itself recommends looking at metrics in context rather than treating click-through rate as a standalone measure.
 
-In practical terms, clinics should ask: **Was the content discovered? Did it stop the viewer? Did the viewer keep watching?**
+In practical terms, clinics should ask: Was the content discovered? Did it stop the viewer? Did the viewer keep watching?
 
 For clinics, there is another important question: what happens next?
 
@@ -100,13 +100,13 @@ Clinics therefore need to consider both sides at once: attracting attention whil
 
 I organize clinic video content into three categories:
 
-1. **Reassurance** — reduce anxiety before a first visit
-2. **Treatment understanding** — help patients decide whether a service may be relevant
-3. **Attention building** — address difficult questions or misconceptions with professional expertise
+1. Reassurance — reduce anxiety before a first visit
+2. Treatment understanding — help patients decide whether a service may be relevant
+3. Attention building — address difficult questions or misconceptions with professional expertise
 
 The video itself is only the beginning. After it come LINE, questionnaires, booking, and the consultation.
 
-**What clinic video needs most is not visual polish. It needs information that reduces uncertainty and questions that patients cannot easily ignore.**
+What clinic video needs most is not visual polish. It needs information that reduces uncertainty and questions that patients cannot easily ignore.
 
 If a clinic does not know what to film first, working backward from the patient journey usually makes the priorities much clearer.
 
