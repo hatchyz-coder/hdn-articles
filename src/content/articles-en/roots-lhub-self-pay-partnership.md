@@ -16,7 +16,7 @@ sourceUrl: "https://rts-inc.jp/post-614/"
 cta: lhub
 ---
 
-HDN Inc. has begun collaborating with ROOTS Inc. to provide **digital operational support for clinics offering self-pay medical services using LHub**.
+HDN Inc. has begun collaborating with ROOTS Inc. to provide digital operational support for clinics offering self-pay medical services using LHub.
 
 The collaboration combines ROOTS' expertise in clinic management and on-site operational support with HDN's LINE-connected service, LHub, to help medical institutions introduce and operate self-pay care in a practical way.
 
@@ -41,7 +41,7 @@ Depending on each clinic's operation, the patient journey can include functions 
 - Patient information management
 - Post-visit guidance and ongoing follow-up
 
-The objective is not simply to install another system. The design focuses on **helping patients move to the next action without confusion while reducing the amount of manual checking required from staff**.
+The objective is not simply to install another system. The design focuses on helping patients move to the next action without confusion while reducing the amount of manual checking required from staff.
 
 ## Roles of ROOTS and HDN
 
@@ -49,7 +49,7 @@ ROOTS provides support in areas including outsourced clinic administration, intr
 
 HDN focuses on LHub implementation and operation, together with patient journey design from the digital side.
 
-By combining these capabilities, the two companies aim to go beyond planning a self-pay service and help clinics create **workflows that can actually operate in day-to-day practice**.
+By combining these capabilities, the two companies aim to go beyond planning a self-pay service and help clinics create workflows that can actually operate in day-to-day practice.
 
 ## From introduction to stable operation of self-pay care
 
