@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Select one safe, high-value candidate for automatic draft generation."""
+"""Select one safe, high-value candidate for article generation or publication."""
 
 from __future__ import annotations
 
@@ -122,7 +122,7 @@ def main() -> int:
 
         category = str(candidate.get("suggested_category", "医療経営")).strip() or "医療経営"
         cta = str(candidate.get("recommended_cta") or candidate.get("suggested_cta", "consultation")).strip()
-        if cta not in {"consultation", "lhub", "self-pay"}:
+        if cta not in {"consultation", "lhub", "self-pay", "sns"}:
             cta = "consultation"
 
         rationale = str(candidate.get("rationale") or candidate.get("reason", "")).replace("\n", " ")
