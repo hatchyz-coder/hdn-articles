@@ -7,6 +7,7 @@ const articles = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/articles' }),
   schema: z.object({
     title: z.string(),
+    socialTitle: z.string().min(4).max(80).optional(),
     description: z.string().min(60).max(160),
     publishedAt: z.coerce.date(),
     updatedAt: z.coerce.date().optional(),
@@ -25,6 +26,7 @@ const articlesEn = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/articles-en' }),
   schema: z.object({
     title: z.string(),
+    socialTitle: z.string().min(4).max(100).optional(),
     description: z.string().min(50).max(180),
     publishedAt: z.coerce.date(),
     updatedAt: z.coerce.date().optional(),
