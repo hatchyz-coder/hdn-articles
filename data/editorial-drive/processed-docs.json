@@ -1,0 +1,18 @@
+{
+  "documents": {
+    "f7abfb413e4f2a4e4513e28f0c6c0cedb544c9c254a01f455dbbda4b7f37abf9": {
+      "modifiedTime": "2026-07-23T03:43:02.529Z",
+      "status": "api_timeout",
+      "startedAt": "2026-08-18T21:14:20.542520+00:00",
+      "retry_count": 1,
+      "finishedAt": "2026-08-18T21:15:51.397279+00:00",
+      "reason": "OpenAI API timed out during editorial generation",
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3538,
+        "inputCharacters": 3538
+      }
+    }
+  },
+  "updatedAt": "2026-08-18T21:15:51.397285+00:00"
+}
