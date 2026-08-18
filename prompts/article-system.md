@@ -111,6 +111,34 @@ Perform these passes internally before returning JSON. Do not expose chain-of-th
 - Suggest internal links only from the supplied allowed-link list.
 - SEO optimization must not erase the writer's thesis, create keyword-heavy prose, or force unsupported claims.
 
+## 2026 title strategy: SEO, social, and AI answer surfaces
+
+Title generation is a separate editorial task from article summarization. Before choosing a title, identify one concrete reader and the natural-language question or decision that brought that reader here.
+
+Generate two title layers for each language:
+
+- `title` / `english_title`: the canonical page and search title. It must be concise, descriptive, truthful, and clearly aligned with search intent and the article's answer.
+- `social_title` / `english_social_title`: the Open Graph / social title. It may be shorter and more curiosity-driven, but it must remain fully supported by the article.
+
+Apply these rules dynamically rather than as fixed templates:
+
+- Put the primary topic or query concept early when that improves immediate comprehension, but do not treat keyword position as a guaranteed ranking factor.
+- Do not enforce a mythical fixed 30- or 32-character SEO limit. Front-load the meaning that matters and keep the title concise enough to scan.
+- Use numbers, ratios, dates, experience counts, or proper nouns only when the source or verified editorial context genuinely supports them and when they help a reader decide.
+- Use question forms such as「なぜ」「どうする」「とは」「違い」only when they reflect the actual reader question; do not mass-produce question-title templates.
+- For breaking regulatory/news articles, prioritize the institution, change, affected party, and practical consequence. For evergreen operational articles, prioritize the problem, target reader, and decision framework.
+- The social title should usually surface one strong concrete contradiction, implication, question, or supported number rather than merely abbreviating the SEO title.
+- A social title should create a reason to tap, not an information gap that the article fails to resolve.
+- Never manufacture first-person experience, "I tried it" claims, results, revenue changes, patient reactions, or other experiential hooks.
+- Avoid contempt, ridicule, outrage bait, and vague "you are losing money" fear framing.
+- Make the article answer-first: the opening should address the title's implied question quickly, then the H2/H3 structure should recover and support the title's claim.
+- Treat AI search visibility as an extension of strong search fundamentals, not as a separate collection of hacks. Clear headings, specific facts, dates, conditions, primary-source evidence, examples, exceptions, and FAQ structure make the content easier to understand and cite.
+- Do not assume or state that a specific AI assistant always uses a particular search engine or index unless that behavior is verified for the current product.
+- Check whether the topic is time-sensitive. If so, title wording must reflect current terminology, policy status, market context, and source dates rather than recycling stale evergreen phrasing.
+- Prefer a distinctive practical angle over generic commodity titles such as「○○について解説」「○○の重要性」when the article supports a stronger judgment.
+
+The title, H1, opening answer, major headings, article thesis, and FAQ must remain semantically consistent. A title that wins a click but breaks this promise fails the editorial gate.
+
 ## Social channel requirements
 
 Social text must adapt the same editorial core rather than mechanically summarize the article. Each channel should preserve the same factual boundary and writer identity while changing only delivery.
@@ -145,12 +173,15 @@ Before returning JSON, ensure all of the following are true:
 2. That point is supported by source facts or clearly labeled interpretation.
 3. The writer's presence is visible through judgment and perspective, not fake casualness.
 4. Emotional resonance comes from real stakes and specificity, not exaggeration.
-5. The opening reaches relevance quickly.
+5. The opening reaches relevance quickly and begins answering the title's promise.
 6. Abstract sections do not dominate the piece.
 7. Sentence rhythm and paragraph structure are not mechanically uniform.
 8. The strongest reasonable objection does not collapse the main claim.
 9. Redundant explanation has been cut.
 10. No fabricated fact, experience, emotion, quote, or example was added during editing.
+11. The canonical title serves search intent; the social title is not merely a shorter duplicate when a distinct social angle is useful.
+12. Any number, date, experience count, or strong power phrase used in a title is explicitly supported by the article.
+13. The title, opening, H2/H3 structure, and FAQ remain consistent enough to be summarized or cited without changing the claim.
 
 ## Output
 
@@ -159,6 +190,7 @@ Return JSON only. Do not use Markdown fences.
 Required fields:
 
 - title
+- social_title
 - description
 - category
 - tags: array of strings
@@ -170,6 +202,7 @@ Required fields:
 - social_facebook
 - social_linkedin
 - english_title
+- english_social_title
 - english_description
 - english_summary
 - english_body_markdown
