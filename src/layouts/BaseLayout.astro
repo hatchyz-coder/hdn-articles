@@ -3,6 +3,7 @@ import '../styles/global.css';
 import '../styles/knowledge-hub.css';
 const {
   title = 'HDN Articles',
+  socialTitle,
   description = '医療経営、患者導線設計、自由診療、LINE活用に関する実務記事。',
   canonical,
   type = 'website',
@@ -17,6 +18,7 @@ const imageUrl = image ? new URL(image, siteUrl) : undefined;
 const jaUrl = alternateJa ? new URL(alternateJa, siteUrl) : undefined;
 const enUrl = alternateEn ? new URL(alternateEn, siteUrl) : undefined;
 const ogLocale = lang === 'en' ? 'en_US' : 'ja_JP';
+const shareTitle = socialTitle || title;
 const homeHref = lang === 'en' ? `${import.meta.env.BASE_URL}en/` : import.meta.env.BASE_URL;
 const corporateHref = lang === 'en' ? 'https://hdnjapan.com/en/index.html' : 'https://hdnjapan.com/';
 const lhubHref = lang === 'en' ? 'https://hdnjapan.com/en/lhub.html' : 'https://hdnjapan.com/lhub.html';
@@ -34,14 +36,14 @@ const lhubHref = lang === 'en' ? 'https://hdnjapan.com/en/lhub.html' : 'https://
     {enUrl && <link rel="alternate" hreflang="en" href={enUrl} />}
     {jaUrl && <link rel="alternate" hreflang="x-default" href={jaUrl} />}
     <meta property="og:type" content={type} />
-    <meta property="og:title" content={title} />
+    <meta property="og:title" content={shareTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:site_name" content="HDN Articles" />
     <meta property="og:locale" content={ogLocale} />
     {imageUrl && <meta property="og:image" content={imageUrl} />}
     <meta name="twitter:card" content={imageUrl ? 'summary_large_image' : 'summary'} />
-    <meta name="twitter:title" content={title} />
+    <meta name="twitter:title" content={shareTitle} />
     <meta name="twitter:description" content={description} />
     {imageUrl && <meta name="twitter:image" content={imageUrl} />}
     <link rel="alternate" type="application/rss+xml" title="HDN Articles RSS" href={`${import.meta.env.BASE_URL}rss.xml`} />
