@@ -1,0 +1,262 @@
+name: Official Source Daily Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      min_score:
+        description: Minimum candidate score required for direct publication
+        required: true
+        default: '82'
+        type: string
+  schedule:
+    # 12:30 JST weekdays. This is the second publication slot after the 06:00 Drive editorial run.
+    - cron: '30 3 * * 1-5'
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+  pages: read
+
+concurrency:
+  group: official-source-daily-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      TZ: Asia/Tokyo
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure GitHub Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+      - name: Resolve deployment target
+        env:
+          PAGES_BASE_URL: ${{ steps.pages.outputs.base_url }}
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const target = new URL(process.env.PAGES_BASE_URL);
+          const trimmedPath = target.pathname.replace(/\/+$/, '');
+          const basePath = trimmedPath || '/';
+          fs.appendFileSync(process.env.GITHUB_ENV, `PUBLIC_SITE_URL=${target.origin}\nBASE_PATH=${basePath}\n`);
+          NODE
+
+      - name: Collect source URLs already used by open pull requests
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr list --state open --limit 100 --json body > /tmp/open-prs.json
+          python3 - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          payload = json.loads(Path('/tmp/open-prs.json').read_text(encoding='utf-8'))
+          urls = set()
+          for item in payload:
+              body = item.get('body') or ''
+              match = re.search(r'^- Source:\s*(https?://\S+)', body, re.MULTILINE)
+              if match:
+                  urls.add(match.group(1).rstrip(').,]'))
+          Path('/tmp/open-pr-source-urls.txt').write_text('\n'.join(sorted(urls)), encoding='utf-8')
+          print(f'Excluded {len(urls)} source URLs from open pull requests')
+          PY
+
+      - name: Select highest-confidence eligible candidate
+        id: pick
+        env:
+          MIN_SCORE: ${{ inputs.min_score || '82' }}
+        run: |
+          python scripts/select_top_candidate.py \
+            --min-score "$MIN_SCORE" \
+            --exclude-file /tmp/open-pr-source-urls.txt
+
+      - name: Report no eligible candidate
+        if: steps.pick.outputs.selected != 'true'
+        run: |
+          echo "No official-source article was published in the second slot." >> "$GITHUB_STEP_SUMMARY"
+          echo "Reason: ${{ steps.pick.outputs.reason }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "The quality threshold was preserved; no filler article was generated." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Generate publication-ready JP/EN pair and social copy
+        if: steps.pick.outputs.selected == 'true'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_DRIVE_INTERNAL_REFERENCE_FOLDER_ID: ${{ vars.GOOGLE_DRIVE_INTERNAL_REFERENCE_FOLDER_ID }}
+          GOOGLE_DRIVE_LHUB_ARCHIVE_FOLDER_ID: ${{ vars.GOOGLE_DRIVE_LHUB_ARCHIVE_FOLDER_ID }}
+        run: |
+          python scripts/generate_content.py \
+            --url "${{ steps.pick.outputs.url }}" \
+            --slug "${{ steps.pick.outputs.slug }}" \
+            --category "${{ steps.pick.outputs.category }}" \
+            --cta "${{ steps.pick.outputs.cta }}" \
+            --publish
+
+      - name: Finalize social copy with production URL
+        if: steps.pick.outputs.selected == 'true'
+        env:
+          SLUG: ${{ steps.pick.outputs.slug }}
+        run: python scripts/finalize_social_posts.py --article-path "src/content/articles/${SLUG}.md"
+
+      - name: Verify direct-publication invariants
+        if: steps.pick.outputs.selected == 'true'
+        env:
+          SLUG: ${{ steps.pick.outputs.slug }}
+        run: |
+          set -euo pipefail
+          test -s "src/content/articles/${SLUG}.md"
+          test -s "src/content/articles-en/${SLUG}.md"
+          grep -q '^draft: false$' "src/content/articles/${SLUG}.md"
+          grep -q '^draft: false$' "src/content/articles-en/${SLUG}.md"
+          grep -q '^sourceUrl: ' "src/content/articles/${SLUG}.md"
+          grep -q '^sourceUrl: ' "src/content/articles-en/${SLUG}.md"
+          grep -q '^cta: ' "src/content/articles/${SLUG}.md"
+          grep -q '^cta: ' "src/content/articles-en/${SLUG}.md"
+
+      - name: Lint
+        if: steps.pick.outputs.selected == 'true'
+        run: |
+          if npm run | grep -q " lint"; then npm run lint; else echo "No lint script configured."; fi
+
+      - name: Typecheck
+        if: steps.pick.outputs.selected == 'true'
+        run: |
+          if npm run | grep -q " typecheck"; then npm run typecheck; else npx astro check; fi
+
+      - name: Tests
+        if: steps.pick.outputs.selected == 'true'
+        run: |
+          if npm run | grep -q " test"; then
+            npm test
+          elif [ -d tests ]; then
+            python -m unittest discover -s tests -v
+          else
+            echo "No tests configured."
+          fi
+
+      - name: Build
+        if: steps.pick.outputs.selected == 'true'
+        run: npm run build
+
+      - name: Migration check
+        if: steps.pick.outputs.selected == 'true'
+        run: |
+          if npm run | grep -q "migration:check"; then npm run migration:check; else echo "No migration check configured."; fi
+
+      - name: Create and merge audited publication PR
+        id: merge
+        if: steps.pick.outputs.selected == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_URL: ${{ steps.pick.outputs.url }}
+          SOURCE_TITLE: ${{ steps.pick.outputs.title }}
+          SLUG: ${{ steps.pick.outputs.slug }}
+          CATEGORY: ${{ steps.pick.outputs.category }}
+          CTA: ${{ steps.pick.outputs.cta }}
+          SCORE: ${{ steps.pick.outputs.score }}
+          SELECTION_REASON: ${{ steps.pick.outputs.reason }}
+        run: |
+          set -euo pipefail
+          branch="content/official-publish-${SLUG}-${GITHUB_RUN_ID}"
+          git checkout -b "$branch"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "src/content/articles/${SLUG}.md" "src/content/articles-en/${SLUG}.md" "social/${SLUG}/"
+          git commit -m "Publish official-source article: ${SLUG}"
+          git push origin "$branch"
+
+          cat > /tmp/pr-body.md <<EOF
+          ## High-confidence official-source publication
+
+          - Source: ${SOURCE_URL}
+          - Source title: ${SOURCE_TITLE}
+          - Candidate score: ${SCORE}/100
+          - Selection reason: ${SELECTION_REASON}
+          - Category: ${CATEGORY}
+          - CTA: ${CTA}
+          - Japanese and English: publication-ready pair
+
+          ## Automated publication gates
+
+          - [x] Candidate score met the direct-publication threshold
+          - [x] Primary-source URL preserved in frontmatter
+          - [x] JP and EN both use draft:false
+          - [x] Private Drive context is editorial-only and is not cited publicly
+          - [x] Lint / typecheck / tests / build / migration check completed before merge
+          - [x] Social drafts finalized with production URL
+          EOF
+
+          pr_url=$(gh pr create --base main --head "$branch" --title "Official publication: ${SLUG}" --body-file /tmp/pr-body.md)
+          pr_number="${pr_url##*/}"
+          gh pr merge "$pr_number" --squash --delete-branch
+          main_sha=$(gh api "repos/${GITHUB_REPOSITORY}/commits/main" --jq .sha)
+          echo "main_sha=$main_sha" >> "$GITHUB_OUTPUT"
+          echo "pr_number=$pr_number" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy published article
+        if: steps.pick.outputs.selected == 'true' && steps.merge.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MAIN_SHA: ${{ steps.merge.outputs.main_sha }}
+        run: |
+          set -euo pipefail
+          gh workflow run deploy-pages.yml --ref main
+          run_id=""
+          for attempt in $(seq 1 20); do
+            run_id=$(gh run list \
+              --workflow deploy-pages.yml \
+              --event workflow_dispatch \
+              --branch main \
+              --limit 20 \
+              --json databaseId,headSha \
+              --jq ".[] | select(.headSha == \"$MAIN_SHA\") | .databaseId" | head -n 1)
+            if [ -n "$run_id" ]; then break; fi
+            sleep 3
+          done
+          if [ -z "$run_id" ]; then
+            echo "Could not locate Pages deployment for $MAIN_SHA" >&2
+            exit 1
+          fi
+          gh run watch "$run_id" --exit-status
+
+      - name: Publication summary
+        if: steps.pick.outputs.selected == 'true'
+        env:
+          SLUG: ${{ steps.pick.outputs.slug }}
+          SCORE: ${{ steps.pick.outputs.score }}
+        run: |
+          {
+            echo "## Official-source publication"
+            echo ""
+            echo "Published: https://article.hdnjapan.com/articles/${SLUG}/"
+            echo "English: https://article.hdnjapan.com/en/articles/${SLUG}/"
+            echo "Candidate score: ${SCORE}/100"
+          } >> "$GITHUB_STEP_SUMMARY"

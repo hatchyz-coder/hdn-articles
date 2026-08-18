@@ -27,7 +27,8 @@ ALLOWED_LINKS = [
     {"label": "HDN Japan", "url": "https://hdnjapan.com/"},
     {"label": "自由診療導入支援", "url": "https://hdnjapan.com/self-pay.html"},
     {"label": "LHub", "url": "https://hdnjapan.com/lhub.html"},
-    {"label": "無料相談", "url": "https://forms.gle/148jgfSnDgDZ2HsEA"},
+    {"label": "SNS・動画戦略", "url": "https://hdnjapan.com/medical-sns.html"},
+    {"label": "無料相談", "url": "https://hdnjapan.com/consultation-form.html"},
 ]
 
 
@@ -36,7 +37,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--url", required=True)
     parser.add_argument("--slug", required=True)
     parser.add_argument("--category", default="医療経営")
-    parser.add_argument("--cta", choices=["consultation", "lhub", "self-pay"], default="consultation")
+    parser.add_argument("--cta", choices=["consultation", "lhub", "self-pay", "sns"], default="consultation")
+    parser.add_argument(
+        "--publish",
+        action="store_true",
+        help="Write JP/EN frontmatter with draft:false. Use only after automated publication gates are enabled.",
+    )
     return parser.parse_args()
 
 
@@ -153,7 +159,7 @@ def yaml_string(value: str) -> str:
     return json.dumps(value, ensure_ascii=False)
 
 
-def build_article(data: dict[str, Any], source_url: str, category: str, cta: str) -> str:
+def build_article(data: dict[str, Any], source_url: str, category: str, cta: str, *, publish: bool = False) -> str:
     description = str(data["description"]).strip()
     if not 60 <= len(description) <= 160:
         raise ValueError(f"description must be 60-160 characters; got {len(description)}")
@@ -173,7 +179,7 @@ def build_article(data: dict[str, Any], source_url: str, category: str, cta: str
     lines.extend(f"  - {yaml_string(tag)}" for tag in tags)
     lines.extend([
         'author: "羽田野 剛士"',
-        "draft: true",
+        f"draft: {'false' if publish else 'true'}",
         "featured: false",
         f"sourceUrl: {yaml_string(source_url)}",
         f"cta: {cta}",
@@ -211,7 +217,7 @@ def build_article(data: dict[str, Any], source_url: str, category: str, cta: str
     return "\n".join(lines)
 
 
-def build_english_article(data: dict[str, Any], source_url: str, category: str, cta: str) -> str:
+def build_english_article(data: dict[str, Any], source_url: str, category: str, cta: str, *, publish: bool = False) -> str:
     description = str(data["english_description"]).strip()
     if not 50 <= len(description) <= 180:
         raise ValueError(f"english_description must be 50-180 characters; got {len(description)}")
@@ -233,7 +239,7 @@ def build_english_article(data: dict[str, Any], source_url: str, category: str, 
     lines.extend(f"  - {yaml_string(tag)}" for tag in tags)
     lines.extend([
         'author: "Tsuyoshi Hadano"',
-        "draft: true",
+        f"draft: {'false' if publish else 'true'}",
         f"sourceUrl: {yaml_string(source_url)}",
         f"cta: {cta}",
         "---",
@@ -303,8 +309,8 @@ def main() -> int:
         args.cta,
         reference_context,
     )
-    article = build_article(data, args.url, args.category, args.cta)
-    english_article = build_english_article(data, args.url, args.category, args.cta)
+    article = build_article(data, args.url, args.category, args.cta, publish=args.publish)
+    english_article = build_english_article(data, args.url, args.category, args.cta, publish=args.publish)
     outputs = write_outputs(slug, data, article, english_article)
 
     print("Generated files:")

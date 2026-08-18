@@ -4,13 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       min_score:
-        description: Minimum AI score required for automatic drafting
+        description: Minimum AI score required for manual drafting
         required: true
         default: '70'
         type: string
-  schedule:
-    # 07:30 JST Tuesday and Thursday, after the weekday official-source discovery run.
-    - cron: '30 22 * * 1,3'
 
 permissions:
   contents: write
