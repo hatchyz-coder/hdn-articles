@@ -163,6 +163,9 @@ def build_article(data: dict[str, Any], source_url: str, category: str, cta: str
     description = str(data["description"]).strip()
     if not 60 <= len(description) <= 160:
         raise ValueError(f"description must be 60-160 characters; got {len(description)}")
+    social_title = str(data.get("social_title") or data["title"]).strip()
+    if not 4 <= len(social_title) <= 80:
+        raise ValueError(f"social_title must be 4-80 characters; got {len(social_title)}")
 
     tags = [str(tag).strip() for tag in data.get("tags", []) if str(tag).strip()]
     faq = data.get("faq", [])
@@ -171,6 +174,7 @@ def build_article(data: dict[str, Any], source_url: str, category: str, cta: str
     lines = [
         "---",
         f"title: {yaml_string(str(data['title']).strip())}",
+        f"socialTitle: {yaml_string(social_title)}",
         f"description: {yaml_string(description)}",
         f"publishedAt: {date.today().isoformat()}",
         f"category: {yaml_string(str(data.get('category') or category))}",
@@ -221,6 +225,9 @@ def build_english_article(data: dict[str, Any], source_url: str, category: str, 
     description = str(data["english_description"]).strip()
     if not 50 <= len(description) <= 180:
         raise ValueError(f"english_description must be 50-180 characters; got {len(description)}")
+    social_title = str(data.get("english_social_title") or data["english_title"]).strip()
+    if not 4 <= len(social_title) <= 100:
+        raise ValueError(f"english_social_title must be 4-100 characters; got {len(social_title)}")
 
     tags = [str(tag).strip() for tag in data.get("tags", []) if str(tag).strip()]
     faq = data.get("english_faq", [])
@@ -231,6 +238,7 @@ def build_english_article(data: dict[str, Any], source_url: str, category: str, 
     lines = [
         "---",
         f"title: {yaml_string(str(data['english_title']).strip())}",
+        f"socialTitle: {yaml_string(social_title)}",
         f"description: {yaml_string(description)}",
         f"publishedAt: {date.today().isoformat()}",
         f"category: {yaml_string(str(data.get('category') or category))}",
