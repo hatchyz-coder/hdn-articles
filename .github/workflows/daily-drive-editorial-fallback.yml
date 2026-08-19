@@ -13,7 +13,7 @@ permissions:
 jobs:
   recover:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
     env:
       TZ: Asia/Tokyo
       GH_TOKEN: ${{ github.token }}
@@ -33,49 +33,47 @@ jobs:
           count=$(grep -RIl --include='*.md' "publishedAt: ${today}" src/content/articles 2>/dev/null | wc -l | tr -d ' ' || true)
           if [ "$count" -gt 0 ]; then
             echo "published=true" >> "$GITHUB_OUTPUT"
-            echo "Daily publication already exists for ${today}." >> "$GITHUB_STEP_SUMMARY"
+            echo "Daily publication already exists for ${today}. No paid recovery run needed." >> "$GITHUB_STEP_SUMMARY"
           else
             echo "published=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Recover daily publication slot
+      - name: Recover daily publication slot once
         if: steps.initial.outputs.published != 'true'
         run: |
           set -euo pipefail
           today="$(TZ=Asia/Tokyo date +%F)"
+          before="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
-          for attempt in 1 2 3 4; do
-            echo "Fallback attempt ${attempt}: triggering Daily Drive Editorial Publish"
-            before="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-            gh workflow run daily-drive-editorial-publish.yml --ref main
+          echo "Triggering one bounded Daily Drive recovery run."
+          gh workflow run daily-drive-editorial-publish.yml --ref main
 
-            run_id=""
-            for poll in $(seq 1 30); do
-              run_id=$(gh run list \
-                --workflow daily-drive-editorial-publish.yml \
-                --event workflow_dispatch \
-                --branch main \
-                --limit 20 \
-                --json databaseId,createdAt \
-                --jq ".[] | select(.createdAt >= \"${before}\") | .databaseId" | head -n 1)
-              if [ -n "$run_id" ]; then break; fi
-              sleep 4
-            done
-
-            if [ -z "$run_id" ]; then
-              echo "Could not locate triggered workflow run on attempt ${attempt}" >&2
-              continue
-            fi
-
-            gh run watch "$run_id" --exit-status || true
-            git fetch origin main
-            git checkout --detach origin/main
-            count=$(grep -RIl --include='*.md' "publishedAt: ${today}" src/content/articles 2>/dev/null | wc -l | tr -d ' ' || true)
-            if [ "$count" -gt 0 ]; then
-              echo "Recovered daily publication on attempt ${attempt}." >> "$GITHUB_STEP_SUMMARY"
-              exit 0
-            fi
+          run_id=""
+          for poll in $(seq 1 30); do
+            run_id=$(gh run list \
+              --workflow daily-drive-editorial-publish.yml \
+              --event workflow_dispatch \
+              --branch main \
+              --limit 20 \
+              --json databaseId,createdAt \
+              --jq ".[] | select(.createdAt >= \"${before}\") | .databaseId" | head -n 1)
+            if [ -n "$run_id" ]; then break; fi
+            sleep 4
           done
 
-          echo "Daily article still missing after four fallback attempts." >&2
+          if [ -z "$run_id" ]; then
+            echo "Could not locate the recovery workflow run." >&2
+            exit 1
+          fi
+
+          gh run watch "$run_id" --exit-status || true
+          git fetch origin main
+          git checkout --detach origin/main
+          count=$(grep -RIl --include='*.md' "publishedAt: ${today}" src/content/articles 2>/dev/null | wc -l | tr -d ' ' || true)
+          if [ "$count" -gt 0 ]; then
+            echo "Recovered daily publication with one bounded fallback run." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          echo "Daily article is still missing after the bounded fallback run; manual editorial recovery is required." >&2
           exit 1
