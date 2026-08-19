@@ -13,6 +13,7 @@ import re
 import sys
 import time
 from datetime import date
+from pathlib import Path
 from typing import Any
 
 import requests
@@ -45,6 +46,7 @@ def _record_usage(payload: dict[str, Any], timer: Any, model: str) -> None:
     timer.metrics["apiOutputTokens"] = output_tokens
     timer.metrics["webSearchCalls"] = web_search_calls
 
+    estimated: float | None = None
     pricing = MODEL_PRICING_USD_PER_M.get(model)
     if pricing:
         uncached = max(0, input_tokens - cached_tokens)
@@ -55,6 +57,22 @@ def _record_usage(payload: dict[str, Any], timer: Any, model: str) -> None:
             + web_search_calls * WEB_SEARCH_USD_PER_CALL
         )
         timer.metrics["estimatedOpenAiCostUsd"] = round(estimated, 6)
+
+    summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary_path:
+        lines = [
+            "## OpenAI editorial usage",
+            "",
+            f"- Model: {model}",
+            f"- Input tokens: {input_tokens}",
+            f"- Cached input tokens: {cached_tokens}",
+            f"- Output tokens: {output_tokens}",
+            f"- Web search calls: {web_search_calls} / max 2",
+        ]
+        if estimated is not None:
+            lines.append(f"- Estimated API cost for this generation: ${estimated:.4f}")
+        lines.append("")
+        Path(summary_path).open("a", encoding="utf-8").write("\n".join(lines))
 
 
 def call_openai_cost_optimized(
