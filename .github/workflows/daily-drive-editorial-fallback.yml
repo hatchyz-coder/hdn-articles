@@ -30,7 +30,7 @@ jobs:
           today="$(TZ=Asia/Tokyo date +%F)"
           git fetch origin main
           git checkout --detach origin/main
-          count=$(grep -RIl --include='*.md' "publishedAt: ${today}" src/content/articles 2>/dev/null | wc -l | tr -d ' ')
+          count=$(grep -RIl --include='*.md' "publishedAt: ${today}" src/content/articles 2>/dev/null | wc -l | tr -d ' ' || true)
           if [ "$count" -gt 0 ]; then
             echo "published=true" >> "$GITHUB_OUTPUT"
             echo "Daily publication already exists for ${today}." >> "$GITHUB_STEP_SUMMARY"
@@ -70,7 +70,7 @@ jobs:
             gh run watch "$run_id" --exit-status || true
             git fetch origin main
             git checkout --detach origin/main
-            count=$(grep -RIl --include='*.md' "publishedAt: ${today}" src/content/articles 2>/dev/null | wc -l | tr -d ' ')
+            count=$(grep -RIl --include='*.md' "publishedAt: ${today}" src/content/articles 2>/dev/null | wc -l | tr -d ' ' || true)
             if [ "$count" -gt 0 ]; then
               echo "Recovered daily publication on attempt ${attempt}." >> "$GITHUB_STEP_SUMMARY"
               exit 0
