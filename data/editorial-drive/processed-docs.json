@@ -3,9 +3,9 @@
     "f7abfb413e4f2a4e4513e28f0c6c0cedb544c9c254a01f455dbbda4b7f37abf9": {
       "modifiedTime": "2026-07-23T03:43:02.529Z",
       "status": "api_timeout",
-      "startedAt": "2026-08-19T21:16:50.132622+00:00",
-      "retry_count": 2,
-      "finishedAt": "2026-08-19T21:18:20.949357+00:00",
+      "startedAt": "2026-08-19T21:58:04.208211+00:00",
+      "retry_count": 3,
+      "finishedAt": "2026-08-19T21:59:35.042854+00:00",
       "reason": "OpenAI API timed out during editorial generation",
       "sourceProcessing": {
         "mode": "full_text",
@@ -14,5 +14,5 @@
       }
     }
   },
-  "updatedAt": "2026-08-19T21:18:20.949366+00:00"
+  "updatedAt": "2026-08-19T21:59:35.042865+00:00"
 }
