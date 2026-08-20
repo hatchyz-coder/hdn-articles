@@ -25,8 +25,12 @@ PROMPT_PATH = ROOT / "prompts" / "drive-editorial-daily.md"
 EN_ARTICLE_DIR = ROOT / "src" / "content" / "articles-en"
 MAX_SCAN = 500
 
-# Strongly prefer seeds that fit the current HDN editorial positioning. A broad old
-# archive can contain unrelated SEO drafts; those should not crowd out healthcare work.
+# Fingerprint of the approved Drive editorial folder. The raw private folder ID is never
+# committed to this public repository, while a misconfigured Actions variable fails closed.
+EXPECTED_FOLDER_FINGERPRINT = "377cdda8bba3afb0cbf97915b88d8afb46a313417c07b2885cae8c3b76997bc0"
+
+# Kept for diagnostics/backwards compatibility only. Daily selection is intentionally
+# queue-based now: every eligible draft in the approved folder must eventually be consumed.
 KEYWORD_WEIGHTS = {
     "クリニック": 10,
     "医療": 9,
@@ -107,15 +111,41 @@ def mark_finished(state: dict[str, Any], doc: dict[str, Any], status: str, detai
 
 
 def relevance_score(name: str) -> int:
+    """Diagnostic-only legacy score; it no longer controls queue eligibility."""
     upper = name.upper()
     if any(term.upper() in upper for term in OFF_BRAND):
         return -100
     return sum(weight for term, weight in KEYWORD_WEIGHTS.items() if term.upper() in upper)
 
 
+def is_marked_published(name: str) -> bool:
+    """Return True only for explicit publication markers, never for words like 決済."""
+    normalized = str(name).replace("　", " ")
+    patterns = (
+        r"(?:^|[\s_\-])済(?:$|[\s_\-])",
+        r"[（(]\s*(?:\d{6})?済\s*[）)]",
+    )
+    return any(re.search(pattern, normalized) for pattern in patterns)
+
+
+def queue_sort_key(doc: dict[str, Any]) -> tuple[Any, ...]:
+    """Consume LH/article-number drafts first, then other drafts oldest-first."""
+    name = str(doc.get("name", ""))
+    match = re.search(r"LH\s*(\d+)\s*_\s*記事\s*(\d+)", name, re.I)
+    if match:
+        return (0, int(match.group(1)), int(match.group(2)), name)
+    return (1, str(doc.get("modifiedTime", "")), name)
+
+
+def _verify_approved_folder(folder_id: str) -> None:
+    fingerprint = hashlib.sha256(folder_id.encode("utf-8")).hexdigest()
+    if fingerprint != EXPECTED_FOLDER_FINGERPRINT:
+        raise RuntimeError("Configured Drive editorial folder does not match the approved daily queue")
+
+
 def select_target_doc(drive: Any, state: dict[str, Any], folder_id: str, args: Any, timer: Any):
     with timer.section("driveSeconds", "Drive select editorial seed"):
-        # The configured archive folder itself is the approved source scope.
+        _verify_approved_folder(folder_id)
         source_folder = drive.files().get(
             fileId=folder_id,
             fields="id,name,mimeType,parents",
@@ -128,19 +158,21 @@ def select_target_doc(drive: Any, state: dict[str, Any], folder_id: str, args: A
             doc = base.get_doc_metadata(drive, args.document_id)
             if not base.document_is_within_scope(drive, doc, folder_id):
                 raise RuntimeError("Manual document_id is outside the approved editorial source folder")
+            if is_marked_published(str(doc.get("name", ""))):
+                raise RuntimeError("Manual document_id is explicitly marked as already published")
             timer.metrics["driveFetched"] = 1
             return doc, "manual_document_id"
 
         docs, _folders = base.list_recent_seed_docs(drive, folder_id, MAX_SCAN)
         timer.metrics["driveFetched"] = len(docs)
-        candidates = [doc for doc in docs if is_unprocessed_or_updated(state, doc)]
+        candidates = [
+            doc for doc in docs
+            if is_unprocessed_or_updated(state, doc)
+            and not is_marked_published(str(doc.get("name", "")))
+        ]
         timer.metrics["newDocuments"] = len(candidates)
-        candidates.sort(
-            key=lambda doc: (relevance_score(str(doc.get("name", ""))), str(doc.get("modifiedTime", ""))),
-            reverse=True,
-        )
-        eligible = [doc for doc in candidates if relevance_score(str(doc.get("name", ""))) >= 0]
-        return (eligible[0], "editorial_priority") if eligible else (None, "editorial_priority")
+        candidates.sort(key=queue_sort_key)
+        return (candidates[0], "daily_backlog_queue") if candidates else (None, "daily_backlog_queue")
 
 
 def call_openai_once(doc: dict[str, Any], source_text: str, source_processing: dict[str, Any], timer: Any, mock_timeout: bool) -> dict[str, Any]:
