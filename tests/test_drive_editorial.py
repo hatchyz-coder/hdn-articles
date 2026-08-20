@@ -18,9 +18,43 @@ import generate_from_drive_editorial as editorial
 
 
 class DriveEditorialTests(unittest.TestCase):
-    def test_healthcare_seed_scores_above_off_brand_seed(self):
+    def test_healthcare_seed_scores_above_off_brand_seed_for_diagnostics_only(self):
         self.assertGreater(editorial.relevance_score("クリニックのLINE患者導線改善"), 0)
         self.assertLess(editorial.relevance_score("NFTと仮想通貨の集客方法"), 0)
+
+    def test_explicit_published_marker_is_detected(self):
+        self.assertTrue(editorial.is_marked_published("LH5_記事1_LINE活用 済 のコピー"))
+        self.assertTrue(editorial.is_marked_published("LH9_記事7_クラフトビール（202511済） のコピー"))
+
+    def test_payment_word_is_not_mistaken_for_published_marker(self):
+        self.assertFalse(editorial.is_marked_published("LH5_記事2_LINE × 定期販売・会費管理・決済"))
+        self.assertFalse(editorial.is_marked_published("LH7_記事1_予約・決済・処方のスマート導線"))
+
+    def test_queue_orders_lh_then_article_number(self):
+        docs = [
+            {"name": "LH10_記事1_後", "modifiedTime": "2026-01-01T00:00:00Z"},
+            {"name": "LH6_記事2_先", "modifiedTime": "2026-01-01T00:00:00Z"},
+            {"name": "LH6_記事1_最初", "modifiedTime": "2026-01-01T00:00:00Z"},
+            {"name": "番号なし", "modifiedTime": "2025-01-01T00:00:00Z"},
+        ]
+        ordered = sorted(docs, key=editorial.queue_sort_key)
+        self.assertEqual(
+            [doc["name"] for doc in ordered],
+            ["LH6_記事1_最初", "LH6_記事2_先", "LH10_記事1_後", "番号なし"],
+        )
+
+    def test_non_lh_drafts_fall_back_oldest_first(self):
+        docs = [
+            {"name": "newer", "modifiedTime": "2026-02-01T00:00:00Z"},
+            {"name": "older", "modifiedTime": "2026-01-01T00:00:00Z"},
+        ]
+        ordered = sorted(docs, key=editorial.queue_sort_key)
+        self.assertEqual([doc["name"] for doc in ordered], ["older", "newer"])
+
+    def test_approved_folder_fingerprint_fails_closed(self):
+        editorial._verify_approved_folder("1R8K22La-iytMBhwhGTj8qhHyl3Zd9FXz")
+        with self.assertRaises(RuntimeError):
+            editorial._verify_approved_folder("wrong-folder")
 
     def test_state_key_does_not_expose_drive_id(self):
         raw = "1PrivateDriveIdentifierABC"
