@@ -3,7 +3,7 @@ name: Daily Drive Editorial Fallback
 on:
   workflow_dispatch:
   schedule:
-    # 10:00 JST every day. Recover missing Drive slots until two JP/EN pairs exist today.
+    # 10:00 JST every day. Recover missing Drive slots until two Drive-origin pairs exist today.
     - cron: '0 1 * * *'
 
 permissions:
@@ -24,14 +24,44 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Count today's Japanese articles
+      - name: Count today's Drive publications
         id: initial
         run: |
           set -euo pipefail
           today="$(TZ=Asia/Tokyo date +%F)"
-          git fetch origin main
-          git checkout --detach origin/main
-          count=$(grep -RIl --include='*.md' "publishedAt: ${today}" src/content/articles 2>/dev/null | wc -l | tr -d ' ' || true)
+
+          count_drive_today() {
+            git fetch origin editorial-drive-state >/dev/null 2>&1 || true
+            if git show origin/editorial-drive-state:data/editorial-drive/processed-docs.json > /tmp/processed-docs.json 2>/dev/null; then
+              python - "$today" <<'PY'
+          import json
+          import sys
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+
+          target = sys.argv[1]
+          data = json.load(open('/tmp/processed-docs.json', encoding='utf-8'))
+          count = 0
+          for record in data.get('documents', {}).values():
+              if record.get('status') not in {'generated', 'published_manual'}:
+                  continue
+              raw = record.get('finishedAt')
+              if not raw:
+                  continue
+              try:
+                  dt = datetime.fromisoformat(raw.replace('Z', '+00:00'))
+                  if dt.astimezone(ZoneInfo('Asia/Tokyo')).date().isoformat() == target:
+                      count += 1
+              except ValueError:
+                  continue
+          print(count)
+          PY
+            else
+              echo 0
+            fi
+          }
+
+          count="$(count_drive_today)"
           echo "count=${count}" >> "$GITHUB_OUTPUT"
           if [ "$count" -ge "$DAILY_TARGET" ]; then
             echo "complete=true" >> "$GITHUB_OUTPUT"
@@ -47,14 +77,43 @@ jobs:
           set -euo pipefail
           today="$(TZ=Asia/Tokyo date +%F)"
 
+          count_drive_today() {
+            git fetch origin editorial-drive-state >/dev/null 2>&1 || true
+            if git show origin/editorial-drive-state:data/editorial-drive/processed-docs.json > /tmp/processed-docs.json 2>/dev/null; then
+              python - "$today" <<'PY'
+          import json
+          import sys
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+
+          target = sys.argv[1]
+          data = json.load(open('/tmp/processed-docs.json', encoding='utf-8'))
+          count = 0
+          for record in data.get('documents', {}).values():
+              if record.get('status') not in {'generated', 'published_manual'}:
+                  continue
+              raw = record.get('finishedAt')
+              if not raw:
+                  continue
+              try:
+                  dt = datetime.fromisoformat(raw.replace('Z', '+00:00'))
+                  if dt.astimezone(ZoneInfo('Asia/Tokyo')).date().isoformat() == target:
+                      count += 1
+              except ValueError:
+                  continue
+          print(count)
+          PY
+            else
+              echo 0
+            fi
+          }
+
           # Allow enough attempts to move past quality-gated or transiently failed seeds
           # without lowering the editorial threshold.
           for attempt in 1 2 3 4 5 6; do
-            git fetch origin main
-            git checkout --detach origin/main
-            count=$(grep -RIl --include='*.md' "publishedAt: ${today}" src/content/articles 2>/dev/null | wc -l | tr -d ' ' || true)
+            count="$(count_drive_today)"
             if [ "$count" -ge "$DAILY_TARGET" ]; then
-              echo "Recovered daily target: ${count}/${DAILY_TARGET}." >> "$GITHUB_STEP_SUMMARY"
+              echo "Recovered Drive target: ${count}/${DAILY_TARGET}." >> "$GITHUB_STEP_SUMMARY"
               exit 0
             fi
 
@@ -83,11 +142,9 @@ jobs:
             gh run watch "$run_id" --exit-status || true
           done
 
-          git fetch origin main
-          git checkout --detach origin/main
-          count=$(grep -RIl --include='*.md' "publishedAt: ${today}" src/content/articles 2>/dev/null | wc -l | tr -d ' ' || true)
+          count="$(count_drive_today)"
           if [ "$count" -ge "$DAILY_TARGET" ]; then
-            echo "Recovered daily target after final attempt: ${count}/${DAILY_TARGET}." >> "$GITHUB_STEP_SUMMARY"
+            echo "Recovered Drive target after final attempt: ${count}/${DAILY_TARGET}." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
 
