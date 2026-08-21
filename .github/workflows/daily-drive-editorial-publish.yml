@@ -14,8 +14,10 @@ on:
         default: '72'
         type: string
   schedule:
-    # 06:00 JST every day. Keep the quality gate; skip rather than publish weak material.
+    # Two independent daily slots: 06:00 and 09:00 JST. Each run publishes at most one
+    # quality-gated JP/EN pair, so a failure in one slot does not corrupt the other.
     - cron: '0 21 * * *'
+    - cron: '0 0 * * *'
 
 permissions:
   actions: write
@@ -119,7 +121,7 @@ jobs:
       - name: Report editorial skip
         if: steps.editorial.outputs.selected != 'true'
         run: |
-          echo "No article was published today. Editorial gate: ${{ steps.editorial.outputs.reason }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "No article was published in this slot. Editorial gate: ${{ steps.editorial.outputs.reason }}" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Finalize social copy with production URL
         if: steps.editorial.outputs.selected == 'true'
@@ -260,7 +262,7 @@ jobs:
           SCORE: ${{ steps.editorial.outputs.score }}
         run: |
           {
-            echo "## Daily Drive editorial publication"
+            echo "## Drive editorial publication slot"
             echo ""
             echo "Published: https://article.hdnjapan.com/articles/${SLUG}/"
             echo "English: https://article.hdnjapan.com/en/articles/${SLUG}/"
