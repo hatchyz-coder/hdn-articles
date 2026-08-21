@@ -78,7 +78,16 @@
       "finishedAt": "2026-08-21T00:20:00+00:00",
       "reason": "Published 2026-08-21 after manual editorial recovery",
       "slug": "lhub-line-commerce-operations"
+    },
+    "98d4af67ecf74716544587a6d484e6bcc9c06067874aa4fcca7b8ef9363063df": {
+      "modifiedTime": "2026-07-23T03:43:35.901Z",
+      "status": "skipped_confidential",
+      "startedAt": "2026-08-21T21:14:31.242765+00:00",
+      "retry_count": 0,
+      "finishedAt": "2026-08-21T21:15:43.889904+00:00",
+      "reason": "AI confidentiality flags",
+      "score": 85
     }
   },
-  "updatedAt": "2026-08-21T00:20:00+00:00"
+  "updatedAt": "2026-08-21T21:15:43.889913+00:00"
 }
