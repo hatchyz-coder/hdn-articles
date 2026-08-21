@@ -17,9 +17,13 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      published_slugs: ${{ steps.changed.outputs.slugs }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
       - name: Configure GitHub Pages
         id: pages
@@ -43,6 +47,50 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends fonts-noto-cjk
           python -m pip install --disable-pip-version-check pillow
+
+      - name: Detect and validate changed published article pairs
+        id: changed
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os
+          import re
+          import subprocess
+          from pathlib import Path
+
+          try:
+              changed = subprocess.check_output(
+                  ["git", "diff", "--name-only", "HEAD^", "HEAD"],
+                  text=True,
+              ).splitlines()
+          except subprocess.CalledProcessError:
+              changed = []
+
+          slugs = []
+          for raw in changed:
+              path = Path(raw)
+              if path.parent != Path("src/content/articles") or path.suffix != ".md":
+                  continue
+              if not path.exists():
+                  continue
+              jp = path.read_text(encoding="utf-8")
+              if not re.search(r"(?m)^draft:\s*false\s*$", jp):
+                  continue
+
+              slug = path.stem
+              en_path = Path("src/content/articles-en") / f"{slug}.md"
+              if not en_path.exists():
+                  raise SystemExit(f"Published JP article has no EN pair: {slug}")
+              en = en_path.read_text(encoding="utf-8")
+              if not re.search(r"(?m)^draft:\s*false\s*$", en):
+                  raise SystemExit(f"English pair is not published: {slug}")
+              slugs.append(slug)
+
+          slugs = sorted(set(slugs))
+          print("Changed published JP/EN pairs:", slugs or "none")
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as out:
+              out.write("slugs=" + " ".join(slugs) + "\n")
+          PY
 
       - name: Generate article OGP images
         run: |
@@ -83,14 +131,39 @@ jobs:
       - name: Build article site
         run: npm run build
 
-      - name: Verify generated article is in build output
+      - name: Verify build output for changed article pairs
+        env:
+          PUBLISHED_SLUGS: ${{ steps.changed.outputs.slugs }}
         run: |
-          grep -R -F "無難な動画では、患者は動かない" dist >/dev/null
+          set -euo pipefail
           test -f dist/sitemap-index.xml || test -f dist/sitemap-0.xml || test -f dist/sitemap.xml
-          test -f dist/og/ja/clinic-video-strategy.png
-          test -f dist/og/en/clinic-video-strategy.png
-          grep -R -F "og/ja/clinic-video-strategy.png" dist/articles/clinic-video-strategy/index.html >/dev/null
-          grep -R -F "og/en/clinic-video-strategy.png" dist/en/articles/clinic-video-strategy/index.html >/dev/null
+
+          for slug in $PUBLISHED_SLUGS; do
+            test -f "dist/articles/${slug}/index.html" || {
+              echo "Missing Japanese build output for ${slug}" >&2
+              exit 1
+            }
+            test -f "dist/en/articles/${slug}/index.html" || {
+              echo "Missing English build output for ${slug}" >&2
+              exit 1
+            }
+            test -f "dist/og/ja/${slug}.png" || {
+              echo "Missing Japanese OGP for ${slug}" >&2
+              exit 1
+            }
+            test -f "dist/og/en/${slug}.png" || {
+              echo "Missing English OGP for ${slug}" >&2
+              exit 1
+            }
+            grep -F "og/ja/${slug}.png" "dist/articles/${slug}/index.html" >/dev/null || {
+              echo "Japanese page does not reference its OGP for ${slug}" >&2
+              exit 1
+            }
+            grep -F "og/en/${slug}.png" "dist/en/articles/${slug}/index.html" >/dev/null || {
+              echo "English page does not reference its OGP for ${slug}" >&2
+              exit 1
+            }
+          done
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -108,9 +181,10 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: Smoke test deployed site
+      - name: Smoke test deployed site and changed JP/EN URLs
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+          PUBLISHED_SLUGS: ${{ needs.build.outputs.published_slugs }}
         run: |
           set -euo pipefail
           echo "Deployed page: ${PAGE_URL}"
@@ -120,21 +194,29 @@ jobs:
               break
             fi
             if [ "$attempt" -eq 6 ]; then
-              echo "GitHub Pages root did not become reachable."
+              echo "GitHub Pages root did not become reachable." >&2
               exit 1
             fi
             sleep 10
           done
 
-          grep -F "無難な動画では、患者は動かない" /tmp/index.html >/dev/null || {
-            echo "Published article is not visible on the deployed index."
-            exit 1
-          }
-
-          curl --fail --silent --show-error --location --max-time 20 "${PAGE_URL}og/ja/clinic-video-strategy.png" -o /tmp/og-ja.png
-          curl --fail --silent --show-error --location --max-time 20 "${PAGE_URL}og/en/clinic-video-strategy.png" -o /tmp/og-en.png
-          test -s /tmp/og-ja.png
-          test -s /tmp/og-en.png
+          for slug in $PUBLISHED_SLUGS; do
+            for path in "articles/${slug}/" "en/articles/${slug}/" "og/ja/${slug}.png" "og/en/${slug}.png"; do
+              ok=false
+              for attempt in 1 2 3 4 5 6; do
+                if curl --fail --silent --show-error --location --max-time 20 "${PAGE_URL}${path}" -o /tmp/smoke; then
+                  test -s /tmp/smoke
+                  ok=true
+                  break
+                fi
+                sleep 10
+              done
+              if [ "$ok" != true ]; then
+                echo "Production URL failed smoke test: ${PAGE_URL}${path}" >&2
+                exit 1
+              fi
+            done
+          done
 
           for sitemap in sitemap-index.xml sitemap-0.xml sitemap.xml; do
             if curl --fail --silent --show-error --location --max-time 20 "${PAGE_URL}${sitemap}" -o /tmp/sitemap.xml; then
@@ -143,5 +225,5 @@ jobs:
             fi
           done
 
-          echo "No sitemap endpoint was reachable after deployment."
+          echo "No sitemap endpoint was reachable after deployment." >&2
           exit 1
