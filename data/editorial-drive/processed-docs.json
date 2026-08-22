@@ -123,7 +123,20 @@
         "sourceTextCharacters": 3497,
         "inputCharacters": 3497
       }
+    },
+    "1841e9772fe9a28b7a55ab04675cd744961a7cab37120c5a393308ccb5753866": {
+      "modifiedTime": "2026-07-23T03:43:35.767Z",
+      "status": "api_timeout",
+      "startedAt": "2026-08-22T02:17:43.211085+00:00",
+      "retry_count": 1,
+      "finishedAt": "2026-08-22T02:19:14.145286+00:00",
+      "reason": "OpenAI API timed out during editorial generation",
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3635,
+        "inputCharacters": 3635
+      }
     }
   },
-  "updatedAt": "2026-08-22T02:16:55.325882+00:00"
+  "updatedAt": "2026-08-22T02:19:14.145298+00:00"
 }
