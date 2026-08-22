@@ -101,7 +101,16 @@
         "inputCharacters": 3796
       },
       "score": 85
+    },
+    "2139b07ad3ec4700691d97a4841eb46890536463625216da0923ece578bfabed": {
+      "modifiedTime": "2026-07-23T03:43:35.901Z",
+      "status": "skipped_confidential",
+      "startedAt": "2026-08-22T02:08:57.375537+00:00",
+      "retry_count": 0,
+      "finishedAt": "2026-08-22T02:10:11.582594+00:00",
+      "reason": "AI confidentiality flags",
+      "score": 86
     }
   },
-  "updatedAt": "2026-08-22T02:08:12.367163+00:00"
+  "updatedAt": "2026-08-22T02:10:11.582603+00:00"
 }
