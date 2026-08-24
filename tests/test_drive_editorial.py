@@ -83,6 +83,14 @@ class DriveEditorialTests(unittest.TestCase):
         self.assertNotIn("secret-value", sanitized)
         self.assertTrue(flags)
 
+    def test_seed_sanitizer_anonymizes_labeled_private_names_before_ai(self):
+        text = "顧客名: 秘密メディカル株式会社\n担当者名: 山田太郎\n論点: 予約導線を改善する"
+        sanitized, flags = editorial.sanitize_seed_text(text)
+        self.assertNotIn("秘密メディカル株式会社", sanitized)
+        self.assertNotIn("山田太郎", sanitized)
+        self.assertIn("予約導線を改善する", sanitized)
+        self.assertIn("private_name", flags)
+
     def test_public_privacy_check_does_not_block_generic_pricing(self):
         data = {"body_markdown": "公開料金として月額5,000円のサービスを比較する。"}
         self.assertEqual(editorial.validate_sanitized_output(data), [])
