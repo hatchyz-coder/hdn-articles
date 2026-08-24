@@ -21,6 +21,12 @@ class DailyDrivePublicationGuardrailTests(unittest.TestCase):
         self.assertNotIn("{'generated', 'published_manual'}", text)
         self.assertIn("record.get('publishedAt') or record.get('finishedAt')", text)
 
+    def test_fallback_waits_for_active_regular_run_before_recovery(self):
+        text = FALLBACK.read_text(encoding='utf-8')
+        self.assertIn('Wait for regular publication slot to settle', text)
+        self.assertIn('.status == "in_progress" or .status == "queued"', text)
+        self.assertIn('Waiting for active publication run', text)
+
     def test_backlog_scan_is_not_limited_to_recent_500(self):
         text = PUBLISH.read_text(encoding='utf-8')
         self.assertIn('--max-drive-files 5000', text)
