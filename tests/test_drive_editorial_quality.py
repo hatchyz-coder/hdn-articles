@@ -36,6 +36,28 @@ class DriveEditorialQualityTests(unittest.TestCase):
         self.assertNotIn("ABC123", data["body_markdown"])
         self.assertNotIn("secret-token", data["body_markdown"])
 
+    def test_private_drive_reference_is_removed_from_public_references(self):
+        data = {
+            "body_markdown": "本文は公開可能です。",
+            "references": [
+                {"label": "private seed", "url": "https://docs.google.com/document/d/private/edit"},
+                {"label": "public source", "url": "https://www.mhlw.go.jp/"},
+            ],
+        }
+        self.assertEqual(editorial.validate_sanitized_output(data), [])
+        self.assertEqual(len(data["references"]), 1)
+        self.assertEqual(data["references"][0]["url"], "https://www.mhlw.go.jp/")
+
+    def test_public_metadata_is_sanitized_not_only_article_body(self):
+        data = {
+            "body_markdown": "本文",
+            "category": "連絡先 person@example.com",
+            "tags": ["APIキー: secret-token", "業務改善"],
+        }
+        self.assertEqual(editorial.validate_sanitized_output(data), [])
+        self.assertNotIn("person@example.com", data["category"])
+        self.assertNotIn("secret-token", " ".join(data["tags"]))
+
     def test_generic_private_marker_phrase_is_not_an_article_veto(self):
         data = {"body_markdown": "社外秘情報をLINEへ貼り付けない運用ルールを決める。"}
         self.assertEqual(editorial.validate_sanitized_output(data), [])
