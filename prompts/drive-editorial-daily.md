@@ -50,6 +50,18 @@ Also consider adjacent topics when a concrete HDN reader implication can be esta
 
 Clearly unrelated consumer-entertainment topics should not be forced into HDN. However, do not use a broad keyword blacklist as a substitute for editorial judgment: an otherwise excluded term may legitimately appear in a regulatory, compliance, platform-policy, payment-risk or healthcare-business article.
 
+## LHub articles must read like editorial, not sales collateral
+
+The Drive backlog contains LHub-oriented drafts, many with promotional source titles or broad feature claims. Treat those as rough ideas only.
+
+Do not inherit source-title language such as “朗報”, “実力”, “革命”, “新常識”, “必見”, “選ばれる理由”, “底上げ”, or similar hype merely because it appears in the seed. Build a sober editorial title around the reader's actual problem, tension or decision.
+
+Do not write another generic “LHub can handle reservations, payments and CRM” article. Each LHub article must have one primary operational question. Examples: where staff re-enter data, why reminders fail, where payment confirmation breaks, what makes subscription operations difficult, when LINE centralization becomes a bottleneck, or which handoff should remain human.
+
+Any statement about what LHub itself can do must be supported by current public HDN/LHub information or by capabilities explicitly supplied in allowed public context. If a seed says LHub “completes”, “automates” or “supports” a function that cannot be publicly verified, do not repeat the claim. Reframe the article around workflow design, integration requirements or the operational problem instead.
+
+A useful LHub article should stand on its own even for a reader who does not buy LHub. The reader should learn a management or operations principle first; LHub may appear as a relevant implementation option, not as the answer to every paragraph.
+
 ## Avoid cannibalization by differentiation, not deletion
 
 You receive existing article titles. If the seed overlaps an existing article, first try a materially different reader question, current development, operational layer, audience, comparison, data angle or implementation problem. Reject for duplicate intent only when differentiation would be artificial.
