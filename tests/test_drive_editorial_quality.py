@@ -69,6 +69,40 @@ class DriveEditorialQualityTests(unittest.TestCase):
             args = editorial.impl.base.parse_args()
         self.assertEqual(args.min_score, 72)
 
+    def test_description_repairs_short_japanese_metadata(self):
+        text = editorial._description("短い説明", "患者導線の実務記事", 160)
+        self.assertGreaterEqual(len(text), 60)
+        self.assertLessEqual(len(text), 160)
+
+    def test_description_repairs_short_english_metadata(self):
+        text = editorial._description("Short", "Patient journey operations", 180)
+        self.assertGreaterEqual(len(text), 50)
+        self.assertLessEqual(len(text), 180)
+
+    def test_depth_check_detects_thin_jp_and_en_pair(self):
+        data = {
+            "title": "JP",
+            "summary": "summary",
+            "body_markdown": "## A\nshort\n## B\nshort",
+            "english_title": "EN",
+            "english_summary": "summary",
+            "english_body_markdown": "## A\nshort\n## B\nshort",
+        }
+        issues = editorial._depth_issues(data)
+        self.assertIn("jp_body_too_thin", issues)
+        self.assertIn("en_body_too_thin", issues)
+
+    def test_depth_check_accepts_substantive_pair(self):
+        data = {
+            "title": "JP",
+            "summary": "summary",
+            "body_markdown": "## A\n" + ("具体的な運用判断。" * 100) + "\n## B\n" + ("失敗パターンと改善。" * 60),
+            "english_title": "EN",
+            "english_summary": "summary",
+            "english_body_markdown": "## A\n" + ("Operational detail and trade-offs. " * 35) + "\n## B\n" + ("Failure patterns and decisions. " * 30),
+        }
+        self.assertEqual(editorial._depth_issues(data), [])
+
 
 if __name__ == "__main__":
     unittest.main()
