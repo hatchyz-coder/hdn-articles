@@ -1,17 +1,15 @@
-name: Discover article candidates
+name: Legacy Three-Source Candidate Discovery (Manual Only)
 
 on:
   workflow_dispatch:
-  schedule:
-    # 05:30 JST Monday-Friday. Refresh the MHLW / PMDA / CAA candidate queue before editorial selection.
-    - cron: '30 20 * * 0-4'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   discover:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,20 +22,20 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Discover and rank candidates
+      - name: Discover legacy three-source candidates
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
         run: python scripts/discover_sources.py
 
-      - name: Commit candidate queue
+      - name: Upload comparison output
+        uses: actions/upload-artifact@v4
+        with:
+          name: legacy-three-source-discovery-${{ github.run_id }}
+          path: data/candidates/latest.json
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Summary
         run: |
-          if git diff --quiet -- data; then
-            echo "No new candidates."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "4189826+github-actions[bot]@users.noreply.github.com"
-          git add data/candidates/latest.json data/seen-urls.json
-          git commit -m "Update article candidate queue [skip ci]"
-          git push
+          echo "Manual comparison only. Production candidate supply uses the 20-source Official Source Collector." >> "$GITHUB_STEP_SUMMARY"
