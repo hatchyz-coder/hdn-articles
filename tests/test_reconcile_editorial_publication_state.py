@@ -26,6 +26,21 @@ class ReconcileEditorialPublicationStateTests(unittest.TestCase):
         self.assertEqual(state["documents"]["x"]["status"], "published")
         self.assertIn("publishedAt", state["documents"]["x"])
 
+    @patch.object(reconcile, "pair_is_live", return_value=True)
+    def test_old_generated_record_retains_historical_timestamp(self, _mock):
+        old_time = "2026-08-20T01:00:00+00:00"
+        state = {
+            "documents": {
+                "old": {"status": "generated", "slug": "old-example", "finishedAt": old_time},
+                "new": {"status": "generated", "slug": "new-example", "finishedAt": "2026-08-24T01:00:00+00:00"},
+            }
+        }
+        promoted, required_live = reconcile.reconcile_state(state, reconcile.DEFAULT_BASE_URL, "new-example", 1, 0)
+        self.assertEqual(promoted, 2)
+        self.assertTrue(required_live)
+        self.assertEqual(state["documents"]["old"]["publishedAt"], old_time)
+        self.assertNotEqual(state["documents"]["new"]["publishedAt"], old_time)
+
     @patch.object(reconcile, "pair_is_live", return_value=False)
     def test_unverified_generated_record_is_not_promoted(self, _mock):
         state = {"documents": {"x": {"status": "generated", "slug": "example"}}}
