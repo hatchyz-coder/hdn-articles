@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-"""Build the canonical official-source editorial queue from persistent collector candidates.
-
-The collector is responsible for safe source fetching. This script is responsible for
-pending-queue persistence, fair source representation, published-source removal, and
-conversion into the candidate format used by the editorial opportunity scorer.
-"""
+"""Build the canonical official-source editorial queue from persistent collector candidates."""
 from __future__ import annotations
 
 import argparse
@@ -31,10 +26,15 @@ def load_json(path: Path, default: Any) -> Any:
 
 
 def published_source_urls() -> set[str]:
+    """Only draft:false articles consume a pending official source permanently."""
     urls: set[str] = set()
-    pattern = re.compile(r'^sourceUrl:\s*["\']?([^"\'\n]+)', re.MULTILINE)
+    source_pattern = re.compile(r'^sourceUrl:\s*["\']?([^"\'\n]+)', re.MULTILINE)
+    published_pattern = re.compile(r'(?m)^draft:\s*false\s*$')
     for path in ARTICLE_DIR.glob("*.md") if ARTICLE_DIR.exists() else []:
-        match = pattern.search(path.read_text(encoding="utf-8"))
+        text = path.read_text(encoding="utf-8")
+        if not published_pattern.search(text):
+            continue
+        match = source_pattern.search(text)
         if match:
             urls.add(match.group(1).strip())
     return urls
@@ -80,22 +80,15 @@ def merge_pending(existing: list[dict[str, Any]], fresh: list[dict[str, Any]], p
         current = by_url.get(item["url"])
         if current is None or int(item.get("score", 0)) >= int(current.get("score", 0)):
             by_url[item["url"]] = item
-
     ranked = sorted(
         by_url.values(),
-        key=lambda item: (
-            int(item.get("score", 0)),
-            int(item.get("source_priority", 0)),
-            str(item.get("published_at", "")),
-            str(item.get("discovered_at", "")),
-        ),
+        key=lambda item: (int(item.get("score", 0)), int(item.get("source_priority", 0)), str(item.get("published_at", "")), str(item.get("discovered_at", ""))),
         reverse=True,
     )
     return ranked[:MAX_PENDING]
 
 
 def fair_top_window(pending: list[dict[str, Any]], limit: int = 100) -> list[dict[str, Any]]:
-    """Keep high-value ordering while preventing one source from monopolizing selection."""
     chosen: list[dict[str, Any]] = []
     deferred: list[dict[str, Any]] = []
     per_source: dict[str, int] = {}
@@ -126,14 +119,12 @@ def main() -> int:
     parser.add_argument("--pending-path", type=Path, default=DEFAULT_PENDING)
     parser.add_argument("--output-path", type=Path, default=DEFAULT_OUTPUT)
     args = parser.parse_args()
-
     official = load_json(args.official_path, {"candidates": []}).get("candidates", [])
     existing = load_json(args.pending_path, {"candidates": []}).get("candidates", [])
     published = published_source_urls()
     pending = merge_pending(existing, official, published)
     selection_queue = fair_top_window(pending)
     now = datetime.now(timezone.utc).isoformat()
-
     write_json(args.pending_path, {"generated_at": now, "candidates": pending})
     write_json(args.output_path, {"generated_at": now, "source_mode": "official_20_source_pending", "candidates": selection_queue})
     print(f"Prepared official editorial pending queue: pending={len(pending)} selectable={len(selection_queue)} published_removed={len(published)}")
