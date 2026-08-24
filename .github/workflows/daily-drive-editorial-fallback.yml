@@ -3,7 +3,7 @@ name: Daily Drive Editorial Fallback
 on:
   workflow_dispatch:
   schedule:
-    # 09:30 JST every day, immediately after the second regular Drive slot.
+    # 09:30 JST every day. Wait for any still-running regular publication before recovery.
     - cron: '30 0 * * *'
 
 permissions:
@@ -24,6 +24,25 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Wait for regular publication slot to settle
+        run: |
+          set -euo pipefail
+          # The 09:00 JST run may still be queued, building or verifying production at
+          # 09:30. Counting before it settles can incorrectly trigger a third article.
+          for poll in $(seq 1 20); do
+            active_ids=$(gh run list \
+              --workflow daily-drive-editorial-publish.yml \
+              --branch main \
+              --limit 20 \
+              --json databaseId,status,createdAt \
+              --jq '.[] | select(.status == "in_progress" or .status == "queued") | .databaseId')
+            if [ -z "$active_ids" ]; then
+              break
+            fi
+            echo "Waiting for regular Drive publication run(s) to settle before counting: $active_ids"
+            sleep 30
+          done
+
       - name: Count today's verified Drive publications
         id: initial
         run: |
@@ -43,8 +62,6 @@ jobs:
           data = json.load(open('/tmp/processed-docs.json', encoding='utf-8'))
           count = 0
           for record in data.get('documents', {}).values():
-              # `generated` means merged but not yet production-verified and must never
-              # satisfy the daily publication target.
               if record.get('status') not in {'published', 'published_manual'}:
                   continue
               raw = record.get('publishedAt') or record.get('finishedAt')
@@ -110,13 +127,25 @@ jobs:
             fi
           }
 
-          # Move past unsuitable drafts, transient API failures and deploy failures
-          # without lowering the editorial quality threshold.
           for attempt in 1 2 3 4 5 6 7 8; do
             count="$(count_drive_today)"
             if [ "$count" -ge "$DAILY_TARGET" ]; then
               echo "Recovered verified LHub/Drive target: ${count}/${DAILY_TARGET}." >> "$GITHUB_STEP_SUMMARY"
               exit 0
+            fi
+
+            # Re-check immediately before dispatch so a publication that completed while
+            # this recovery job was working cannot cause an unnecessary extra article.
+            active_id=$(gh run list \
+              --workflow daily-drive-editorial-publish.yml \
+              --branch main \
+              --limit 10 \
+              --json databaseId,status \
+              --jq '.[] | select(.status == "in_progress" or .status == "queued") | .databaseId' | head -n 1)
+            if [ -n "$active_id" ]; then
+              echo "Waiting for active publication run ${active_id} before recovery attempt ${attempt}."
+              gh run watch "$active_id" --exit-status || true
+              continue
             fi
 
             echo "Recovery attempt ${attempt}: ${count}/${DAILY_TARGET}; triggering Daily Drive Editorial Publish"
