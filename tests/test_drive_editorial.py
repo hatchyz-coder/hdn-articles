@@ -8,11 +8,10 @@ SCRIPTS = ROOT / "scripts"
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
-# The repository CI intentionally does not install Python runtime dependencies before
-# unit tests. These tests only exercise pure editorial helpers, so a lightweight module
-# stub is sufficient for import-time validation.
 if "requests" not in sys.modules:
-    sys.modules["requests"] = types.ModuleType("requests")
+    requests_stub = types.ModuleType("requests")
+    requests_stub.Timeout = TimeoutError
+    sys.modules["requests"] = requests_stub
 
 import generate_from_drive_editorial as editorial
 
@@ -38,10 +37,7 @@ class DriveEditorialTests(unittest.TestCase):
             {"name": "番号なし", "modifiedTime": "2025-01-01T00:00:00Z"},
         ]
         ordered = sorted(docs, key=editorial.queue_sort_key)
-        self.assertEqual(
-            [doc["name"] for doc in ordered],
-            ["LH6_記事1_最初", "LH6_記事2_先", "LH10_記事1_後", "番号なし"],
-        )
+        self.assertEqual([doc["name"] for doc in ordered], ["LH6_記事1_最初", "LH6_記事2_先", "LH10_記事1_後", "番号なし"])
 
     def test_non_lh_drafts_fall_back_oldest_first(self):
         docs = [
@@ -63,6 +59,32 @@ class DriveEditorialTests(unittest.TestCase):
         self.assertNotIn(raw, key)
         self.assertEqual(len(key), 64)
 
+    def test_old_confidential_skip_is_requeued_after_processor_upgrade(self):
+        doc = {"id": "doc-1", "name": "LH6_記事1", "modifiedTime": "2026-08-20T00:00:00Z"}
+        state = {"documents": {editorial._state_key("doc-1"): {"modifiedTime": doc["modifiedTime"], "status": "skipped_confidential", "retry_count": 0}}}
+        self.assertTrue(editorial.is_unprocessed_or_updated(state, doc))
+
+    def test_current_generated_item_is_not_requeued(self):
+        doc = {"id": "doc-2", "name": "LH6_記事2", "modifiedTime": "2026-08-20T00:00:00Z"}
+        state = {"documents": {editorial._state_key("doc-2"): {"modifiedTime": doc["modifiedTime"], "status": "generated", "retry_count": 0, "processorVersion": editorial.PROCESSOR_VERSION}}}
+        self.assertFalse(editorial.is_unprocessed_or_updated(state, doc))
+
+    def test_seed_sanitizer_redacts_direct_identifiers_before_ai(self):
+        text = "連絡先 test@example.com 電話 090-1234-5678 APIキー: secret-value"
+        sanitized, flags = editorial.sanitize_seed_text(text)
+        self.assertNotIn("test@example.com", sanitized)
+        self.assertNotIn("090-1234-5678", sanitized)
+        self.assertNotIn("secret-value", sanitized)
+        self.assertTrue(flags)
+
+    def test_public_privacy_check_does_not_block_generic_pricing(self):
+        data = {"body_markdown": "公開料金として月額5,000円のサービスを比較する。"}
+        self.assertEqual(editorial.validate_sanitized_output(data), [])
+
+    def test_public_privacy_check_blocks_email_or_secret(self):
+        self.assertIn("email_address", editorial.validate_sanitized_output({"body_markdown": "連絡先は person@example.com"}))
+        self.assertIn("credential_secret", editorial.validate_sanitized_output({"body_markdown": "APIキー: abc123"}))
+
     def test_public_article_does_not_include_private_drive_reference(self):
         data = {
             "title": "患者導線を見直すときに先に確認したいこと",
@@ -75,11 +97,7 @@ class DriveEditorialTests(unittest.TestCase):
             "faq": [],
             "references": [{"label": "HDN Japan", "url": "https://hdnjapan.com/"}],
         }
-        doc = {
-            "id": "1PrivateDriveIdentifierABC",
-            "name": "PRIVATE SOURCE TITLE",
-            "webViewLink": "https://docs.google.com/document/d/1PrivateDriveIdentifierABC/edit",
-        }
+        doc = {"id": "1PrivateDriveIdentifierABC", "name": "PRIVATE SOURCE TITLE", "webViewLink": "https://docs.google.com/document/d/1PrivateDriveIdentifierABC/edit"}
         article = editorial.build_article(data, doc)
         self.assertNotIn("1PrivateDriveIdentifierABC", article)
         self.assertNotIn("docs.google.com", article)
