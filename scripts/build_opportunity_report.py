@@ -81,6 +81,16 @@ def fallback_scores(candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return scored
 
 
+def apply_generation_failure_penalty(candidate: dict[str, Any], opportunity: dict[str, Any]) -> dict[str, Any]:
+    """Keep transiently bad candidates retryable without letting them monopolize ranking."""
+    failures = max(0, int(candidate.get("generation_failures", 0) or 0))
+    penalty = min(50, failures * 10)
+    adjusted = dict(opportunity)
+    adjusted["generation_failure_penalty"] = penalty
+    adjusted["total_score"] = max(0, int(adjusted.get("total_score", 0) or 0) - penalty)
+    return adjusted
+
+
 def main() -> None:
     candidates = load_candidates()
     try:
@@ -94,7 +104,7 @@ def main() -> None:
     for i, candidate in enumerate(candidates):
         score = by_id.get(i)
         if score:
-            opportunities.append({**candidate, **score})
+            opportunities.append({**candidate, **apply_generation_failure_penalty(candidate, score)})
     opportunities.sort(key=lambda x: (int(x.get("total_score", 0)), int(x.get("article_value_score", 0)), int(x.get("authority_score", 0))), reverse=True)
     now = datetime.now(JST)
     OPPORTUNITIES.parent.mkdir(parents=True, exist_ok=True)
@@ -108,8 +118,8 @@ def main() -> None:
         for index, item in enumerate(opportunities[:10], start=1):
             targets = "、".join(item.get("target_segments", []))
             expansion = "、".join(item.get("research_expansion", []))
-            lines.extend([f"### {index}. {item.get('title', 'Untitled')}", "", f"- 総合スコア: **{item.get('total_score', 0)}/100**", f"- 通常記事価値: {item.get('article_value_score', 0)}", f"- 速報価値: {item.get('urgency_score', 0)}", f"- 一次情報信頼性: {item.get('authority_score', 0)}", f"- HDN適合度: {item.get('hdn_fit_score', 0)}", f"- 推奨アクション: {item.get('recommended_action', 'monitor')}", f"- 想定対象: {targets or '未設定'}", f"- 記事角度: {item.get('article_angle', '')}", f"- 追加調査: {expansion or '未設定'}", f"- 出典: {item.get('url', '')}", ""])
-    lines.extend(["## 運用メモ", "", "- 速報価値と通常記事価値は別判定です。", "- 候補点数は入口の優先順位であり、公開可否は最終生成記事の品質ゲートで判断します。", "- 公開済みURLだけpending queueから除外します。", ""])
+            lines.extend([f"### {index}. {item.get('title', 'Untitled')}", "", f"- 総合スコア: **{item.get('total_score', 0)}/100**", f"- 通常記事価値: {item.get('article_value_score', 0)}", f"- 速報価値: {item.get('urgency_score', 0)}", f"- 一次情報信頼性: {item.get('authority_score', 0)}", f"- HDN適合度: {item.get('hdn_fit_score', 0)}", f"- 生成失敗ペナルティ: -{item.get('generation_failure_penalty', 0)}", f"- 推奨アクション: {item.get('recommended_action', 'monitor')}", f"- 想定対象: {targets or '未設定'}", f"- 記事角度: {item.get('article_angle', '')}", f"- 追加調査: {expansion or '未設定'}", f"- 出典: {item.get('url', '')}", ""])
+    lines.extend(["## 運用メモ", "", "- 速報価値と通常記事価値は別判定です。", "- 候補点数は入口の優先順位であり、公開可否は最終生成記事の品質ゲートで判断します。", "- 生成失敗候補は永久除外せず、失敗回数に応じて優先順位だけ下げます。", "- 公開済みURLだけpending queueから除外します。", ""])
     report_path.write_text("\n".join(lines), encoding="utf-8")
     print(f"Wrote {OPPORTUNITIES.relative_to(ROOT)}")
     print(f"Wrote {report_path.relative_to(ROOT)}")
