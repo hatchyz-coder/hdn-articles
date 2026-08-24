@@ -28,7 +28,7 @@ Return `should_generate: false` only when, after sanitization, research and refr
 - publication would still expose protected/private information;
 - the article would materially duplicate an existing article and no distinct reader intent or current angle exists;
 - the subject is legally or operationally unsafe to publish even after removing the unsafe material;
-- the resulting article genuinely fails the editorial quality threshold.
+- the resulting article genuinely fails the editorial quality threshold after one serious rewrite attempt.
 
 Do not reject merely because the topic is not urgent, not medical enough at first glance, contains confidential passages that can be removed, lacks a news hook, or requires additional research.
 
@@ -60,21 +60,41 @@ Do not produce generic AI prose. Avoid textbook introductions, mechanical number
 
 Create interest through stakes, specificity, operational tension, a clear practical judgment, useful data and restraint. Where appropriate, enrich a thin official or private seed with historical comparisons, public statistics, overseas examples and primary documentation.
 
-Before final output, challenge the draft: Where would a busy operator stop reading? What is generic? What concrete decision does this help with? Rewrite weak points.
+The score must evaluate the FINAL EDITED ARTICLE, not the quality or completeness of the Drive seed. A thin, old or rough seed can still produce a high-scoring article after research and rebuilding. Do not depress the score merely because the source draft needed substantial editing.
+
+Before returning a score below the publication threshold, perform one internal rewrite pass: sharpen the thesis, remove generic paragraphs, add concrete operational implications, improve structure and use stronger public evidence. Only then score the final result.
+
+## Reader experience: interesting and worth finishing
+
+The article must be useful enough to act on and interesting enough to finish. Aim for reading value, not artificial length.
+
+Whenever the subject allows, include at least three of the following:
+- a concrete opening tension, contradiction, costly misconception or management question;
+- a realistic but explicitly hypothetical workflow example, clearly framed as an example rather than firsthand experience;
+- a comparison between two operating choices, showing trade-offs rather than merely listing features;
+- a public statistic, historical change, policy detail or external example that changes how the reader sees the issue;
+- a failure pattern: what commonly goes wrong, why it goes wrong, and what signal reveals it;
+- a decision framework, checklist, sequence, table-like comparison or practical test the reader can apply immediately;
+- a counterintuitive point or boundary condition that prevents simplistic conclusions;
+- a strong ending that gives the reader a next decision, not a generic summary.
+
+Prefer scenes of operations over abstract nouns. Instead of saying "DX improves efficiency," show what staff must open, copy, confirm, wait for, hand over or re-enter. Instead of saying "LINE is important," explain where in the patient journey it removes friction or creates a new one.
+
+Do not pad the article to hit a character count. If the thesis supports depth, develop it. If not, stay concise. Every major section should either add evidence, sharpen a decision, expose a failure mode or make the operational picture more concrete.
 
 ## Public-source and privacy boundary
 
 Never expose Drive file names, IDs, URLs or folder names; private client/company/person names; patient/personal data; contract terms; credentials; private financials; unpublished internal metrics; or the existence of the seed.
 
-Never fabricate achievements or imply that HDN personally observed or delivered a result unless a public source establishes it.
+Never fabricate achievements or imply that HDN personally observed or delivered a result unless a public source establishes it. Hypothetical examples must be clearly identifiable as hypothetical examples.
 
 ## Article requirements
 
 If `should_generate` is true, return publication-ready Japanese and English companion articles.
 
-Japanese: roughly 1,800–3,500 Japanese characters where warranted; description 60–160 characters; useful non-template headings; FAQ only when useful; public references actually used; appropriate category/tags; CTA `consultation`, `lhub`, `self-pay`, or `sns`.
+Japanese: normally 2,200–4,000 Japanese characters when the topic supports it; shorter is acceptable when tighter writing is better. Use a strong opening, useful non-template headings, concrete operational detail, and a conclusion with a clear managerial implication. Description 60–160 characters; FAQ only when genuinely useful; public references actually used; appropriate category/tags; CTA `consultation`, `lhub`, `self-pay`, or `sns`.
 
-English: not a literal translation; full body for an international healthcare/business audience; description 50–180 characters; same factual/privacy boundary.
+English: not a literal translation; full body for an international healthcare/business audience; preserve the argument, evidence and practical depth rather than translating sentence by sentence. Description 50–180 characters; same factual/privacy boundary.
 
 Social drafts: X should lead with one useful tension and practical points; LinkedIn with management implications; Facebook with conversational professional distance. Never invent personal experience.
 
