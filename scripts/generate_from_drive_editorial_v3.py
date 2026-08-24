@@ -53,8 +53,7 @@ def sanitize_seed_text(text: str) -> tuple[str, list[str]]:
 
 impl.sanitize_seed_text = sanitize_seed_text
 
-# Public-output checks should prevent disclosure, not discard an otherwise useful article
-# because the model happened to include a contact address or a sensitive-value-shaped token.
+# Public-output checks should prevent disclosure, not discard an otherwise useful article.
 # Recoverable findings are removed before the hard residual gate. Only high-risk material
 # that survives this deterministic pass can veto publication.
 PUBLIC_AUTO_REDACTIONS = (
@@ -64,10 +63,11 @@ PUBLIC_AUTO_REDACTIONS = (
     (r"(患者氏名|患者名|患者ID|カルテ番号|診察券番号)\s*[:：=]\s*\S+", "[patient identifier omitted]"),
     (r"(マイナンバー|個人番号|運転免許証番号|保険証番号)\s*[:：=]?\s*[A-Z0-9０-９-]{4,}", "[personal identifier omitted]"),
 )
+PRIVATE_REFERENCE_URL = re.compile(r"^https?://(?:docs|drive)\.google\.com/", re.I)
 PUBLIC_TEXT_KEYS = {
     "title", "description", "summary", "body_markdown", "social_x", "social_facebook",
     "social_linkedin", "english_title", "english_description", "english_summary",
-    "english_body_markdown",
+    "english_body_markdown", "category", "english_category",
 }
 
 
@@ -86,17 +86,45 @@ def sanitize_public_output(data: dict[str, Any]) -> list[str]:
     for key in PUBLIC_TEXT_KEYS:
         if key in data and isinstance(data[key], str):
             data[key] = clean(data[key])
+
+    for key in ("tags", "english_tags"):
+        if isinstance(data.get(key), list):
+            data[key] = [clean(str(value)) for value in data[key] if str(value).strip()]
+
     for item in data.get("faq", []):
         if isinstance(item, dict):
             for key in ("question", "answer"):
                 if isinstance(item.get(key), str):
                     item[key] = clean(item[key])
+
+    safe_references: list[dict[str, Any]] = []
+    for item in data.get("references", []):
+        if not isinstance(item, dict):
+            continue
+        label = clean(str(item.get("label", "")))
+        url = str(item.get("url", "")).strip()
+        # Private Drive/Docs URLs can never be public references, regardless of model output.
+        if PRIVATE_REFERENCE_URL.match(url):
+            changed.append("private_reference_removed")
+            continue
+        safe_references.append({**item, "label": label, "url": url})
+    data["references"] = safe_references
     return changed
 
 
 def validate_sanitized_output(data: dict[str, Any]) -> list[str]:
     sanitize_public_output(data)
     payload = impl._published_payload(data)
+    extra_parts = [
+        str(data.get("category", "")),
+        str(data.get("english_category", "")),
+        " ".join(str(tag) for tag in data.get("tags", [])),
+        " ".join(str(tag) for tag in data.get("english_tags", [])),
+    ]
+    for item in data.get("references", []):
+        if isinstance(item, dict):
+            extra_parts.extend([str(item.get("label", "")), str(item.get("url", ""))])
+    payload = payload + "\n" + "\n".join(extra_parts)
     hard_patterns = [
         (label, pattern)
         for label, pattern in impl.PUBLIC_SENSITIVE_PATTERNS
