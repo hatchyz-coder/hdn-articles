@@ -20,6 +20,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: official-sources-state-writer
+  cancel-in-progress: false
+
 jobs:
   collect:
     runs-on: ubuntu-latest
