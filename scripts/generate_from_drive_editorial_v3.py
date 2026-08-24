@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Privacy and retry hardening wrapper for the resilient Drive editorial generator."""
+"""Privacy, retry and backlog hardening wrapper for the resilient Drive editorial generator."""
 from __future__ import annotations
 
 import re
@@ -8,6 +8,13 @@ from typing import Any
 import generate_from_drive_editorial_v2 as impl
 from generate_from_drive_editorial_v2 import *  # noqa: F401,F403
 from generate_from_drive_editorial_v2 import _state_key, _verify_approved_folder
+
+# The approved LHub archive is a backlog, not merely a recent-file feed. Keep generous
+# discovery ceilings so older unprocessed manuscripts cannot disappear behind a processed
+# recent-file window. Drive pagination still bounds each API request.
+impl.MAX_SCAN = 5000
+impl.base.MAX_FOLDER_SCAN = 1000
+MAX_SCAN = impl.MAX_SCAN
 
 # Legacy runs permanently exhausted some transient states before the resilient processor
 # existed. On a processor-version upgrade, allow exactly one fresh retry cycle for them.
@@ -29,8 +36,6 @@ CREDENTIAL_VALUE_PATTERNS = (
 
 def sanitize_seed_text(text: str) -> tuple[str, list[str]]:
     sanitized, flags = _v2_sanitize_seed_text(text)
-    # The legacy pattern can match only the credential label. Perform a second pass
-    # that consumes the value too, so no token survives into the model input.
     original = str(text)
     for pattern in CREDENTIAL_VALUE_PATTERNS:
         if re.search(pattern, original):
