@@ -48,6 +48,18 @@ class DriveEditorialQualityTests(unittest.TestCase):
         self.assertIn("failure pattern", prompt)
         self.assertIn("hypothetical", prompt)
 
+    def test_prompt_prevents_lhub_advertorial_repetition_and_unverified_features(self):
+        prompt = (ROOT / "prompts" / "drive-editorial-daily.md").read_text(encoding="utf-8")
+        self.assertIn("LHub articles must read like editorial, not sales collateral", prompt)
+        self.assertIn("Do not write another generic", prompt)
+        self.assertIn("must be supported by current public HDN/LHub information", prompt)
+        self.assertIn("should stand on its own even for a reader who does not buy LHub", prompt)
+        self.assertIn("朗報", prompt)
+        self.assertIn("革命", prompt)
+
+    def test_final_processor_version_is_distinct_from_intermediate_implementation(self):
+        self.assertGreaterEqual(editorial.PROCESSOR_VERSION, 3)
+
 
 if __name__ == "__main__":
     unittest.main()
