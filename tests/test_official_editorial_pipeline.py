@@ -10,11 +10,13 @@ SCRIPTS = ROOT / "scripts"
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
+import build_opportunity_report as opportunity
 import collect_official_sources as collector
 import collect_official_sources_fair as fair_collector
 import generate_content
 import prepare_official_editorial_queue as queue
 import select_top_candidate as selector
+import update_official_candidate_state as candidate_state
 
 
 class OfficialEditorialPipelineTests(unittest.TestCase):
@@ -31,6 +33,35 @@ class OfficialEditorialPipelineTests(unittest.TestCase):
         fresh = {"url": "https://example.com/new", "title": "New useful update", "score": 75, "source_id": "b"}
         merged = queue.merge_pending([old], [fresh], set())
         self.assertEqual({item["url"] for item in merged}, {old["url"], fresh["url"]})
+
+    def test_pending_queue_preserves_failures_and_demotes_repeated_failure(self):
+        failed = {"url": "https://example.com/failed", "title": "Failed", "score": 80, "source_id": "a", "generation_failures": 2}
+        fresh = {"url": "https://example.com/fresh", "title": "Fresh", "score": 75, "source_id": "b"}
+        merged = queue.merge_pending([failed], [fresh], set())
+        self.assertEqual(merged[0]["url"], fresh["url"])
+        failed_item = next(item for item in merged if item["url"] == failed["url"])
+        self.assertEqual(failed_item["generation_failures"], 2)
+
+    def test_opportunity_ranking_keeps_generation_failure_penalty(self):
+        candidate = {"generation_failures": 3}
+        ranked = opportunity.apply_generation_failure_penalty(candidate, {"total_score": 88, "article_value_score": 90})
+        self.assertEqual(ranked["generation_failure_penalty"], 30)
+        self.assertEqual(ranked["total_score"], 58)
+        self.assertEqual(ranked["article_value_score"], 90)
+
+    def test_candidate_state_failure_is_retryable_and_published_is_removed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "pending.json"
+            url = "https://example.com/retry"
+            path.write_text(json.dumps({"candidates": [{"url": url, "title": "Retry", "generation_failures": 1}]}), encoding="utf-8")
+            with patch.object(sys, "argv", ["update_official_candidate_state.py", "--pending-path", str(path), "--url", url, "--outcome", "generation_failed"]):
+                self.assertEqual(candidate_state.main(), 0)
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual(payload["candidates"][0]["generation_failures"], 2)
+            with patch.object(sys, "argv", ["update_official_candidate_state.py", "--pending-path", str(path), "--url", url, "--outcome", "published"]):
+                self.assertEqual(candidate_state.main(), 0)
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual(payload["candidates"], [])
 
     def test_pending_queue_removes_only_published_source(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -68,10 +99,20 @@ class OfficialEditorialPipelineTests(unittest.TestCase):
         self.assertIn("prepare_official_editorial_queue.py", text)
         self.assertIn("collect_official_sources_fair.py", text)
         self.assertIn("build_opportunity_report.py", text)
+        self.assertIn("update_official_candidate_state.py", text)
+        self.assertIn("--outcome generation_failed", text)
+        self.assertIn("--outcome published", text)
         self.assertIn("--min-score 72", text)
         self.assertIn("for attempt in 1 2 3 4 5", text)
         self.assertIn("Verify JP and EN production URLs", text)
         self.assertNotIn("gh workflow run deploy-pages.yml --ref main", text)
+
+    def test_official_state_writers_share_one_non_cancelling_lock(self):
+        collector_workflow = (ROOT / ".github/workflows/official-source-collector.yml").read_text(encoding="utf-8")
+        publisher_workflow = (ROOT / ".github/workflows/official-source-daily-publish.yml").read_text(encoding="utf-8")
+        for text in (collector_workflow, publisher_workflow):
+            self.assertIn("group: official-sources-state-writer", text)
+            self.assertIn("cancel-in-progress: false", text)
 
     def test_legacy_automatic_article_paths_are_manual_only(self):
         for name in ("drive-knowledge-article-pr.yml", "hdn-growth-pipeline.yml", "discover-article-candidates.yml"):
