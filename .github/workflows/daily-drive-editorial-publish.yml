@@ -14,8 +14,7 @@ on:
         default: '72'
         type: string
   schedule:
-    # Two independent daily slots: 06:00 and 09:00 JST. Each run publishes at most one
-    # quality-gated JP/EN pair, so a failure in one slot does not corrupt the other.
+    # Two independent daily slots: 06:00 and 09:00 JST.
     - cron: '0 21 * * *'
     - cron: '0 0 * * *'
 
@@ -32,7 +31,7 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     env:
       TZ: Asia/Tokyo
     steps:
@@ -85,7 +84,7 @@ jobs:
             --min-score "$MIN_SCORE"
             --state-path data/editorial-drive/processed-docs.json
             --report-path /tmp/editorial-drive-run.json
-            --max-drive-files 500
+            --max-drive-files 5000
           )
           if [ -n "$DOCUMENT_ID" ]; then args+=(--document-id "$DOCUMENT_ID"); fi
           python "${args[@]}"
@@ -192,6 +191,7 @@ jobs:
           - [x] Existing article titles are checked for duplicate intent
           - [x] AI-pattern editorial review is part of the generation prompt
           - [x] Lint / typecheck / tests / build / migration check completed before merge
+          - [ ] JP and EN production URLs must return 2xx before this item counts toward the daily target
           EOF
 
           pr_url=$(gh pr create --base main --head "$branch" --title "Daily editorial: ${SLUG}" --body-file /tmp/pr-body.md)
@@ -201,7 +201,10 @@ jobs:
           echo "main_sha=$main_sha" >> "$GITHUB_OUTPUT"
           echo "pr_number=$pr_number" >> "$GITHUB_OUTPUT"
 
-      - name: Persist state after successful publication merge
+      # Save the merged state immediately so a deploy outage cannot cause the same private
+      # seed to be regenerated into a duplicate article. Status remains `generated`, which
+      # is deliberately NOT counted as a published article by the fallback monitor.
+      - name: Persist merged state before deploy
         if: steps.editorial.outputs.selected == 'true' && steps.merge.outcome == 'success'
         run: |
           set -euo pipefail
@@ -225,11 +228,11 @@ jobs:
           cp "$tmpdir/processed-docs.json" data/editorial-drive/processed-docs.json
           git add data/editorial-drive/processed-docs.json
           if ! git diff --cached --quiet; then
-            git commit -m "Update editorial seed state [skip ci]"
+            git commit -m "Record merged editorial article [skip ci]"
             git push origin editorial-drive-state
           fi
 
-      - name: Deploy published article
+      - name: Deploy merged article
         if: steps.editorial.outputs.selected == 'true' && steps.merge.outcome == 'success'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -255,8 +258,39 @@ jobs:
           fi
           gh run watch "$run_id" --exit-status
 
+      - name: Verify JP and EN production URLs and reconcile state
+        if: steps.editorial.outputs.selected == 'true' && steps.merge.outcome == 'success'
+        env:
+          SLUG: ${{ steps.editorial.outputs.slug }}
+        run: |
+          python scripts/reconcile_editorial_publication_state.py \
+            --state-path data/editorial-drive/processed-docs.json \
+            --required-slug "$SLUG" \
+            --retries 12 \
+            --sleep-seconds 10
+
+      - name: Persist publication-confirmed state
+        if: steps.editorial.outputs.selected == 'true' && steps.merge.outcome == 'success'
+        run: |
+          set -euo pipefail
+          tmpdir="$(mktemp -d)"
+          cp data/editorial-drive/processed-docs.json "$tmpdir/processed-docs.json"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin editorial-drive-state
+          git worktree add "$tmpdir/state" origin/editorial-drive-state
+          cd "$tmpdir/state"
+          git checkout -B editorial-drive-state
+          mkdir -p data/editorial-drive
+          cp "$tmpdir/processed-docs.json" data/editorial-drive/processed-docs.json
+          git add data/editorial-drive/processed-docs.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Confirm editorial publication [skip ci]"
+            git push origin editorial-drive-state
+          fi
+
       - name: Publication summary
-        if: steps.editorial.outputs.selected == 'true'
+        if: steps.editorial.outputs.selected == 'true' && success()
         env:
           SLUG: ${{ steps.editorial.outputs.slug }}
           SCORE: ${{ steps.editorial.outputs.score }}
@@ -264,8 +298,8 @@ jobs:
           {
             echo "## Drive editorial publication slot"
             echo ""
-            echo "Published: https://article.hdnjapan.com/articles/${SLUG}/"
-            echo "English: https://article.hdnjapan.com/en/articles/${SLUG}/"
+            echo "Published and verified: https://article.hdnjapan.com/articles/${SLUG}/"
+            echo "English verified: https://article.hdnjapan.com/en/articles/${SLUG}/"
             echo "Editorial score: ${SCORE}/100"
-            echo "The private Drive seed identifier was not written into the public article or PR."
+            echo "Both production URLs returned 2xx before the item was marked published."
           } >> "$GITHUB_STEP_SUMMARY"
