@@ -9,7 +9,7 @@ on:
         default: ''
         type: string
       min_score:
-        description: Minimum editorial score required for publication
+        description: Minimum editorial score required for publication (production floor is 72)
         required: true
         default: '72'
         type: string
@@ -31,7 +31,7 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       TZ: Asia/Tokyo
     steps:
@@ -72,11 +72,23 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
           DRIVE_EDITORIAL_FOLDER_ID: ${{ vars.GOOGLE_DRIVE_LHUB_ARCHIVE_FOLDER_ID }}
-          MIN_SCORE: ${{ inputs.min_score || '72' }}
+          REQUESTED_MIN_SCORE: ${{ inputs.min_score || '72' }}
           DOCUMENT_ID: ${{ inputs.document_id || '' }}
           PYTHONUNBUFFERED: '1'
         run: |
           set -euo pipefail
+
+          # Repository policy never permits the production quality floor to be lowered.
+          if ! [[ "$REQUESTED_MIN_SCORE" =~ ^[0-9]+$ ]]; then
+            echo "Invalid min_score: $REQUESTED_MIN_SCORE" >&2
+            exit 1
+          fi
+          if [ "$REQUESTED_MIN_SCORE" -lt 72 ]; then
+            MIN_SCORE=72
+          else
+            MIN_SCORE="$REQUESTED_MIN_SCORE"
+          fi
+
           args=(
             scripts/generate_from_drive_editorial.py
             --folder-id "$DRIVE_EDITORIAL_FOLDER_ID"
@@ -87,7 +99,36 @@ jobs:
             --max-drive-files 5000
           )
           if [ -n "$DOCUMENT_ID" ]; then args+=(--document-id "$DOCUMENT_ID"); fi
-          python "${args[@]}"
+
+          # A slot should not be wasted merely because the first backlog seed is unsuitable.
+          # Evaluate up to three sequential candidates while preserving state between tries.
+          # Manual document_id runs remain single-candidate by design.
+          REAL_GITHUB_OUTPUT="$GITHUB_OUTPUT"
+          MAX_CANDIDATE_TRIES=3
+          if [ -n "$DOCUMENT_ID" ]; then MAX_CANDIDATE_TRIES=1; fi
+          selected=false
+          last_attempt_output=""
+
+          for candidate_try in $(seq 1 "$MAX_CANDIDATE_TRIES"); do
+            attempt_output="$(mktemp)"
+            last_attempt_output="$attempt_output"
+            echo "Editorial candidate attempt ${candidate_try}/${MAX_CANDIDATE_TRIES}"
+            GITHUB_OUTPUT="$attempt_output" python "${args[@]}"
+
+            attempt_selected=$(awk -F= '$1=="selected" {value=$2} END {print value}' "$attempt_output")
+            attempt_reason=$(awk -F= '$1=="reason" {value=$2} END {print value}' "$attempt_output")
+            echo "Candidate attempt ${candidate_try}: selected=${attempt_selected:-false} reason=${attempt_reason:-unknown}"
+
+            if [ "$attempt_selected" = "true" ]; then
+              cat "$attempt_output" >> "$REAL_GITHUB_OUTPUT"
+              selected=true
+              break
+            fi
+          done
+
+          if [ "$selected" != "true" ] && [ -n "$last_attempt_output" ]; then
+            cat "$last_attempt_output" >> "$REAL_GITHUB_OUTPUT"
+          fi
 
       - name: Persist state when no article is suitable
         if: steps.editorial.outputs.selected != 'true'
@@ -120,7 +161,7 @@ jobs:
       - name: Report editorial skip
         if: steps.editorial.outputs.selected != 'true'
         run: |
-          echo "No article was published in this slot. Editorial gate: ${{ steps.editorial.outputs.reason }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "No article was published in this slot after candidate rotation. Final editorial gate: ${{ steps.editorial.outputs.reason }}" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Finalize social copy with production URL
         if: steps.editorial.outputs.selected == 'true'
@@ -232,31 +273,36 @@ jobs:
             git push origin editorial-drive-state
           fi
 
-      - name: Deploy merged article
+      - name: Observe push-triggered Pages deployment
         if: steps.editorial.outputs.selected == 'true' && steps.merge.outcome == 'success'
         env:
           GH_TOKEN: ${{ github.token }}
           MAIN_SHA: ${{ steps.merge.outputs.main_sha }}
         run: |
           set -euo pipefail
-          gh workflow run deploy-pages.yml --ref main
+          # main push already triggers deploy-pages.yml. Do not launch a duplicate deployment;
+          # duplicate runs can cancel one another because Pages intentionally deploys latest-only.
           run_id=""
-          for attempt in $(seq 1 20); do
+          for attempt in $(seq 1 24); do
             run_id=$(gh run list \
               --workflow deploy-pages.yml \
-              --event workflow_dispatch \
               --branch main \
-              --limit 20 \
-              --json databaseId,headSha \
-              --jq ".[] | select(.headSha == \"$MAIN_SHA\") | .databaseId" | head -n 1)
+              --limit 30 \
+              --json databaseId,headSha,event \
+              --jq ".[] | select(.headSha == \"$MAIN_SHA\" and .event == \"push\") | .databaseId" | head -n 1)
             if [ -n "$run_id" ]; then break; fi
-            sleep 3
+            sleep 5
           done
-          if [ -z "$run_id" ]; then
-            echo "Could not locate Pages deployment for $MAIN_SHA" >&2
-            exit 1
+
+          if [ -n "$run_id" ]; then
+            echo "Observing push-triggered Pages run ${run_id} for ${MAIN_SHA}."
+            # A newer main deployment may cancel this exact run. That is not a publication
+            # failure if the newer deployment contains the article, so production URL
+            # verification below remains authoritative.
+            gh run watch "$run_id" --exit-status || true
+          else
+            echo "No exact push deployment was located; production URL verification will decide publication success."
           fi
-          gh run watch "$run_id" --exit-status
 
       - name: Verify JP and EN production URLs and reconcile state
         if: steps.editorial.outputs.selected == 'true' && steps.merge.outcome == 'success'
@@ -266,7 +312,7 @@ jobs:
           python scripts/reconcile_editorial_publication_state.py \
             --state-path data/editorial-drive/processed-docs.json \
             --required-slug "$SLUG" \
-            --retries 12 \
+            --retries 36 \
             --sleep-seconds 10
 
       - name: Persist publication-confirmed state
