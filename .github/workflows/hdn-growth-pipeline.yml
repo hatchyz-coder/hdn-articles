@@ -1,219 +1,59 @@
-name: HDN Growth Pipeline
+name: Legacy HDN Growth Research (Manual Only)
 
 on:
   workflow_dispatch:
     inputs:
-      min_score:
-        description: Minimum AI score required for article drafting
-        required: true
-        default: '70'
-        type: string
       audit_wordpress:
         description: Also audit the existing WordPress article site
         required: true
         default: false
         type: boolean
-  schedule:
-    - cron: '15 22 * * 1-5'
 
 permissions:
-  contents: write
-  pull-requests: write
-  pages: read
-
-concurrency:
-  group: hdn-growth-pipeline
-  cancel-in-progress: false
+  contents: read
 
 jobs:
-  pipeline:
+  research:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Configure GitHub Pages
-        id: pages
-        uses: actions/configure-pages@v5
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
+          cache: pip
+          cache-dependency-path: requirements.txt
 
       - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-          npm install
+        run: pip install -r requirements.txt
 
-      - name: Resolve deployment target
-        env:
-          PAGES_BASE_URL: ${{ steps.pages.outputs.base_url }}
-        run: |
-          node <<'NODE'
-          const fs = require('fs');
-          const target = new URL(process.env.PAGES_BASE_URL);
-          const trimmedPath = target.pathname.replace(/\/+$/, '');
-          const basePath = trimmedPath || '/';
-          fs.appendFileSync(process.env.GITHUB_ENV, `PUBLIC_SITE_URL=${target.origin}\nBASE_PATH=${basePath}\n`);
-          console.log(`PUBLIC_SITE_URL=${target.origin}`);
-          console.log(`BASE_PATH=${basePath}`);
-          NODE
-
-      - name: Audit existing WordPress URLs
-        if: github.event_name == 'workflow_dispatch' && inputs.audit_wordpress == true
+      - name: Optional WordPress audit
+        if: inputs.audit_wordpress == true
         run: python scripts/audit_wordpress_migration.py
 
-      - name: Discover and rank article candidates
+      - name: Run legacy three-source discovery for comparison only
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
-        run: python scripts/discover_sources.py
-
-      - name: Build opportunity report
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
-        run: python scripts/build_opportunity_report.py
-
-      - name: Commit queue, report, and migration audit
         run: |
-          if git diff --quiet -- data reports; then
-            echo "No queue, report, or migration changes."
-          else
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add data reports
-            git commit -m "Update HDN growth data and reports [skip ci]"
-            git push origin main
-          fi
+          python scripts/discover_sources.py
+          python scripts/build_opportunity_report.py
 
-      - name: Collect source URLs already used by open pull requests
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Upload research output
+        uses: actions/upload-artifact@v4
+        with:
+          name: legacy-growth-research-${{ github.run_id }}
+          path: |
+            data/candidates/latest.json
+            data/opportunities/latest.json
+            reports/daily/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Summary
         run: |
-          gh pr list --state open --limit 100 --json body > /tmp/open-prs.json
-          python3 - <<'PY'
-          import json
-          import re
-          from pathlib import Path
-
-          payload = json.loads(Path('/tmp/open-prs.json').read_text(encoding='utf-8'))
-          urls = set()
-          for item in payload:
-              body = item.get('body') or ''
-              match = re.search(r'^- Source:\s*(https?://\S+)', body, re.MULTILINE)
-              if match:
-                  urls.add(match.group(1).rstrip(').,]'))
-          Path('/tmp/open-pr-source-urls.txt').write_text('\n'.join(sorted(urls)), encoding='utf-8')
-          print(f'Excluded {len(urls)} source URLs from open pull requests')
-          PY
-
-      - name: Select highest-value eligible candidate
-        id: pick
-        env:
-          MIN_SCORE: ${{ inputs.min_score || '70' }}
-        run: |
-          python scripts/select_top_candidate.py \
-            --min-score "$MIN_SCORE" \
-            --exclude-file /tmp/open-pr-source-urls.txt
-
-      - name: Report no eligible candidate
-        if: steps.pick.outputs.selected != 'true'
-        run: |
-          echo "No eligible candidate was found."
-          echo "Reason: ${{ steps.pick.outputs.reason }}"
-
-      - name: Generate article and channel drafts
-        if: steps.pick.outputs.selected == 'true'
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
-          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
-          GOOGLE_DRIVE_INTERNAL_REFERENCE_FOLDER_ID: ${{ vars.GOOGLE_DRIVE_INTERNAL_REFERENCE_FOLDER_ID }}
-          GOOGLE_DRIVE_LHUB_ARCHIVE_FOLDER_ID: ${{ vars.GOOGLE_DRIVE_LHUB_ARCHIVE_FOLDER_ID }}
-        run: |
-          python scripts/generate_content.py \
-            --url "${{ steps.pick.outputs.url }}" \
-            --slug "${{ steps.pick.outputs.slug }}" \
-            --category "${{ steps.pick.outputs.category }}" \
-            --cta "${{ steps.pick.outputs.cta }}"
-
-      - name: Build and validate site
-        if: steps.pick.outputs.selected == 'true'
-        run: npm run build
-
-      - name: Create review pull request
-        if: steps.pick.outputs.selected == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          SOURCE_URL: ${{ steps.pick.outputs.url }}
-          SLUG: ${{ steps.pick.outputs.slug }}
-          CATEGORY: ${{ steps.pick.outputs.category }}
-          CTA: ${{ steps.pick.outputs.cta }}
-          SCORE: ${{ steps.pick.outputs.score }}
-          SOURCE_TITLE: ${{ steps.pick.outputs.title }}
-          SELECTION_REASON: ${{ steps.pick.outputs.reason }}
-        run: |
-          branch="content/growth-${SLUG}-${GITHUB_RUN_ID}"
-          git checkout -b "$branch"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/content/articles social outputs/en
-          git commit -m "Generate HDN growth article draft: ${SLUG}"
-          git push origin "$branch"
-
-          cat > /tmp/pr-body.md <<EOF
-          ## HDN Growth Pipeline
-
-          - Source: ${SOURCE_URL}
-          - Source title: ${SOURCE_TITLE}
-          - AI score: ${SCORE}/100
-          - Selection reason: ${SELECTION_REASON}
-          - Category: ${CATEGORY}
-          - CTA: ${CTA}
-
-          ## Generated files
-
-          - Article: \`src/content/articles/${SLUG}.md\`
-          - Social drafts: \`social/${SLUG}/\`
-          - English draft: \`outputs/en/${SLUG}.md\`
-
-          ## Review checklist
-
-          - [ ] Primary-source facts and dates are accurate
-          - [ ] HDN commentary is separated from sourced facts
-          - [ ] No unsupported medical, legal, or advertising claims appear
-          - [ ] No private Drive client identifiers or confidential details appear
-          - [ ] Search intent, title, headings, and description are aligned
-          - [ ] Internal links and CTA are useful rather than forced
-          - [ ] Social copy is suitable for each platform
-          - [ ] Change \`draft: true\` to \`draft: false\` only after approval
-          EOF
-
-          gh pr create \
-            --base main \
-            --head "$branch" \
-            --title "HDN Growth article draft: ${SLUG}" \
-            --body-file /tmp/pr-body.md
-
-      - name: Write workflow summary
-        if: always()
-        run: |
-          {
-            echo "## HDN Growth Pipeline"
-            echo ""
-            echo "- WordPress audit requested: ${{ inputs.audit_wordpress || 'false' }}"
-            echo "- Candidate selected: ${{ steps.pick.outputs.selected || 'false' }}"
-            echo "- Reason: ${{ steps.pick.outputs.reason || 'not available' }}"
-            echo "- Score: ${{ steps.pick.outputs.score || 'n/a' }}"
-            echo "- Source: ${{ steps.pick.outputs.url || 'n/a' }}"
-            echo "- Production URL: ${PUBLIC_SITE_URL}${BASE_PATH}"
-          } >> "$GITHUB_STEP_SUMMARY"
+          echo "Legacy growth research is manual-only. It no longer creates scheduled article PRs or modifies main." >> "$GITHUB_STEP_SUMMARY"
+          echo "Production official-source publishing uses the 20-source collector and Official Source Daily Publish workflow." >> "$GITHUB_STEP_SUMMARY"
