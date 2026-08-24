@@ -15,6 +15,20 @@ from generate_from_drive_editorial_v2 import _state_key, _verify_approved_folder
 impl.PROCESSOR_VERSION = 3
 PROCESSOR_VERSION = impl.PROCESSOR_VERSION
 
+# Editorial quality is a repository invariant. workflow_dispatch must not be able to lower
+# it accidentally or intentionally below the production floor.
+HARD_MIN_SCORE = 72
+_base_parse_args = impl.base.parse_args
+
+
+def _parse_args_with_floor():
+    args = _base_parse_args()
+    args.min_score = max(HARD_MIN_SCORE, int(args.min_score))
+    return args
+
+
+impl.base.parse_args = _parse_args_with_floor
+
 # The approved LHub archive is a backlog, not merely a recent-file feed. Keep generous
 # discovery ceilings so older unprocessed manuscripts cannot disappear behind a processed
 # recent-file window. Drive pagination still bounds each API request.
