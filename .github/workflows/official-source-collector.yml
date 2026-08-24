@@ -14,15 +14,20 @@ on:
         default: ''
         type: string
   schedule:
+    # 07:00 JST weekdays. Feed the canonical 12:30 editorial publication queue.
     - cron: '0 22 * * 0-4'
 
 permissions:
   contents: write
 
+concurrency:
+  group: official-sources-state-writer
+  cancel-in-progress: false
+
 jobs:
   collect:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -47,18 +52,19 @@ jobs:
             git show origin/official-sources-state:data/official-sources/state.json > data/official-sources/state.json || true
             git show origin/official-sources-state:data/official-sources/latest-run.json > data/official-sources/latest-run.json || true
             git show origin/official-sources-state:data/official-sources/candidates.json > data/official-sources/candidates.json || true
+            git show origin/official-sources-state:data/official-sources/editorial-pending.json > data/official-sources/editorial-pending.json || true
           else
             echo "No official-sources-state branch exists yet."
           fi
 
-      - name: Collect official source candidates
+      - name: Collect official source candidates fairly across all enabled sources
         env:
           PYTHONUNBUFFERED: '1'
           DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
           SOURCE_ID: ${{ github.event.inputs.source_id || '' }}
         run: |
           args=(
-            scripts/collect_official_sources.py
+            scripts/collect_official_sources_fair.py
             --state-path data/official-sources/state.json
             --latest-run-path data/official-sources/latest-run.json
             --candidates-path data/official-sources/candidates.json
@@ -69,7 +75,7 @@ jobs:
           if [ "$DRY_RUN" = "true" ]; then
             args+=(--dry-run)
           fi
-          timeout --signal=TERM --kill-after=15s 240s python -u "${args[@]}"
+          timeout --signal=TERM --kill-after=15s 480s python -u "${args[@]}"
 
       - name: Upload official source artifacts
         if: always()
@@ -80,6 +86,7 @@ jobs:
             data/official-sources/candidates.json
             data/official-sources/latest-run.json
             data/official-sources/state.json
+            data/official-sources/editorial-pending.json
           if-no-files-found: warn
           retention-days: 30
 

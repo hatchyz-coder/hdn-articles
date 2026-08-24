@@ -3,8 +3,8 @@ name: Daily Drive Editorial Fallback
 on:
   workflow_dispatch:
   schedule:
-    # 10:00 JST every day. Recover missing Drive slots until two Drive-origin pairs exist today.
-    - cron: '0 1 * * *'
+    # 09:30 JST every day. Wait for any still-running regular publication before recovery.
+    - cron: '30 0 * * *'
 
 permissions:
   actions: write
@@ -13,7 +13,7 @@ permissions:
 jobs:
   recover:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 120
     env:
       TZ: Asia/Tokyo
       GH_TOKEN: ${{ github.token }}
@@ -24,7 +24,26 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Count today's Drive publications
+      - name: Wait for regular publication slot to settle
+        run: |
+          set -euo pipefail
+          # The 09:00 JST run may still be queued, building or verifying production at
+          # 09:30. Counting before it settles can incorrectly trigger a third article.
+          for poll in $(seq 1 20); do
+            active_ids=$(gh run list \
+              --workflow daily-drive-editorial-publish.yml \
+              --branch main \
+              --limit 20 \
+              --json databaseId,status,createdAt \
+              --jq '.[] | select(.status == "in_progress" or .status == "queued") | .databaseId')
+            if [ -z "$active_ids" ]; then
+              break
+            fi
+            echo "Waiting for regular Drive publication run(s) to settle before counting: $active_ids"
+            sleep 30
+          done
+
+      - name: Count today's verified Drive publications
         id: initial
         run: |
           set -euo pipefail
@@ -43,9 +62,9 @@ jobs:
           data = json.load(open('/tmp/processed-docs.json', encoding='utf-8'))
           count = 0
           for record in data.get('documents', {}).values():
-              if record.get('status') not in {'generated', 'published_manual'}:
+              if record.get('status') not in {'published', 'published_manual'}:
                   continue
-              raw = record.get('finishedAt')
+              raw = record.get('publishedAt') or record.get('finishedAt')
               if not raw:
                   continue
               try:
@@ -65,10 +84,10 @@ jobs:
           echo "count=${count}" >> "$GITHUB_OUTPUT"
           if [ "$count" -ge "$DAILY_TARGET" ]; then
             echo "complete=true" >> "$GITHUB_OUTPUT"
-            echo "Daily Drive target already satisfied for ${today}: ${count}/${DAILY_TARGET}." >> "$GITHUB_STEP_SUMMARY"
+            echo "Daily verified LHub/Drive target satisfied for ${today}: ${count}/${DAILY_TARGET}." >> "$GITHUB_STEP_SUMMARY"
           else
             echo "complete=false" >> "$GITHUB_OUTPUT"
-            echo "Daily Drive target incomplete for ${today}: ${count}/${DAILY_TARGET}." >> "$GITHUB_STEP_SUMMARY"
+            echo "Daily verified LHub/Drive target incomplete for ${today}: ${count}/${DAILY_TARGET}. Recovery starts now." >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Recover missing publication slots
@@ -90,9 +109,9 @@ jobs:
           data = json.load(open('/tmp/processed-docs.json', encoding='utf-8'))
           count = 0
           for record in data.get('documents', {}).values():
-              if record.get('status') not in {'generated', 'published_manual'}:
+              if record.get('status') not in {'published', 'published_manual'}:
                   continue
-              raw = record.get('finishedAt')
+              raw = record.get('publishedAt') or record.get('finishedAt')
               if not raw:
                   continue
               try:
@@ -108,16 +127,28 @@ jobs:
             fi
           }
 
-          # Allow enough attempts to move past quality-gated or transiently failed seeds
-          # without lowering the editorial threshold.
-          for attempt in 1 2 3 4 5 6; do
+          for attempt in 1 2 3 4 5 6 7 8; do
             count="$(count_drive_today)"
             if [ "$count" -ge "$DAILY_TARGET" ]; then
-              echo "Recovered Drive target: ${count}/${DAILY_TARGET}." >> "$GITHUB_STEP_SUMMARY"
+              echo "Recovered verified LHub/Drive target: ${count}/${DAILY_TARGET}." >> "$GITHUB_STEP_SUMMARY"
               exit 0
             fi
 
-            echo "Fallback attempt ${attempt}: ${count}/${DAILY_TARGET}; triggering Daily Drive Editorial Publish"
+            # Re-check immediately before dispatch so a publication that completed while
+            # this recovery job was working cannot cause an unnecessary extra article.
+            active_id=$(gh run list \
+              --workflow daily-drive-editorial-publish.yml \
+              --branch main \
+              --limit 10 \
+              --json databaseId,status \
+              --jq '.[] | select(.status == "in_progress" or .status == "queued") | .databaseId' | head -n 1)
+            if [ -n "$active_id" ]; then
+              echo "Waiting for active publication run ${active_id} before recovery attempt ${attempt}."
+              gh run watch "$active_id" --exit-status || true
+              continue
+            fi
+
+            echo "Recovery attempt ${attempt}: ${count}/${DAILY_TARGET}; triggering Daily Drive Editorial Publish"
             before="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
             gh workflow run daily-drive-editorial-publish.yml --ref main
 
@@ -138,15 +169,14 @@ jobs:
               echo "Could not locate triggered workflow run on attempt ${attempt}" >&2
               continue
             fi
-
             gh run watch "$run_id" --exit-status || true
           done
 
           count="$(count_drive_today)"
           if [ "$count" -ge "$DAILY_TARGET" ]; then
-            echo "Recovered Drive target after final attempt: ${count}/${DAILY_TARGET}." >> "$GITHUB_STEP_SUMMARY"
+            echo "Recovered verified LHub/Drive target after final attempt: ${count}/${DAILY_TARGET}." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
 
-          echo "Drive editorial target still incomplete after recovery: ${count}/${DAILY_TARGET}." >&2
+          echo "Verified LHub/Drive daily target still incomplete after recovery: ${count}/${DAILY_TARGET}." >&2
           exit 1

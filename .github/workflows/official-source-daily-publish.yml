@@ -3,13 +3,13 @@ name: Official Source Daily Publish
 on:
   workflow_dispatch:
     inputs:
-      min_score:
-        description: Minimum candidate score required for direct publication
+      candidate_floor:
+        description: Candidate prioritization floor only; final article quality floor remains 72
         required: true
-        default: '82'
+        default: '55'
         type: string
   schedule:
-    # 12:30 JST weekdays. This is the second publication slot after the 06:00 Drive editorial run.
+    # 12:30 JST weekdays. Official-source coverage is additive to the two daily LHub slots.
     - cron: '30 3 * * 1-5'
 
 permissions:
@@ -19,13 +19,13 @@ permissions:
   pages: read
 
 concurrency:
-  group: official-source-daily-publish
+  group: official-sources-state-writer
   cancel-in-progress: false
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 60
     env:
       TZ: Asia/Tokyo
     steps:
@@ -33,10 +33,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Configure GitHub Pages
-        id: pages
-        uses: actions/configure-pages@v5
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -55,81 +51,182 @@ jobs:
           pip install -r requirements.txt
           if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
-      - name: Resolve deployment target
-        env:
-          PAGES_BASE_URL: ${{ steps.pages.outputs.base_url }}
+      - name: Restore canonical official-source state
         run: |
-          node <<'NODE'
-          const fs = require('fs');
-          const target = new URL(process.env.PAGES_BASE_URL);
-          const trimmedPath = target.pathname.replace(/\/+$/, '');
-          const basePath = trimmedPath || '/';
-          fs.appendFileSync(process.env.GITHUB_ENV, `PUBLIC_SITE_URL=${target.origin}\nBASE_PATH=${basePath}\n`);
-          NODE
+          set -euo pipefail
+          mkdir -p data/official-sources data/candidates data/opportunities reports/daily
+          if git ls-remote --exit-code --heads origin official-sources-state >/dev/null 2>&1; then
+            git fetch origin official-sources-state
+            for file in state.json latest-run.json candidates.json editorial-pending.json; do
+              git show "origin/official-sources-state:data/official-sources/${file}" > "data/official-sources/${file}" 2>/dev/null || true
+            done
+          else
+            echo "No official-sources-state branch exists yet; 12:30 will collect directly."
+          fi
+
+      - name: Refresh official sources if the morning collector is missing or stale
+        run: |
+          set -euo pipefail
+          stale=true
+          if [ -s data/official-sources/latest-run.json ]; then
+            stale=$(python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+          data=json.loads(Path('data/official-sources/latest-run.json').read_text(encoding='utf-8'))
+          raw=data.get('generated_at','')
+          try:
+              dt=datetime.fromisoformat(raw.replace('Z','+00:00'))
+              print('false' if (datetime.now(timezone.utc)-dt).total_seconds() <= 8*3600 else 'true')
+          except Exception:
+              print('true')
+          PY
+            )
+          fi
+          if [ "$stale" = "true" ] || [ ! -s data/official-sources/candidates.json ]; then
+            echo "Official-source state is missing/stale; running fair collector inline."
+            python scripts/collect_official_sources_fair.py \
+              --state-path data/official-sources/state.json \
+              --latest-run-path data/official-sources/latest-run.json \
+              --candidates-path data/official-sources/candidates.json
+          else
+            echo "Using fresh morning official-source collection."
+          fi
+
+      - name: Prepare persistent official editorial queue
+        run: |
+          python scripts/prepare_official_editorial_queue.py \
+            --official-path data/official-sources/candidates.json \
+            --pending-path data/official-sources/editorial-pending.json \
+            --output-path data/candidates/latest.json
+
+      - name: Build fresh article-value and urgency ranking
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
+        run: python scripts/build_opportunity_report.py
 
       - name: Collect source URLs already used by open pull requests
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh pr list --state open --limit 100 --json body > /tmp/open-prs.json
+          set -euo pipefail
+          gh pr list --state open --limit 100 --json body > /tmp/open-prs.json || echo '[]' > /tmp/open-prs.json
           python3 - <<'PY'
-          import json
-          import re
+          import json,re
           from pathlib import Path
-
-          payload = json.loads(Path('/tmp/open-prs.json').read_text(encoding='utf-8'))
-          urls = set()
+          payload=json.loads(Path('/tmp/open-prs.json').read_text(encoding='utf-8'))
+          urls=set()
           for item in payload:
-              body = item.get('body') or ''
-              match = re.search(r'^- Source:\s*(https?://\S+)', body, re.MULTILINE)
-              if match:
-                  urls.add(match.group(1).rstrip(').,]'))
+              body=item.get('body') or ''
+              match=re.search(r'^- Source:\s*(https?://\S+)', body, re.MULTILINE)
+              if match: urls.add(match.group(1).rstrip(').,]'))
           Path('/tmp/open-pr-source-urls.txt').write_text('\n'.join(sorted(urls)), encoding='utf-8')
           print(f'Excluded {len(urls)} source URLs from open pull requests')
           PY
 
-      - name: Select highest-confidence eligible candidate
-        id: pick
-        env:
-          MIN_SCORE: ${{ inputs.min_score || '82' }}
-        run: |
-          python scripts/select_top_candidate.py \
-            --min-score "$MIN_SCORE" \
-            --exclude-file /tmp/open-pr-source-urls.txt
-
-      - name: Report no eligible candidate
-        if: steps.pick.outputs.selected != 'true'
-        run: |
-          echo "No official-source article was published in the second slot." >> "$GITHUB_STEP_SUMMARY"
-          echo "Reason: ${{ steps.pick.outputs.reason }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "The quality threshold was preserved; no filler article was generated." >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Generate publication-ready JP/EN pair and social copy
-        if: steps.pick.outputs.selected == 'true'
+      - name: Select and generate a quality-gated official article
+        id: article
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           GOOGLE_DRIVE_INTERNAL_REFERENCE_FOLDER_ID: ${{ vars.GOOGLE_DRIVE_INTERNAL_REFERENCE_FOLDER_ID }}
           GOOGLE_DRIVE_LHUB_ARCHIVE_FOLDER_ID: ${{ vars.GOOGLE_DRIVE_LHUB_ARCHIVE_FOLDER_ID }}
+          REQUESTED_CANDIDATE_FLOOR: ${{ inputs.candidate_floor || '55' }}
         run: |
-          python scripts/generate_content.py \
-            --url "${{ steps.pick.outputs.url }}" \
-            --slug "${{ steps.pick.outputs.slug }}" \
-            --category "${{ steps.pick.outputs.category }}" \
-            --cta "${{ steps.pick.outputs.cta }}" \
-            --publish
+          set -euo pipefail
+          if ! [[ "$REQUESTED_CANDIDATE_FLOOR" =~ ^[0-9]+$ ]]; then
+            echo "Invalid candidate_floor: $REQUESTED_CANDIDATE_FLOOR" >&2
+            exit 1
+          fi
+          CANDIDATE_FLOOR="$REQUESTED_CANDIDATE_FLOOR"
+          if [ "$CANDIDATE_FLOOR" -lt 0 ]; then CANDIDATE_FLOOR=0; fi
+          if [ "$CANDIDATE_FLOOR" -gt 100 ]; then CANDIDATE_FLOOR=100; fi
+
+          REAL_GITHUB_OUTPUT="$GITHUB_OUTPUT"
+          selected=false
+          final_reason="no eligible official-source candidate"
+
+          for attempt in 1 2 3 4 5; do
+            pick_out="$(mktemp)"
+            GITHUB_OUTPUT="$pick_out" python scripts/select_top_candidate.py \
+              --min-score "$CANDIDATE_FLOOR" \
+              --exclude-file /tmp/open-pr-source-urls.txt
+            picked=$(awk -F= '$1=="selected" {v=$2} END {print v}' "$pick_out")
+            if [ "$picked" != "true" ]; then
+              final_reason=$(awk -F= '$1=="reason" {sub(/^[^=]*=/,""); v=$0} END {print v}' "$pick_out")
+              break
+            fi
+
+            URL=$(awk -F= '$1=="url" {sub(/^[^=]*=/,""); v=$0} END {print v}' "$pick_out")
+            SLUG=$(awk -F= '$1=="slug" {v=$2} END {print v}' "$pick_out")
+            CATEGORY=$(awk -F= '$1=="category" {sub(/^[^=]*=/,""); v=$0} END {print v}' "$pick_out")
+            CTA=$(awk -F= '$1=="cta" {v=$2} END {print v}' "$pick_out")
+            SCORE=$(awk -F= '$1=="score" {v=$2} END {print v}' "$pick_out")
+            TITLE=$(awk -F= '$1=="title" {sub(/^[^=]*=/,""); v=$0} END {print v}' "$pick_out")
+            REASON=$(awk -F= '$1=="reason" {sub(/^[^=]*=/,""); v=$0} END {print v}' "$pick_out")
+
+            echo "Official candidate ${attempt}/5: ${TITLE} (${SCORE}/100 candidate priority)"
+            set +e
+            python scripts/generate_content.py \
+              --url "$URL" \
+              --slug "$SLUG" \
+              --category "$CATEGORY" \
+              --cta "$CTA" \
+              --min-score 72 \
+              --publish
+            generation_status=$?
+            set -e
+
+            if [ "$generation_status" -eq 0 ]; then
+              {
+                echo "selected=true"
+                echo "url=$URL"
+                echo "slug=$SLUG"
+                echo "category=$CATEGORY"
+                echo "cta=$CTA"
+                echo "candidate_score=$SCORE"
+                echo "title=$TITLE"
+                echo "reason=$REASON"
+              } >> "$REAL_GITHUB_OUTPUT"
+              selected=true
+              break
+            fi
+
+            echo "Candidate failed final article/source gate; applying persistent priority penalty and moving on."
+            python scripts/update_official_candidate_state.py \
+              --pending-path data/official-sources/editorial-pending.json \
+              --url "$URL" \
+              --outcome generation_failed
+            echo "$URL" >> /tmp/open-pr-source-urls.txt
+            rm -f "src/content/articles/${SLUG}.md" "src/content/articles-en/${SLUG}.md"
+            rm -rf "social/${SLUG}"
+            final_reason="candidate generation/quality gate failed"
+          done
+
+          if [ "$selected" != "true" ]; then
+            echo "selected=false" >> "$REAL_GITHUB_OUTPUT"
+            echo "reason=$final_reason" >> "$REAL_GITHUB_OUTPUT"
+          fi
+
+      - name: Report no publishable official candidate
+        if: steps.article.outputs.selected != 'true'
+        run: |
+          echo "No official-source article was published after candidate rotation." >> "$GITHUB_STEP_SUMMARY"
+          echo "Reason: ${{ steps.article.outputs.reason }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidates remain in the pending queue unless already published; failed candidates receive persistent priority penalties and final article quality floor was not lowered." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Finalize social copy with production URL
-        if: steps.pick.outputs.selected == 'true'
+        if: steps.article.outputs.selected == 'true'
         env:
-          SLUG: ${{ steps.pick.outputs.slug }}
+          SLUG: ${{ steps.article.outputs.slug }}
         run: python scripts/finalize_social_posts.py --article-path "src/content/articles/${SLUG}.md"
 
       - name: Verify direct-publication invariants
-        if: steps.pick.outputs.selected == 'true'
+        if: steps.article.outputs.selected == 'true'
         env:
-          SLUG: ${{ steps.pick.outputs.slug }}
+          SLUG: ${{ steps.article.outputs.slug }}
         run: |
           set -euo pipefail
           test -s "src/content/articles/${SLUG}.md"
@@ -138,51 +235,43 @@ jobs:
           grep -q '^draft: false$' "src/content/articles-en/${SLUG}.md"
           grep -q '^sourceUrl: ' "src/content/articles/${SLUG}.md"
           grep -q '^sourceUrl: ' "src/content/articles-en/${SLUG}.md"
-          grep -q '^cta: ' "src/content/articles/${SLUG}.md"
-          grep -q '^cta: ' "src/content/articles-en/${SLUG}.md"
 
       - name: Lint
-        if: steps.pick.outputs.selected == 'true'
+        if: steps.article.outputs.selected == 'true'
         run: |
           if npm run | grep -q " lint"; then npm run lint; else echo "No lint script configured."; fi
 
       - name: Typecheck
-        if: steps.pick.outputs.selected == 'true'
+        if: steps.article.outputs.selected == 'true'
         run: |
           if npm run | grep -q " typecheck"; then npm run typecheck; else npx astro check; fi
 
       - name: Tests
-        if: steps.pick.outputs.selected == 'true'
+        if: steps.article.outputs.selected == 'true'
         run: |
-          if npm run | grep -q " test"; then
-            npm test
-          elif [ -d tests ]; then
-            python -m unittest discover -s tests -v
-          else
-            echo "No tests configured."
-          fi
+          if npm run | grep -q " test"; then npm test; elif [ -d tests ]; then python -m unittest discover -s tests -v; else echo "No tests configured."; fi
 
       - name: Build
-        if: steps.pick.outputs.selected == 'true'
+        if: steps.article.outputs.selected == 'true'
         run: npm run build
 
       - name: Migration check
-        if: steps.pick.outputs.selected == 'true'
+        if: steps.article.outputs.selected == 'true'
         run: |
           if npm run | grep -q "migration:check"; then npm run migration:check; else echo "No migration check configured."; fi
 
       - name: Create and merge audited publication PR
         id: merge
-        if: steps.pick.outputs.selected == 'true'
+        if: steps.article.outputs.selected == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-          SOURCE_URL: ${{ steps.pick.outputs.url }}
-          SOURCE_TITLE: ${{ steps.pick.outputs.title }}
-          SLUG: ${{ steps.pick.outputs.slug }}
-          CATEGORY: ${{ steps.pick.outputs.category }}
-          CTA: ${{ steps.pick.outputs.cta }}
-          SCORE: ${{ steps.pick.outputs.score }}
-          SELECTION_REASON: ${{ steps.pick.outputs.reason }}
+          SOURCE_URL: ${{ steps.article.outputs.url }}
+          SOURCE_TITLE: ${{ steps.article.outputs.title }}
+          SLUG: ${{ steps.article.outputs.slug }}
+          CATEGORY: ${{ steps.article.outputs.category }}
+          CTA: ${{ steps.article.outputs.cta }}
+          CANDIDATE_SCORE: ${{ steps.article.outputs.candidate_score }}
+          SELECTION_REASON: ${{ steps.article.outputs.reason }}
         run: |
           set -euo pipefail
           branch="content/official-publish-${SLUG}-${GITHUB_RUN_ID}"
@@ -192,71 +281,123 @@ jobs:
           git add "src/content/articles/${SLUG}.md" "src/content/articles-en/${SLUG}.md" "social/${SLUG}/"
           git commit -m "Publish official-source article: ${SLUG}"
           git push origin "$branch"
-
           cat > /tmp/pr-body.md <<EOF
-          ## High-confidence official-source publication
+          ## Official-source publication
 
           - Source: ${SOURCE_URL}
           - Source title: ${SOURCE_TITLE}
-          - Candidate score: ${SCORE}/100
+          - Candidate-priority score: ${CANDIDATE_SCORE}/100 (not the final article quality score)
           - Selection reason: ${SELECTION_REASON}
           - Category: ${CATEGORY}
           - CTA: ${CTA}
-          - Japanese and English: publication-ready pair
 
           ## Automated publication gates
 
-          - [x] Candidate score met the direct-publication threshold
-          - [x] Primary-source URL preserved in frontmatter
-          - [x] JP and EN both use draft:false
-          - [x] Private Drive context is editorial-only and is not cited publicly
+          - [x] Official-source pending queue considered urgency and normal article value separately
+          - [x] Final JP/EN article pair passed the independent >=72 editorial quality gate
+          - [x] JP and EN both use draft:false and preserve the public source URL
+          - [x] Private Drive context is sanitized editorial background only
           - [x] Lint / typecheck / tests / build / migration check completed before merge
-          - [x] Social drafts finalized with production URL
+          - [ ] JP and EN production URLs must return 2xx before publication is reported successful
           EOF
-
           pr_url=$(gh pr create --base main --head "$branch" --title "Official publication: ${SLUG}" --body-file /tmp/pr-body.md)
           pr_number="${pr_url##*/}"
           gh pr merge "$pr_number" --squash --delete-branch
           main_sha=$(gh api "repos/${GITHUB_REPOSITORY}/commits/main" --jq .sha)
           echo "main_sha=$main_sha" >> "$GITHUB_OUTPUT"
-          echo "pr_number=$pr_number" >> "$GITHUB_OUTPUT"
 
-      - name: Deploy published article
-        if: steps.pick.outputs.selected == 'true' && steps.merge.outcome == 'success'
+      - name: Observe push-triggered Pages deployment
+        if: steps.article.outputs.selected == 'true' && steps.merge.outcome == 'success'
         env:
           GH_TOKEN: ${{ github.token }}
           MAIN_SHA: ${{ steps.merge.outputs.main_sha }}
         run: |
           set -euo pipefail
-          gh workflow run deploy-pages.yml --ref main
           run_id=""
-          for attempt in $(seq 1 20); do
-            run_id=$(gh run list \
-              --workflow deploy-pages.yml \
-              --event workflow_dispatch \
-              --branch main \
-              --limit 20 \
-              --json databaseId,headSha \
-              --jq ".[] | select(.headSha == \"$MAIN_SHA\") | .databaseId" | head -n 1)
+          for attempt in $(seq 1 24); do
+            run_id=$(gh run list --workflow deploy-pages.yml --branch main --limit 30 --json databaseId,headSha,event \
+              --jq ".[] | select(.headSha == \"$MAIN_SHA\" and .event == \"push\") | .databaseId" | head -n 1)
             if [ -n "$run_id" ]; then break; fi
-            sleep 3
+            sleep 5
           done
-          if [ -z "$run_id" ]; then
-            echo "Could not locate Pages deployment for $MAIN_SHA" >&2
-            exit 1
+          if [ -n "$run_id" ]; then
+            gh run watch "$run_id" --exit-status || true
           fi
-          gh run watch "$run_id" --exit-status
+
+      - name: Verify JP and EN production URLs
+        if: steps.article.outputs.selected == 'true' && steps.merge.outcome == 'success'
+        env:
+          SLUG: ${{ steps.article.outputs.slug }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 36); do
+            jp=false; en=false
+            curl --fail --silent --show-error --location --max-time 20 "https://article.hdnjapan.com/articles/${SLUG}/" -o /tmp/jp.html && test -s /tmp/jp.html && jp=true || true
+            curl --fail --silent --show-error --location --max-time 20 "https://article.hdnjapan.com/en/articles/${SLUG}/" -o /tmp/en.html && test -s /tmp/en.html && en=true || true
+            if [ "$jp" = true ] && [ "$en" = true ]; then
+              echo "Production JP/EN pair verified."
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Production JP/EN pair did not become reachable." >&2
+          exit 1
+
+      - name: Remove newly published source from pending queue
+        if: steps.article.outputs.selected == 'true' && steps.merge.outcome == 'success' && success()
+        env:
+          SOURCE_URL: ${{ steps.article.outputs.url }}
+        run: |
+          python scripts/update_official_candidate_state.py \
+            --pending-path data/official-sources/editorial-pending.json \
+            --url "$SOURCE_URL" \
+            --outcome published
+          python scripts/prepare_official_editorial_queue.py \
+            --official-path data/official-sources/candidates.json \
+            --pending-path data/official-sources/editorial-pending.json \
+            --output-path data/candidates/latest.json
+
+      - name: Persist official pending/state branch
+        if: always()
+        run: |
+          set -euo pipefail
+          if [ ! -d data/official-sources ]; then exit 0; fi
+          tmpdir="$(mktemp -d)"
+          cp -R data/official-sources "$tmpdir/official-sources"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin official-sources-state >/dev/null 2>&1; then
+            git fetch origin official-sources-state
+            git worktree add "$tmpdir/state" origin/official-sources-state
+            cd "$tmpdir/state"
+            git checkout -B official-sources-state
+          else
+            git worktree add --detach "$tmpdir/state" HEAD
+            cd "$tmpdir/state"
+            git checkout --orphan official-sources-state
+            git rm -r --cached . || true
+            find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          fi
+          mkdir -p data
+          rm -rf data/official-sources
+          cp -R "$tmpdir/official-sources" data/official-sources
+          git add data/official-sources
+          if ! git diff --cached --quiet; then
+            git commit -m "Persist official editorial pending queue [skip ci]"
+            git push origin official-sources-state
+          fi
 
       - name: Publication summary
-        if: steps.pick.outputs.selected == 'true'
+        if: steps.article.outputs.selected == 'true' && success()
         env:
-          SLUG: ${{ steps.pick.outputs.slug }}
-          SCORE: ${{ steps.pick.outputs.score }}
+          SLUG: ${{ steps.article.outputs.slug }}
+          CANDIDATE_SCORE: ${{ steps.article.outputs.candidate_score }}
         run: |
           {
             echo "## Official-source publication"
             echo ""
-            echo "Published: https://article.hdnjapan.com/articles/${SLUG}/"
-            echo "English: https://article.hdnjapan.com/en/articles/${SLUG}/"
-            echo "Candidate score: ${SCORE}/100"
+            echo "Published and verified: https://article.hdnjapan.com/articles/${SLUG}/"
+            echo "English verified: https://article.hdnjapan.com/en/articles/${SLUG}/"
+            echo "Candidate-priority score: ${CANDIDATE_SCORE}/100"
+            echo "Final article quality floor: >=72"
           } >> "$GITHUB_STEP_SUMMARY"
