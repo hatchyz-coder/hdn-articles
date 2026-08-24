@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Privacy, retry, deduplication and backlog hardening for the Drive editorial generator."""
+"""Privacy, retry, deduplication and quality hardening for the Drive editorial generator."""
 from __future__ import annotations
 
 import hashlib
@@ -156,6 +156,76 @@ def validate_sanitized_output(data: dict[str, Any]) -> list[str]:
 
 
 impl.validate_sanitized_output = validate_sanitized_output
+
+# Prevent schema failures caused by an otherwise usable model description being a few
+# characters too short. This is metadata repair only; it does not inflate article bodies.
+_v2_description = impl._description
+
+
+def _description(value: Any, fallback: Any, max_chars: int) -> str:
+    text = _v2_description(value, fallback, max_chars)
+    min_chars = 60 if max_chars == 160 else 50
+    if len(text) < min_chars:
+        fallback_text = str(fallback or "").strip()
+        if fallback_text and fallback_text not in text:
+            text = f"{text} {fallback_text}".strip()
+    if len(text) < min_chars:
+        suffix = (
+            "実務で確認したい論点、判断基準、運用上の注意点を具体的に整理します。"
+            if max_chars == 160
+            else "Practical implications, trade-offs, and implementation checks are explained for operators."
+        )
+        text = f"{text} {suffix}".strip()
+    if len(text) > max_chars:
+        text = text[: max_chars - 1].rstrip() + "…"
+    return text
+
+
+impl._description = _description
+
+# The prompt already performs an internal rewrite. Add one API-level retry only when the
+# returned pair is objectively too thin/incomplete, so a transient weak model response does
+# not become either a thin publication or a permanently discarded useful seed.
+_v2_call_openai_once = impl.call_openai_once
+MIN_JP_BODY_CHARS = 1200
+MIN_EN_BODY_CHARS = 900
+
+
+def _depth_issues(data: dict[str, Any]) -> list[str]:
+    issues: list[str] = []
+    required = ("title", "summary", "body_markdown", "english_title", "english_summary", "english_body_markdown")
+    for key in required:
+        if not str(data.get(key, "")).strip():
+            issues.append(f"missing:{key}")
+    jp = str(data.get("body_markdown", "")).strip()
+    en = str(data.get("english_body_markdown", "")).strip()
+    if jp and len(jp) < MIN_JP_BODY_CHARS:
+        issues.append("jp_body_too_thin")
+    if en and len(en) < MIN_EN_BODY_CHARS:
+        issues.append("en_body_too_thin")
+    if jp and jp.count("## ") < 2:
+        issues.append("jp_structure_too_thin")
+    if en and en.count("## ") < 2:
+        issues.append("en_structure_too_thin")
+    return issues
+
+
+def call_openai_once(doc: dict[str, Any], source_text: str, source_processing: dict[str, Any], timer: Any, mock_timeout: bool) -> dict[str, Any]:
+    data = _v2_call_openai_once(doc, source_text, source_processing, timer, mock_timeout)
+    first_issues = _depth_issues(data)
+    if not first_issues or not data.get("should_generate"):
+        return data
+    retry_data = _v2_call_openai_once(doc, source_text, source_processing, timer, mock_timeout)
+    timer.metrics["apiCalls"] = max(2, int(timer.metrics.get("apiCalls", 0)))
+    retry_issues = _depth_issues(retry_data)
+    if retry_issues and retry_data.get("should_generate"):
+        retry_data["should_generate"] = False
+        retry_data["score"] = min(int(retry_data.get("score", 0)), HARD_MIN_SCORE - 1)
+        retry_data["skip_reason"] = "Final JP/EN article pair remained objectively too thin after an automatic rewrite retry: " + ", ".join(retry_issues)
+    return retry_data
+
+
+impl.call_openai_once = call_openai_once
 
 
 def unique_slug(suggested: str, doc_id: str) -> str:
