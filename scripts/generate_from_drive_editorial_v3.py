@@ -8,6 +8,16 @@ import generate_from_drive_editorial_v2 as impl
 from generate_from_drive_editorial_v2 import *  # noqa: F401,F403
 from generate_from_drive_editorial_v2 import _state_key, _verify_approved_folder
 
+# Legacy runs permanently exhausted some transient states before the resilient processor
+# existed. On a processor-version upgrade, allow exactly one fresh retry cycle for them.
+impl.REPROCESS_ON_VERSION_CHANGE = set(impl.REPROCESS_ON_VERSION_CHANGE) | {
+    "api_timeout",
+    "os_timeout",
+    "processing",
+    "dry_run",
+}
+REPROCESS_ON_VERSION_CHANGE = impl.REPROCESS_ON_VERSION_CHANGE
+
 _v2_sanitize_seed_text = impl.sanitize_seed_text
 
 CREDENTIAL_VALUE_PATTERNS = (
