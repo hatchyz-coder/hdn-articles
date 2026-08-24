@@ -19,7 +19,7 @@ permissions:
   pages: read
 
 concurrency:
-  group: official-source-daily-publish
+  group: official-sources-state-writer
   cancel-in-progress: false
 
 jobs:
@@ -194,7 +194,11 @@ jobs:
               break
             fi
 
-            echo "Candidate failed final article/source gate; moving to next pending candidate."
+            echo "Candidate failed final article/source gate; applying persistent priority penalty and moving on."
+            python scripts/update_official_candidate_state.py \
+              --pending-path data/official-sources/editorial-pending.json \
+              --url "$URL" \
+              --outcome generation_failed
             echo "$URL" >> /tmp/open-pr-source-urls.txt
             rm -f "src/content/articles/${SLUG}.md" "src/content/articles-en/${SLUG}.md"
             rm -rf "social/${SLUG}"
@@ -211,7 +215,7 @@ jobs:
         run: |
           echo "No official-source article was published after candidate rotation." >> "$GITHUB_STEP_SUMMARY"
           echo "Reason: ${{ steps.article.outputs.reason }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "Candidates remain in the pending queue unless already published; final article quality floor was not lowered." >> "$GITHUB_STEP_SUMMARY"
+          echo "Candidates remain in the pending queue unless already published; failed candidates receive persistent priority penalties and final article quality floor was not lowered." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Finalize social copy with production URL
         if: steps.article.outputs.selected == 'true'
@@ -341,7 +345,13 @@ jobs:
 
       - name: Remove newly published source from pending queue
         if: steps.article.outputs.selected == 'true' && steps.merge.outcome == 'success' && success()
+        env:
+          SOURCE_URL: ${{ steps.article.outputs.url }}
         run: |
+          python scripts/update_official_candidate_state.py \
+            --pending-path data/official-sources/editorial-pending.json \
+            --url "$SOURCE_URL" \
+            --outcome published
           python scripts/prepare_official_editorial_queue.py \
             --official-path data/official-sources/candidates.json \
             --pending-path data/official-sources/editorial-pending.json \
