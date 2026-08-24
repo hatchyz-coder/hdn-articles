@@ -24,7 +24,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Count today's Drive publications
+      - name: Count today's verified Drive publications
         id: initial
         run: |
           set -euo pipefail
@@ -43,9 +43,11 @@ jobs:
           data = json.load(open('/tmp/processed-docs.json', encoding='utf-8'))
           count = 0
           for record in data.get('documents', {}).values():
-              if record.get('status') not in {'generated', 'published_manual'}:
+              # `generated` means merged but not yet production-verified and must never
+              # satisfy the daily publication target.
+              if record.get('status') not in {'published', 'published_manual'}:
                   continue
-              raw = record.get('finishedAt')
+              raw = record.get('publishedAt') or record.get('finishedAt')
               if not raw:
                   continue
               try:
@@ -65,10 +67,10 @@ jobs:
           echo "count=${count}" >> "$GITHUB_OUTPUT"
           if [ "$count" -ge "$DAILY_TARGET" ]; then
             echo "complete=true" >> "$GITHUB_OUTPUT"
-            echo "Daily LHub/Drive target satisfied for ${today}: ${count}/${DAILY_TARGET}." >> "$GITHUB_STEP_SUMMARY"
+            echo "Daily verified LHub/Drive target satisfied for ${today}: ${count}/${DAILY_TARGET}." >> "$GITHUB_STEP_SUMMARY"
           else
             echo "complete=false" >> "$GITHUB_OUTPUT"
-            echo "Daily LHub/Drive target incomplete for ${today}: ${count}/${DAILY_TARGET}. Recovery starts now." >> "$GITHUB_STEP_SUMMARY"
+            echo "Daily verified LHub/Drive target incomplete for ${today}: ${count}/${DAILY_TARGET}. Recovery starts now." >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Recover missing publication slots
@@ -90,9 +92,9 @@ jobs:
           data = json.load(open('/tmp/processed-docs.json', encoding='utf-8'))
           count = 0
           for record in data.get('documents', {}).values():
-              if record.get('status') not in {'generated', 'published_manual'}:
+              if record.get('status') not in {'published', 'published_manual'}:
                   continue
-              raw = record.get('finishedAt')
+              raw = record.get('publishedAt') or record.get('finishedAt')
               if not raw:
                   continue
               try:
@@ -108,11 +110,12 @@ jobs:
             fi
           }
 
-          # Move past unsuitable drafts and transient API failures without lowering quality.
+          # Move past unsuitable drafts, transient API failures and deploy failures
+          # without lowering the editorial quality threshold.
           for attempt in 1 2 3 4 5 6 7 8; do
             count="$(count_drive_today)"
             if [ "$count" -ge "$DAILY_TARGET" ]; then
-              echo "Recovered LHub/Drive target: ${count}/${DAILY_TARGET}." >> "$GITHUB_STEP_SUMMARY"
+              echo "Recovered verified LHub/Drive target: ${count}/${DAILY_TARGET}." >> "$GITHUB_STEP_SUMMARY"
               exit 0
             fi
 
@@ -142,9 +145,9 @@ jobs:
 
           count="$(count_drive_today)"
           if [ "$count" -ge "$DAILY_TARGET" ]; then
-            echo "Recovered LHub/Drive target after final attempt: ${count}/${DAILY_TARGET}." >> "$GITHUB_STEP_SUMMARY"
+            echo "Recovered verified LHub/Drive target after final attempt: ${count}/${DAILY_TARGET}." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
 
-          echo "LHub/Drive daily target still incomplete after recovery: ${count}/${DAILY_TARGET}." >&2
+          echo "Verified LHub/Drive daily target still incomplete after recovery: ${count}/${DAILY_TARGET}." >&2
           exit 1
