@@ -15,8 +15,8 @@ ARTICLE_DIR = ROOT / "src" / "content" / "articles"
 DEFAULT_OFFICIAL = ROOT / "data" / "official-sources" / "candidates.json"
 DEFAULT_PENDING = ROOT / "data" / "official-sources" / "editorial-pending.json"
 DEFAULT_OUTPUT = ROOT / "data" / "candidates" / "latest.json"
-MAX_PENDING = 200
-MAX_PER_SOURCE_IN_TOP_WINDOW = 5
+MAX_PENDING = 5000
+MAX_PER_SOURCE_IN_TOP_WINDOW = 2
 
 
 def load_json(path: Path, default: Any) -> Any:
@@ -26,7 +26,6 @@ def load_json(path: Path, default: Any) -> Any:
 
 
 def published_source_urls() -> set[str]:
-    """Only draft:false articles consume a pending official source permanently."""
     urls: set[str] = set()
     source_pattern = re.compile(r'^sourceUrl:\s*["\']?([^"\'\n]+)', re.MULTILINE)
     published_pattern = re.compile(r'(?m)^draft:\s*false\s*$')
@@ -51,23 +50,18 @@ def normalized_candidate(item: dict[str, Any]) -> dict[str, Any] | None:
     priority = int(item.get("priority", item.get("source_priority", 0)) or 0)
     matched = [str(v) for v in item.get("matched_keywords", []) if str(v).strip()]
     identifier = str(item.get("fingerprint") or hashlib.sha256(url.encode("utf-8")).hexdigest())
+    failures = int(item.get("generation_failures", 0) or 0)
     return {
         **item,
-        "id": identifier[:16],
-        "source_id": source_id,
-        "source_name": source_name,
-        "source": source_name,
-        "url": url,
-        "title": title,
-        "score": score,
-        "ai_score": score,
-        "source_priority": priority,
+        "id": identifier[:16], "source_id": source_id, "source_name": source_name, "source": source_name,
+        "url": url, "title": title, "score": score, "ai_score": score, "source_priority": priority,
         "keyword_score": max(int(item.get("keyword_score", 0) or 0), min(30, len(matched) * 10)),
         "reason": str(item.get("reason") or f"Official-source update from {source_name}; editorial value is evaluated separately from urgency."),
         "suggested_category": str(item.get("suggested_category") or "コンプライアンス・行政"),
         "suggested_cta": str(item.get("suggested_cta") or "consultation"),
         "suggested_slug": str(item.get("suggested_slug") or ""),
         "discovered_at": str(item.get("discovered_at") or datetime.now(timezone.utc).isoformat()),
+        "generation_failures": failures,
     }
 
 
@@ -78,14 +72,23 @@ def merge_pending(existing: list[dict[str, Any]], fresh: list[dict[str, Any]], p
         if not item or item["url"] in published:
             continue
         current = by_url.get(item["url"])
-        if current is None or int(item.get("score", 0)) >= int(current.get("score", 0)):
+        if current is None:
             by_url[item["url"]] = item
-    ranked = sorted(
-        by_url.values(),
-        key=lambda item: (int(item.get("score", 0)), int(item.get("source_priority", 0)), str(item.get("published_at", "")), str(item.get("discovered_at", ""))),
-        reverse=True,
-    )
-    return ranked[:MAX_PENDING]
+            continue
+        # Fresh collector metadata may improve, but operational failure history must survive
+        # rediscovery so the same bad source cannot monopolize every day.
+        merged = {**current, **item}
+        merged["generation_failures"] = max(int(current.get("generation_failures", 0) or 0), int(item.get("generation_failures", 0) or 0))
+        if current.get("last_generation_failure_at"):
+            merged["last_generation_failure_at"] = current["last_generation_failure_at"]
+        by_url[item["url"]] = merged
+
+    def rank(item: dict[str, Any]) -> tuple[Any, ...]:
+        failures = int(item.get("generation_failures", 0) or 0)
+        effective_score = int(item.get("score", 0)) - min(50, failures * 10)
+        return (effective_score, int(item.get("source_priority", 0)), str(item.get("published_at", "")), str(item.get("discovered_at", "")))
+
+    return sorted(by_url.values(), key=rank, reverse=True)[:MAX_PENDING]
 
 
 def fair_top_window(pending: list[dict[str, Any]], limit: int = 100) -> list[dict[str, Any]]:
