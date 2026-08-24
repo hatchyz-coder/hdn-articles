@@ -9,6 +9,12 @@ import generate_from_drive_editorial_v2 as impl
 from generate_from_drive_editorial_v2 import *  # noqa: F401,F403
 from generate_from_drive_editorial_v2 import _state_key, _verify_approved_folder
 
+# This wrapper changes privacy, retry and backlog semantics, so expose a distinct processor
+# version. Legacy states from earlier semantics can be reconsidered once without deleting
+# the audit trail.
+impl.PROCESSOR_VERSION = 3
+PROCESSOR_VERSION = impl.PROCESSOR_VERSION
+
 # The approved LHub archive is a backlog, not merely a recent-file feed. Keep generous
 # discovery ceilings so older unprocessed manuscripts cannot disappear behind a processed
 # recent-file window. Drive pagination still bounds each API request.
