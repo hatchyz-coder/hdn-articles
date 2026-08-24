@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Privacy, retry and backlog hardening wrapper for the resilient Drive editorial generator."""
+"""Privacy, retry, deduplication and backlog hardening for the Drive editorial generator."""
 from __future__ import annotations
 
+import hashlib
 import re
 from typing import Any
 
@@ -45,6 +46,21 @@ impl.REPROCESS_ON_VERSION_CHANGE = set(impl.REPROCESS_ON_VERSION_CHANGE) | {
     "dry_run",
 }
 REPROCESS_ON_VERSION_CHANGE = impl.REPROCESS_ON_VERSION_CHANGE
+
+# Once a backlog seed has produced a merged/published article it is consumed. A later typo
+# edit in Drive must not silently generate a second article from the same seed.
+TERMINAL_CONSUMED_STATUSES = {"generated", "published", "published_manual", "duplicate_source"}
+_v2_is_unprocessed_or_updated = impl.is_unprocessed_or_updated
+
+
+def is_unprocessed_or_updated(state: dict[str, Any], doc: dict[str, Any]) -> bool:
+    record = state.get("documents", {}).get(_state_key(doc["id"]))
+    if record and str(record.get("status", "")) in TERMINAL_CONSUMED_STATUSES:
+        return False
+    return _v2_is_unprocessed_or_updated(state, doc)
+
+
+impl.is_unprocessed_or_updated = is_unprocessed_or_updated
 
 _v2_sanitize_seed_text = impl.sanitize_seed_text
 
@@ -148,6 +164,34 @@ def validate_sanitized_output(data: dict[str, Any]) -> list[str]:
 
 
 impl.validate_sanitized_output = validate_sanitized_output
+
+# Slug collision handling must never overwrite an existing article, even if state is lost
+# or a repeated model suggestion collides more than once.
+def unique_slug(suggested: str, doc_id: str) -> str:
+    base_slug = impl.base.normalize_slug(suggested, doc_id)
+    suffix = hashlib.sha256(doc_id.encode("utf-8")).hexdigest()[:8]
+    candidates = [base_slug, f"{base_slug}-{suffix}"]
+    candidates.extend(f"{base_slug}-{suffix}-{index}" for index in range(2, 1000))
+    for slug in candidates:
+        if not (impl.base.ARTICLE_DIR / f"{slug}.md").exists() and not (impl.EN_ARTICLE_DIR / f"{slug}.md").exists():
+            return slug
+    raise RuntimeError("Could not allocate a unique article slug without overwriting existing content")
+
+
+impl.unique_slug = unique_slug
+
+_v2_write_outputs = impl.write_outputs
+
+
+def write_outputs(slug: str, data: dict[str, Any], article: str):
+    jp = impl.base.ARTICLE_DIR / f"{slug}.md"
+    en = impl.EN_ARTICLE_DIR / f"{slug}.md"
+    if jp.exists() or en.exists():
+        raise FileExistsError(f"Refusing to overwrite existing published article pair: {slug}")
+    return _v2_write_outputs(slug, data, article)
+
+
+impl.write_outputs = write_outputs
 
 
 def main() -> int:
