@@ -3,8 +3,8 @@ name: Daily Drive Editorial Fallback
 on:
   workflow_dispatch:
   schedule:
-    # 10:00 JST every day. Recover missing Drive slots until two Drive-origin pairs exist today.
-    - cron: '0 1 * * *'
+    # 09:30 JST every day, immediately after the second regular Drive slot.
+    - cron: '30 0 * * *'
 
 permissions:
   actions: write
@@ -13,7 +13,7 @@ permissions:
 jobs:
   recover:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 120
     env:
       TZ: Asia/Tokyo
       GH_TOKEN: ${{ github.token }}
@@ -65,10 +65,10 @@ jobs:
           echo "count=${count}" >> "$GITHUB_OUTPUT"
           if [ "$count" -ge "$DAILY_TARGET" ]; then
             echo "complete=true" >> "$GITHUB_OUTPUT"
-            echo "Daily Drive target already satisfied for ${today}: ${count}/${DAILY_TARGET}." >> "$GITHUB_STEP_SUMMARY"
+            echo "Daily LHub/Drive target satisfied for ${today}: ${count}/${DAILY_TARGET}." >> "$GITHUB_STEP_SUMMARY"
           else
             echo "complete=false" >> "$GITHUB_OUTPUT"
-            echo "Daily Drive target incomplete for ${today}: ${count}/${DAILY_TARGET}." >> "$GITHUB_STEP_SUMMARY"
+            echo "Daily LHub/Drive target incomplete for ${today}: ${count}/${DAILY_TARGET}. Recovery starts now." >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Recover missing publication slots
@@ -108,16 +108,15 @@ jobs:
             fi
           }
 
-          # Allow enough attempts to move past quality-gated or transiently failed seeds
-          # without lowering the editorial threshold.
-          for attempt in 1 2 3 4 5 6; do
+          # Move past unsuitable drafts and transient API failures without lowering quality.
+          for attempt in 1 2 3 4 5 6 7 8; do
             count="$(count_drive_today)"
             if [ "$count" -ge "$DAILY_TARGET" ]; then
-              echo "Recovered Drive target: ${count}/${DAILY_TARGET}." >> "$GITHUB_STEP_SUMMARY"
+              echo "Recovered LHub/Drive target: ${count}/${DAILY_TARGET}." >> "$GITHUB_STEP_SUMMARY"
               exit 0
             fi
 
-            echo "Fallback attempt ${attempt}: ${count}/${DAILY_TARGET}; triggering Daily Drive Editorial Publish"
+            echo "Recovery attempt ${attempt}: ${count}/${DAILY_TARGET}; triggering Daily Drive Editorial Publish"
             before="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
             gh workflow run daily-drive-editorial-publish.yml --ref main
 
@@ -138,15 +137,14 @@ jobs:
               echo "Could not locate triggered workflow run on attempt ${attempt}" >&2
               continue
             fi
-
             gh run watch "$run_id" --exit-status || true
           done
 
           count="$(count_drive_today)"
           if [ "$count" -ge "$DAILY_TARGET" ]; then
-            echo "Recovered Drive target after final attempt: ${count}/${DAILY_TARGET}." >> "$GITHUB_STEP_SUMMARY"
+            echo "Recovered LHub/Drive target after final attempt: ${count}/${DAILY_TARGET}." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
 
-          echo "Drive editorial target still incomplete after recovery: ${count}/${DAILY_TARGET}." >&2
+          echo "LHub/Drive daily target still incomplete after recovery: ${count}/${DAILY_TARGET}." >&2
           exit 1
