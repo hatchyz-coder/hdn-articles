@@ -10,14 +10,9 @@ import generate_from_drive_editorial_v2 as impl
 from generate_from_drive_editorial_v2 import *  # noqa: F401,F403
 from generate_from_drive_editorial_v2 import _state_key, _verify_approved_folder
 
-# This wrapper changes privacy, retry and backlog semantics, so expose a distinct processor
-# version. Legacy states from earlier semantics can be reconsidered once without deleting
-# the audit trail.
 impl.PROCESSOR_VERSION = 3
 PROCESSOR_VERSION = impl.PROCESSOR_VERSION
 
-# Editorial quality is a repository invariant. workflow_dispatch must not be able to lower
-# it accidentally or intentionally below the production floor.
 HARD_MIN_SCORE = 72
 _base_parse_args = impl.base.parse_args
 
@@ -30,15 +25,10 @@ def _parse_args_with_floor():
 
 impl.base.parse_args = _parse_args_with_floor
 
-# The approved LHub archive is a backlog, not merely a recent-file feed. Keep generous
-# discovery ceilings so older unprocessed manuscripts cannot disappear behind a processed
-# recent-file window. Drive pagination still bounds each API request.
 impl.MAX_SCAN = 5000
 impl.base.MAX_FOLDER_SCAN = 1000
 MAX_SCAN = impl.MAX_SCAN
 
-# Legacy runs permanently exhausted some transient states before the resilient processor
-# existed. On a processor-version upgrade, allow exactly one fresh retry cycle for them.
 impl.REPROCESS_ON_VERSION_CHANGE = set(impl.REPROCESS_ON_VERSION_CHANGE) | {
     "api_timeout",
     "os_timeout",
@@ -47,8 +37,6 @@ impl.REPROCESS_ON_VERSION_CHANGE = set(impl.REPROCESS_ON_VERSION_CHANGE) | {
 }
 REPROCESS_ON_VERSION_CHANGE = impl.REPROCESS_ON_VERSION_CHANGE
 
-# Once a backlog seed has produced a merged/published article it is consumed. A later typo
-# edit in Drive must not silently generate a second article from the same seed.
 TERMINAL_CONSUMED_STATUSES = {"generated", "published", "published_manual", "duplicate_source"}
 _v2_is_unprocessed_or_updated = impl.is_unprocessed_or_updated
 
@@ -68,6 +56,10 @@ CREDENTIAL_VALUE_PATTERNS = (
     r"(?i)(パスワード|APIキー|秘密鍵|認証情報|アクセストークン|refresh_token|client_secret)\s*[:：=]\s*[^\s\n]+",
     r"(?i)(authorization\s*:\s*bearer)\s+[^\s\n]+",
 )
+PRIVATE_LABELED_NAME_PATTERNS = (
+    r"(?i)(顧客名|取引先名|会社名|法人名|医院名|クリニック名|店舗名|担当者名|院長名|医師名)\s*[:：=]\s*[^\n、。]{1,80}",
+    r"(?i)(client|customer|company|clinic|doctor|contact)\s+name\s*[:=]\s*[^\n,.;]{1,80}",
+)
 
 
 def sanitize_seed_text(text: str) -> tuple[str, list[str]]:
@@ -78,14 +70,15 @@ def sanitize_seed_text(text: str) -> tuple[str, list[str]]:
             sanitized = re.sub(pattern, "[REDACTED:credential_secret]", sanitized)
             sanitized = re.sub(r"\[REDACTED:credential_secret\]\s+[^\s\n]+", "[REDACTED:credential_secret]", sanitized)
             flags.append("credential_secret")
+    for pattern in PRIVATE_LABELED_NAME_PATTERNS:
+        if re.search(pattern, sanitized):
+            sanitized = re.sub(pattern, "[REDACTED:private_name]", sanitized)
+            flags.append("private_name")
     return sanitized, sorted(set(flags))
 
 
 impl.sanitize_seed_text = sanitize_seed_text
 
-# Public-output checks should prevent disclosure, not discard an otherwise useful article.
-# Recoverable findings are removed before the hard residual gate. Only high-risk material
-# that survives this deterministic pass can veto publication.
 PUBLIC_AUTO_REDACTIONS = (
     (r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", "[contact omitted]"),
     (r"(?:\+81[-\s]?)?0\d{1,4}[-\s]?\d{1,4}[-\s]?\d{3,4}", "[contact omitted]"),
@@ -133,7 +126,6 @@ def sanitize_public_output(data: dict[str, Any]) -> list[str]:
             continue
         label = clean(str(item.get("label", "")))
         url = str(item.get("url", "")).strip()
-        # Private Drive/Docs URLs can never be public references, regardless of model output.
         if PRIVATE_REFERENCE_URL.match(url):
             changed.append("private_reference_removed")
             continue
@@ -165,8 +157,7 @@ def validate_sanitized_output(data: dict[str, Any]) -> list[str]:
 
 impl.validate_sanitized_output = validate_sanitized_output
 
-# Slug collision handling must never overwrite an existing article, even if state is lost
-# or a repeated model suggestion collides more than once.
+
 def unique_slug(suggested: str, doc_id: str) -> str:
     base_slug = impl.base.normalize_slug(suggested, doc_id)
     suffix = hashlib.sha256(doc_id.encode("utf-8")).hexdigest()[:8]
