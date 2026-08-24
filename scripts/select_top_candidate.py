@@ -7,7 +7,6 @@ import hashlib
 import json
 import os
 import re
-from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -27,9 +26,13 @@ def parse_args() -> argparse.Namespace:
 
 def existing_source_urls() -> set[str]:
     urls: set[str] = set()
-    pattern = re.compile(r'^sourceUrl:\s*["\']?([^"\'\n]+)', re.MULTILINE)
+    source_pattern = re.compile(r'^sourceUrl:\s*["\']?([^"\'\n]+)', re.MULTILINE)
+    published_pattern = re.compile(r'(?m)^draft:\s*false\s*$')
     for path in ARTICLE_DIR.glob("*.md") if ARTICLE_DIR.exists() else []:
-        match = pattern.search(path.read_text(encoding="utf-8"))
+        text = path.read_text(encoding="utf-8")
+        if not published_pattern.search(text):
+            continue
+        match = source_pattern.search(text)
         if match:
             urls.add(match.group(1).strip())
     return urls
@@ -79,7 +82,6 @@ def _load(path: Path) -> dict:
 
 
 def load_ranked_candidates() -> tuple[list[dict], str]:
-    """Use opportunity ranking when it is at least as fresh as the candidate queue."""
     opportunity_payload = _load(OPPORTUNITIES_PATH)
     candidate_payload = _load(LATEST_PATH)
     opportunities = opportunity_payload.get("opportunities", [])
@@ -112,7 +114,6 @@ def main() -> int:
         write_output("selected", "false")
         write_output("reason", "candidate queue does not exist")
         return 0
-
     blocked_urls = existing_source_urls() | excluded_urls(args.exclude_file)
     considered = 0
     for candidate in candidates:
@@ -122,13 +123,8 @@ def main() -> int:
         parsed = urlparse(url)
         if score < args.min_score or not is_article_candidate(candidate, mode):
             continue
-        if not url or parsed.scheme not in {"http", "https"}:
+        if not url or parsed.scheme not in {"http", "https"} or parsed.path.lower().endswith(".pdf") or url in blocked_urls:
             continue
-        if parsed.path.lower().endswith(".pdf"):
-            continue
-        if url in blocked_urls:
-            continue
-
         category = str(candidate.get("suggested_category", "医療経営")).strip() or "医療経営"
         cta = str(candidate.get("recommended_cta") or candidate.get("suggested_cta", "consultation")).strip()
         if cta not in {"consultation", "lhub", "self-pay", "sns"}:
@@ -146,7 +142,6 @@ def main() -> int:
         write_output("selection_mode", mode)
         write_output("considered", str(considered))
         return 0
-
     write_output("selected", "false")
     write_output("reason", f"no eligible candidate after {mode} prioritization")
     write_output("selection_mode", mode)
