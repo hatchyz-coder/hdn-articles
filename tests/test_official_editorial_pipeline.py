@@ -49,6 +49,11 @@ class OfficialEditorialPipelineTests(unittest.TestCase):
         self.assertEqual(ranked["total_score"], 58)
         self.assertEqual(ranked["article_value_score"], 90)
 
+    def test_opportunity_pipeline_keeps_candidates_outside_ai_top_forty_and_stable_ids(self):
+        source = (ROOT / "scripts/build_opportunity_report.py").read_text(encoding="utf-8")
+        self.assertIn("score = by_id.get(i) or fallback_score(candidate, i)", source)
+        self.assertIn('adjusted.pop("id", None)', source)
+
     def test_candidate_state_failure_is_retryable_and_published_is_removed(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "pending.json"
