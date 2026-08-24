@@ -227,7 +227,20 @@
       "finishedAt": "2026-08-24T02:15:26.476674+00:00",
       "reason": "AI confidentiality flags",
       "score": 85
+    },
+    "e08d42f45a85af5cc1ffe750a4b0280d860c6e0dc80cdcafe63fb5f43424df5a": {
+      "modifiedTime": "2026-07-23T03:43:18.472Z",
+      "status": "api_timeout",
+      "startedAt": "2026-08-24T02:16:09.925141+00:00",
+      "retry_count": 1,
+      "finishedAt": "2026-08-24T02:17:40.975758+00:00",
+      "reason": "OpenAI API timed out during editorial generation",
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3684,
+        "inputCharacters": 3684
+      }
     }
   },
-  "updatedAt": "2026-08-24T02:15:26.476684+00:00"
+  "updatedAt": "2026-08-24T02:17:40.975764+00:00"
 }
