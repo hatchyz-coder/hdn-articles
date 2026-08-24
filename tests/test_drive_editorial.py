@@ -2,6 +2,7 @@ import sys
 import types
 import unittest
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
@@ -69,6 +70,11 @@ class DriveEditorialTests(unittest.TestCase):
         state = {"documents": {editorial._state_key("doc-2"): {"modifiedTime": doc["modifiedTime"], "status": "generated", "retry_count": 0, "processorVersion": editorial.PROCESSOR_VERSION}}}
         self.assertFalse(editorial.is_unprocessed_or_updated(state, doc))
 
+    def test_published_seed_is_not_requeued_after_drive_edit(self):
+        doc = {"id": "published-doc", "name": "LH6_記事3", "modifiedTime": "2026-08-24T00:00:00Z"}
+        state = {"documents": {editorial._state_key(doc["id"]): {"modifiedTime": "2026-08-20T00:00:00Z", "status": "published", "processorVersion": editorial.PROCESSOR_VERSION}}}
+        self.assertFalse(editorial.is_unprocessed_or_updated(state, doc))
+
     def test_seed_sanitizer_redacts_direct_identifiers_before_ai(self):
         text = "連絡先 test@example.com 電話 090-1234-5678 APIキー: secret-value"
         sanitized, flags = editorial.sanitize_seed_text(text)
@@ -88,6 +94,32 @@ class DriveEditorialTests(unittest.TestCase):
         self.assertEqual(editorial.validate_sanitized_output(secret_data), [])
         self.assertNotIn("person@example.com", email_data["body_markdown"])
         self.assertNotIn("abc123", secret_data["body_markdown"])
+
+    def test_unique_slug_never_returns_existing_pair_path(self):
+        original_jp = editorial.impl.base.ARTICLE_DIR
+        original_en = editorial.impl.EN_ARTICLE_DIR
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            jp = root / "jp"
+            en = root / "en"
+            jp.mkdir()
+            en.mkdir()
+            editorial.impl.base.ARTICLE_DIR = jp
+            editorial.impl.EN_ARTICLE_DIR = en
+            try:
+                doc_id = "same-doc"
+                base_slug = "repeated-title"
+                suffix = __import__('hashlib').sha256(doc_id.encode('utf-8')).hexdigest()[:8]
+                (jp / f"{base_slug}.md").write_text("existing", encoding="utf-8")
+                (en / f"{base_slug}-{suffix}.md").write_text("existing", encoding="utf-8")
+                slug = editorial.unique_slug(base_slug, doc_id)
+                self.assertNotEqual(slug, base_slug)
+                self.assertNotEqual(slug, f"{base_slug}-{suffix}")
+                self.assertFalse((jp / f"{slug}.md").exists())
+                self.assertFalse((en / f"{slug}.md").exists())
+            finally:
+                editorial.impl.base.ARTICLE_DIR = original_jp
+                editorial.impl.EN_ARTICLE_DIR = original_en
 
     def test_public_article_does_not_include_private_drive_reference(self):
         data = {
