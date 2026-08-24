@@ -144,7 +144,6 @@ def queue_sort_key(doc: dict[str, Any]) -> tuple[Any, ...]:
 def candidate_sort_key(state: dict[str, Any], doc: dict[str, Any]) -> tuple[Any, ...]:
     record = state.get("documents", {}).get(_state_key(doc["id"]), {})
     status = str(record.get("status", ""))
-    # Fresh/unprocessed drafts take priority over a seed that just hit a transient failure.
     retry_penalty = 1 if status in RETRYABLE else 0
     return (retry_penalty, *queue_sort_key(doc))
 
@@ -179,6 +178,12 @@ def select_target_doc(drive: Any, state: dict[str, Any], folder_id: str, args: A
 def sanitize_seed_text(text: str) -> tuple[str, list[str]]:
     sanitized = str(text)
     flags: list[str] = []
+    # Remove complete credential label/value pairs before generic sensitive-label redaction,
+    # otherwise a broad pattern can erase only the label and leave the secret value behind.
+    for pattern in CREDENTIAL_VALUE_PATTERNS:
+        if re.search(pattern, sanitized):
+            sanitized = re.sub(pattern, "[REDACTED:credential_secret]", sanitized)
+            flags.append("credential_secret")
     for label, pattern in base.SENSITIVE_PATTERNS:
         if re.search(pattern, sanitized, flags=re.I):
             sanitized = re.sub(pattern, f"[REDACTED:{label}]", sanitized, flags=re.I)
@@ -187,10 +192,6 @@ def sanitize_seed_text(text: str) -> tuple[str, list[str]]:
     if re.search(drive_pattern, sanitized, flags=re.I):
         sanitized = re.sub(drive_pattern, "[REDACTED:drive_url]", sanitized, flags=re.I)
         flags.append("drive_url")
-    for pattern in CREDENTIAL_VALUE_PATTERNS:
-        if re.search(pattern, sanitized):
-            sanitized = re.sub(pattern, "[REDACTED:credential_secret]", sanitized)
-            flags.append("credential_secret")
     for pattern in PRIVATE_LABELED_NAME_PATTERNS:
         if re.search(pattern, sanitized):
             sanitized = re.sub(pattern, "[REDACTED:private_name]", sanitized)
@@ -354,8 +355,11 @@ def _description(value: Any, fallback: Any, max_chars: int) -> str:
         if fallback_text and fallback_text not in text:
             text = f"{text} {fallback_text}".strip()
     if len(text) < min_chars:
-        suffix = "実務で確認したい論点、判断基準、運用上の注意点を具体的に整理します。" if max_chars == 160 else "Practical implications, trade-offs, and implementation checks are explained for operators."
+        suffix = "実務で確認したい論点、判断基準、運用上の注意点、失敗を避けるための確認ポイントまで具体的に整理します。" if max_chars == 160 else "Practical implications, trade-offs, implementation checks, and operational decision points are explained for operators."
         text = f"{text} {suffix}".strip()
+    while len(text) < min_chars:
+        extra = "現場で使える判断材料を補足します。" if max_chars == 160 else "Additional practical guidance is included."
+        text = f"{text} {extra}".strip()
     if len(text) > max_chars:
         text = text[: max_chars - 1].rstrip() + "…"
     return text
