@@ -1,3 +1,4 @@
+import hashlib
 import sys
 import types
 import unittest
@@ -39,6 +40,13 @@ class DriveEditorialTests(unittest.TestCase):
         ]
         ordered = sorted(docs, key=editorial.queue_sort_key)
         self.assertEqual([doc["name"] for doc in ordered], ["LH6_記事1_最初", "LH6_記事2_先", "LH10_記事1_後", "番号なし"])
+
+    def test_retryable_failure_moves_behind_fresh_candidate_in_same_slot(self):
+        failed = {"id": "a", "name": "LH6_記事1", "modifiedTime": "2026-01-01T00:00:00Z"}
+        fresh = {"id": "b", "name": "LH6_記事2", "modifiedTime": "2026-01-01T00:00:00Z"}
+        state = {"documents": {editorial._state_key("a"): {"status": "api_timeout", "modifiedTime": failed["modifiedTime"], "retry_count": 1, "processorVersion": editorial.PROCESSOR_VERSION}}}
+        ordered = sorted([failed, fresh], key=lambda doc: editorial.candidate_sort_key(state, doc))
+        self.assertEqual(ordered[0]["id"], "b")
 
     def test_non_lh_drafts_fall_back_oldest_first(self):
         docs = [
@@ -104,20 +112,19 @@ class DriveEditorialTests(unittest.TestCase):
         self.assertNotIn("abc123", secret_data["body_markdown"])
 
     def test_unique_slug_never_returns_existing_pair_path(self):
-        original_jp = editorial.impl.base.ARTICLE_DIR
-        original_en = editorial.impl.EN_ARTICLE_DIR
+        original_jp = editorial.base.ARTICLE_DIR
+        original_en = editorial.EN_ARTICLE_DIR
         with TemporaryDirectory() as tmp:
             root = Path(tmp)
             jp = root / "jp"
             en = root / "en"
-            jp.mkdir()
-            en.mkdir()
-            editorial.impl.base.ARTICLE_DIR = jp
-            editorial.impl.EN_ARTICLE_DIR = en
+            jp.mkdir(); en.mkdir()
+            editorial.base.ARTICLE_DIR = jp
+            editorial.EN_ARTICLE_DIR = en
             try:
                 doc_id = "same-doc"
                 base_slug = "repeated-title"
-                suffix = __import__('hashlib').sha256(doc_id.encode('utf-8')).hexdigest()[:8]
+                suffix = hashlib.sha256(doc_id.encode("utf-8")).hexdigest()[:8]
                 (jp / f"{base_slug}.md").write_text("existing", encoding="utf-8")
                 (en / f"{base_slug}-{suffix}.md").write_text("existing", encoding="utf-8")
                 slug = editorial.unique_slug(base_slug, doc_id)
@@ -126,20 +133,16 @@ class DriveEditorialTests(unittest.TestCase):
                 self.assertFalse((jp / f"{slug}.md").exists())
                 self.assertFalse((en / f"{slug}.md").exists())
             finally:
-                editorial.impl.base.ARTICLE_DIR = original_jp
-                editorial.impl.EN_ARTICLE_DIR = original_en
+                editorial.base.ARTICLE_DIR = original_jp
+                editorial.EN_ARTICLE_DIR = original_en
 
     def test_public_article_does_not_include_private_drive_reference(self):
         data = {
             "title": "患者導線を見直すときに先に確認したいこと",
             "description": "クリニックの患者導線を見直す際に、集客だけでなくLINE、問診、予約、決済、診療後の継続まで確認する実務上の視点を整理します。",
-            "category": "クリニック経営",
-            "tags": ["患者導線", "クリニック経営"],
-            "cta": "consultation",
-            "summary": "患者導線は集客だけでは完結しません。",
-            "body_markdown": "## 導線は入口だけではない\n\n予約後まで確認します。",
-            "faq": [],
-            "references": [{"label": "HDN Japan", "url": "https://hdnjapan.com/"}],
+            "category": "クリニック経営", "tags": ["患者導線", "クリニック経営"], "cta": "consultation",
+            "summary": "患者導線は集客だけでは完結しません。", "body_markdown": "## 導線は入口だけではない\n\n予約後まで確認します。",
+            "faq": [], "references": [{"label": "HDN Japan", "url": "https://hdnjapan.com/"}],
         }
         doc = {"id": "1PrivateDriveIdentifierABC", "name": "PRIVATE SOURCE TITLE", "webViewLink": "https://docs.google.com/document/d/1PrivateDriveIdentifierABC/edit"}
         article = editorial.build_article(data, doc)
