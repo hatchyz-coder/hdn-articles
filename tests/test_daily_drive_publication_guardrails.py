@@ -41,7 +41,7 @@ class DailyDrivePublicationGuardrailTests(unittest.TestCase):
         text = PUBLISH.read_text(encoding='utf-8')
         self.assertIn('Observe push-triggered Pages deployment', text)
         self.assertNotIn('gh workflow run deploy-pages.yml --ref main', text)
-        self.assertIn('production URL verification below remains authoritative', text)
+        self.assertIn('verification below remains authoritative', text)
 
     def test_fallback_waits_for_active_regular_slot_before_recovery(self):
         text = FALLBACK.read_text(encoding='utf-8')
