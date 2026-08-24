@@ -81,9 +81,13 @@ class DriveEditorialTests(unittest.TestCase):
         data = {"body_markdown": "公開料金として月額5,000円のサービスを比較する。"}
         self.assertEqual(editorial.validate_sanitized_output(data), [])
 
-    def test_public_privacy_check_blocks_email_or_secret(self):
-        self.assertIn("email_address", editorial.validate_sanitized_output({"body_markdown": "連絡先は person@example.com"}))
-        self.assertIn("credential_secret", editorial.validate_sanitized_output({"body_markdown": "APIキー: abc123"}))
+    def test_public_privacy_check_sanitizes_email_and_secret_without_veto(self):
+        email_data = {"body_markdown": "連絡先は person@example.com"}
+        secret_data = {"body_markdown": "APIキー: abc123"}
+        self.assertEqual(editorial.validate_sanitized_output(email_data), [])
+        self.assertEqual(editorial.validate_sanitized_output(secret_data), [])
+        self.assertNotIn("person@example.com", email_data["body_markdown"])
+        self.assertNotIn("abc123", secret_data["body_markdown"])
 
     def test_public_article_does_not_include_private_drive_reference(self):
         data = {
