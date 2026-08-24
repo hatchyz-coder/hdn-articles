@@ -67,18 +67,33 @@ def call_openai(candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return json.loads(text)
 
 
+def fallback_score(candidate: dict[str, Any], index: int) -> dict[str, Any]:
+    base = int(candidate.get("ai_score", candidate.get("score", 0)) or 0)
+    authority = min(95, 70 + int(candidate.get("source_priority", candidate.get("priority", 0)) or 0) * 5)
+    article_value = max(45, base)
+    hdn_fit = base
+    inquiry = max(base - 10, 30)
+    urgency = 45
+    total = round(article_value * .35 + hdn_fit * .25 + authority * .20 + inquiry * .10 + urgency * .10)
+    return {
+        "id": index,
+        "article_value_score": article_value,
+        "urgency_score": urgency,
+        "authority_score": authority,
+        "hdn_fit_score": hdn_fit,
+        "inquiry_score": inquiry,
+        "total_score": total,
+        "target_segments": ["クリニック経営者", "医療事業者"],
+        "article_angle": candidate.get("reason", "一次情報から実務への影響を掘り下げる"),
+        "research_expansion": ["関連する一次資料", "過去との比較", "実務上の判断ポイント"],
+        "recommended_cta": candidate.get("suggested_cta", "consultation"),
+        "recommended_action": "article" if article_value >= 55 else "monitor",
+        "rationale": candidate.get("reason", ""),
+    }
+
+
 def fallback_scores(candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    scored: list[dict[str, Any]] = []
-    for i, c in enumerate(candidates):
-        base = int(c.get("ai_score", c.get("score", 0)) or 0)
-        authority = min(95, 70 + int(c.get("source_priority", c.get("priority", 0)) or 0) * 5)
-        article_value = max(45, base)
-        hdn_fit = base
-        inquiry = max(base - 10, 30)
-        urgency = 45
-        total = round(article_value * .35 + hdn_fit * .25 + authority * .20 + inquiry * .10 + urgency * .10)
-        scored.append({"id": i, "article_value_score": article_value, "urgency_score": urgency, "authority_score": authority, "hdn_fit_score": hdn_fit, "inquiry_score": inquiry, "total_score": total, "target_segments": ["クリニック経営者", "医療事業者"], "article_angle": c.get("reason", "一次情報から実務への影響を掘り下げる"), "research_expansion": ["関連する一次資料", "過去との比較", "実務上の判断ポイント"], "recommended_cta": c.get("suggested_cta", "consultation"), "recommended_action": "article" if article_value >= 55 else "monitor", "rationale": c.get("reason", "")})
-    return scored
+    return [fallback_score(candidate, i) for i, candidate in enumerate(candidates)]
 
 
 def apply_generation_failure_penalty(candidate: dict[str, Any], opportunity: dict[str, Any]) -> dict[str, Any]:
@@ -102,9 +117,13 @@ def main() -> None:
     by_id = {int(item["id"]): item for item in ranked if "id" in item}
     opportunities: list[dict[str, Any]] = []
     for i, candidate in enumerate(candidates):
-        score = by_id.get(i)
-        if score:
-            opportunities.append({**candidate, **apply_generation_failure_penalty(candidate, score)})
+        # OpenAI intentionally evaluates only the first 40 candidates for cost/latency.
+        # Any unevaluated candidate remains selectable through deterministic fallback
+        # scoring rather than disappearing from the day's canonical queue.
+        score = by_id.get(i) or fallback_score(candidate, i)
+        adjusted = apply_generation_failure_penalty(candidate, score)
+        adjusted.pop("id", None)  # preserve the candidate's stable fingerprint-derived id
+        opportunities.append({**candidate, **adjusted})
     opportunities.sort(key=lambda x: (int(x.get("total_score", 0)), int(x.get("article_value_score", 0)), int(x.get("authority_score", 0))), reverse=True)
     now = datetime.now(JST)
     OPPORTUNITIES.parent.mkdir(parents=True, exist_ok=True)
@@ -119,7 +138,7 @@ def main() -> None:
             targets = "、".join(item.get("target_segments", []))
             expansion = "、".join(item.get("research_expansion", []))
             lines.extend([f"### {index}. {item.get('title', 'Untitled')}", "", f"- 総合スコア: **{item.get('total_score', 0)}/100**", f"- 通常記事価値: {item.get('article_value_score', 0)}", f"- 速報価値: {item.get('urgency_score', 0)}", f"- 一次情報信頼性: {item.get('authority_score', 0)}", f"- HDN適合度: {item.get('hdn_fit_score', 0)}", f"- 生成失敗ペナルティ: -{item.get('generation_failure_penalty', 0)}", f"- 推奨アクション: {item.get('recommended_action', 'monitor')}", f"- 想定対象: {targets or '未設定'}", f"- 記事角度: {item.get('article_angle', '')}", f"- 追加調査: {expansion or '未設定'}", f"- 出典: {item.get('url', '')}", ""])
-    lines.extend(["## 運用メモ", "", "- 速報価値と通常記事価値は別判定です。", "- 候補点数は入口の優先順位であり、公開可否は最終生成記事の品質ゲートで判断します。", "- 生成失敗候補は永久除外せず、失敗回数に応じて優先順位だけ下げます。", "- 公開済みURLだけpending queueから除外します。", ""])
+    lines.extend(["## 運用メモ", "", "- 速報価値と通常記事価値は別判定です。", "- 候補点数は入口の優先順位であり、公開可否は最終生成記事の品質ゲートで判断します。", "- 生成失敗候補は永久除外せず、失敗回数に応じて優先順位だけ下げます。", "- AI評価対象外の候補もdeterministic fallbackで当日の選択キューに残します。", "- 公開済みURLだけpending queueから除外します。", ""])
     report_path.write_text("\n".join(lines), encoding="utf-8")
     print(f"Wrote {OPPORTUNITIES.relative_to(ROOT)}")
     print(f"Wrote {report_path.relative_to(ROOT)}")
