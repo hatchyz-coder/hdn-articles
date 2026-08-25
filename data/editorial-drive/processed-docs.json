@@ -300,7 +300,15 @@
       "finishedAt": "2026-08-25T02:17:50.626249+00:00",
       "reason": "AI confidentiality flags",
       "score": 88
+    },
+    "0752c5227aaa977486eae36184c398fc06c36feba8538cf03ebfd17eca79df81": {
+      "modifiedTime": "2026-07-23T03:43:35.767Z",
+      "status": "skipped_confidential",
+      "startedAt": "2026-08-25T02:18:30.809082+00:00",
+      "retry_count": 0,
+      "finishedAt": "2026-08-25T02:18:31.682100+00:00",
+      "reason": "confidentiality heuristic matched"
     }
   },
-  "updatedAt": "2026-08-25T02:17:50.626259+00:00"
+  "updatedAt": "2026-08-25T02:18:31.682111+00:00"
 }
