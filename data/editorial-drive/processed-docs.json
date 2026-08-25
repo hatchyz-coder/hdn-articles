@@ -264,7 +264,16 @@
       "finishedAt": "2026-08-24T21:21:20.878036+00:00",
       "reason": "AI confidentiality flags",
       "score": 86
+    },
+    "fafbd1fbb243877f9bff916981bb57e51735a22f1048c728887886e0116c6970": {
+      "modifiedTime": "2026-07-23T03:43:35.767Z",
+      "status": "skipped_confidential",
+      "startedAt": "2026-08-25T00:42:50.873706+00:00",
+      "retry_count": 0,
+      "finishedAt": "2026-08-25T00:44:02.068613+00:00",
+      "reason": "AI confidentiality flags",
+      "score": 88
     }
   },
-  "updatedAt": "2026-08-24T21:21:20.878048+00:00"
+  "updatedAt": "2026-08-25T00:44:02.068622+00:00"
 }
