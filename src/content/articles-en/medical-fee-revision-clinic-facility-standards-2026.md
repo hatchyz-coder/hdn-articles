@@ -1,6 +1,6 @@
 ---
 title: "Japan's FY2026 Medical Fee Revision: Five Facility-Standard Checks for Clinics"
-description: "Japan's FY2026 medical fee revision updated facility standards and filing materials. Clinics should review refiling requirements, current forms, ownership, evidence, and ongoing compliance."
+description: "Japan's FY2026 medical fee revision updated facility standards. Clinics should review refiling, current forms, ownership, evidence, and ongoing compliance."
 publishedAt: 2026-08-25
 category: "Clinic Operations"
 tags:
