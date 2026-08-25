@@ -1,6 +1,6 @@
 ---
 title: "Electronic Prescriptions Now Reach Over 90% of Pharmacies: Five Operational Checks for Clinics"
-description: "With electronic prescriptions deployed at over 90% of pharmacies in Japan as of May 2026, clinics should review patient guidance, medication checks, fallback workflows, and staff operations."
+description: "With electronic prescriptions at over 90% of pharmacies in Japan, clinics should review patient guidance, medication checks, fallback workflows, and staff operations."
 publishedAt: 2026-08-25
 category: "Clinic Operations"
 tags:
