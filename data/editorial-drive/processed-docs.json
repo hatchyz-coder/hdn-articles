@@ -15,9 +15,9 @@
     },
     "49e920ccc7688c8b6b854646ca4f265e23e94780559ea9de2120ac5b2e4c342a": {
       "modifiedTime": "2026-07-23T03:43:53.195Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-19T22:02:59.116046+00:00",
-      "retry_count": 1,
+      "retry_count": 0,
       "finishedAt": "2026-08-19T22:04:23.720468+00:00",
       "reason": "AI confidentiality flags",
       "sourceProcessing": {
@@ -25,13 +25,15 @@
         "sourceTextCharacters": 3707,
         "inputCharacters": 3707
       },
-      "score": 88
+      "score": 88,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "941d97896af3e945705afdadca2294d69c147258421e87381e48e3fa4aba176b": {
       "modifiedTime": "2026-07-23T03:43:18.472Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-20T21:18:29.215446+00:00",
-      "retry_count": 1,
+      "retry_count": 0,
       "finishedAt": "2026-08-20T21:19:53.018745+00:00",
       "reason": "AI confidentiality flags",
       "sourceProcessing": {
@@ -39,16 +41,20 @@
         "sourceTextCharacters": 3612,
         "inputCharacters": 3612
       },
-      "score": 85
+      "score": 85,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "17eaf99b781947c5cafc583cb89c02605da07b9bdb00a00ecfd9d4011d27d5b3": {
       "modifiedTime": "2026-07-23T03:43:02.529Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-20T21:59:26.849166+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-20T22:00:53.772171+00:00",
       "reason": "AI confidentiality flags",
-      "score": 88
+      "score": 88,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "8c33b6d052868c54934b0d5973bad7c779fcfc67b4d2bb3f66dcb73ecb4fb272": {
       "modifiedTime": "2026-07-23T03:43:35.901Z",
@@ -81,18 +87,26 @@
     },
     "98d4af67ecf74716544587a6d484e6bcc9c06067874aa4fcca7b8ef9363063df": {
       "modifiedTime": "2026-07-23T03:43:35.901Z",
-      "status": "skipped_confidential",
-      "startedAt": "2026-08-21T21:14:31.242765+00:00",
+      "status": "generated",
+      "startedAt": "2026-08-27T10:44:52.757695+00:00",
       "retry_count": 0,
-      "finishedAt": "2026-08-21T21:15:43.889904+00:00",
+      "finishedAt": "2026-08-27T10:45:56.300444+00:00",
       "reason": "AI confidentiality flags",
-      "score": 85
+      "score": 88,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected",
+      "slug": "lhub-retention-guide-line-subscription",
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3504,
+        "inputCharacters": 3504
+      }
     },
     "f4c2ea73a48dfcfd769e9c1519656292a5d45149401bb34fdd4b02d615b4e6a4": {
       "modifiedTime": "2026-07-23T03:43:35.901Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-22T02:06:53.327519+00:00",
-      "retry_count": 1,
+      "retry_count": 0,
       "finishedAt": "2026-08-22T02:08:12.367155+00:00",
       "reason": "AI confidentiality flags",
       "sourceProcessing": {
@@ -100,16 +114,20 @@
         "sourceTextCharacters": 3796,
         "inputCharacters": 3796
       },
-      "score": 85
+      "score": 85,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "2139b07ad3ec4700691d97a4841eb46890536463625216da0923ece578bfabed": {
       "modifiedTime": "2026-07-23T03:43:35.901Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-22T02:08:57.375537+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-22T02:10:11.582594+00:00",
       "reason": "AI confidentiality flags",
-      "score": 86
+      "score": 86,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "6f0b8ccf766d69bd95c49bd73aa8318f182f984c11391294f94d9f95113a95ed": {
       "modifiedTime": "2026-07-23T03:43:35.767Z",
@@ -126,9 +144,9 @@
     },
     "1841e9772fe9a28b7a55ab04675cd744961a7cab37120c5a393308ccb5753866": {
       "modifiedTime": "2026-07-23T03:43:35.767Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-22T21:12:34.164206+00:00",
-      "retry_count": 1,
+      "retry_count": 0,
       "finishedAt": "2026-08-22T21:13:51.208189+00:00",
       "reason": "AI confidentiality flags",
       "sourceProcessing": {
@@ -136,103 +154,125 @@
         "sourceTextCharacters": 3635,
         "inputCharacters": 3635
       },
-      "score": 82
+      "score": 82,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "4e00d281285911e3547339ec3165643268770158a0acb5ad7acff6032426d390": {
       "modifiedTime": "2026-07-23T03:43:35.767Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-23T00:45:00.943006+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-23T00:46:30.351565+00:00",
       "reason": "AI confidentiality flags",
-      "score": 82
+      "score": 82,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "4be6dd0a6c39c637f356719653b42db9559a5951f49dc9649b64b4ee87d73611": {
       "modifiedTime": "2026-07-23T03:43:02.529Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-23T02:16:50.319380+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-23T02:17:58.704247+00:00",
       "reason": "AI confidentiality flags",
-      "score": 90
+      "score": 90,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "53c1bd6048614f76511db9376dc90a25c8d818ce6f5bf027781cac83c06dcc2c": {
       "modifiedTime": "2026-07-23T03:43:02.529Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-23T02:18:40.624913+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-23T02:19:31.845799+00:00",
       "reason": "AI confidentiality flags",
-      "score": 88
+      "score": 88,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "39543cfc08ce742a86ac08c3a8aa8290a113ac207f6bdb43331c03b423aa5471": {
       "modifiedTime": "2026-07-23T03:43:02.529Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-23T02:20:17.867635+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-23T02:21:14.851851+00:00",
       "reason": "AI confidentiality flags",
-      "score": 85
+      "score": 85,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "6a8ef502a61c5f6c8c7d4e7ef639ecb2ed81c50c91d08cbb63bb5b854d267ffd": {
       "modifiedTime": "2026-07-23T03:43:02.540Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-23T02:21:56.154454+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-23T02:23:10.510170+00:00",
       "reason": "AI confidentiality flags",
-      "score": 86
+      "score": 86,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "7bf67ec8b1a0b4dd00337f5738a253e7af73f9a68a04fbacfb81662ced9ab6b9": {
       "modifiedTime": "2026-07-23T03:43:02.540Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-23T02:23:57.186759+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-23T02:25:01.287065+00:00",
       "reason": "AI confidentiality flags",
-      "score": 86
+      "score": 86,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "6a5c468fb1f2145d642c7aeeed10c77c8b2ea5b6689e17e6c9f3fa245233eef8": {
       "modifiedTime": "2026-07-23T03:43:02.540Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-23T02:25:57.510175+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-23T02:27:02.159807+00:00",
       "reason": "AI confidentiality flags",
-      "score": 86
+      "score": 86,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "e8a03c7e3f5f88c4110900e0af39855387ad3f70145218490bef9c30f2b52050": {
       "modifiedTime": "2026-07-23T03:43:02.540Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-23T21:12:30.351871+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-23T21:13:24.467962+00:00",
       "reason": "AI confidentiality flags",
-      "score": 88
+      "score": 88,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "c92c4d06b4520afd571f31d514bbb6b7748713e947f14bedab91bcc2d533a896": {
       "modifiedTime": "2026-07-23T03:43:02.540Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-24T00:43:22.732135+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-24T00:44:12.419332+00:00",
       "reason": "AI confidentiality flags",
-      "score": 88
+      "score": 88,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "dffbb0cb96576c2c2223aef3994eb2053576fd35c056d013a541226904f58e35": {
       "modifiedTime": "2026-07-23T03:43:18.472Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-24T02:14:21.417897+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-24T02:15:26.476674+00:00",
       "reason": "AI confidentiality flags",
-      "score": 85
+      "score": 85,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "e08d42f45a85af5cc1ffe750a4b0280d860c6e0dc80cdcafe63fb5f43424df5a": {
       "modifiedTime": "2026-07-23T03:43:18.472Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-24T02:20:45.290229+00:00",
-      "retry_count": 2,
+      "retry_count": 0,
       "finishedAt": "2026-08-24T02:21:40.657147+00:00",
       "reason": "AI confidentiality flags",
       "sourceProcessing": {
@@ -240,13 +280,15 @@
         "sourceTextCharacters": 3684,
         "inputCharacters": 3684
       },
-      "score": 88
+      "score": 88,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "e2c8c34d6b9b0d335bd1602f00f459d296caf92ac5d1cbc7dc4d8881d2ce48f0": {
       "modifiedTime": "2026-07-23T03:43:18.472Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-24T02:24:37.207019+00:00",
-      "retry_count": 1,
+      "retry_count": 0,
       "finishedAt": "2026-08-24T02:25:54.807878+00:00",
       "reason": "AI confidentiality flags",
       "sourceProcessing": {
@@ -254,52 +296,64 @@
         "sourceTextCharacters": 3700,
         "inputCharacters": 3700
       },
-      "score": 86
+      "score": 86,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "4d5cb5dfe9a54ecfed80ebcc02e15457f1bda43dcdef805e89e37a466f0a0be6": {
       "modifiedTime": "2026-07-23T03:43:18.472Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-24T21:19:56.496830+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-24T21:21:20.878036+00:00",
       "reason": "AI confidentiality flags",
-      "score": 86
+      "score": 86,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "fafbd1fbb243877f9bff916981bb57e51735a22f1048c728887886e0116c6970": {
       "modifiedTime": "2026-07-23T03:43:35.767Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-25T00:42:50.873706+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-25T00:44:02.068613+00:00",
       "reason": "AI confidentiality flags",
-      "score": 88
+      "score": 88,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "e4832157142d9da7e9dbb34887a90bad2ff02f777c9d33b810911e1802445653": {
       "modifiedTime": "2026-07-23T03:43:19.175Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-25T02:10:19.757831+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-25T02:11:44.262765+00:00",
       "reason": "AI confidentiality flags",
-      "score": 88
+      "score": 88,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "3664ff582047a8e943cbb81d200ea6918f3b55e9bf63352973073af63b99768d": {
       "modifiedTime": "2026-07-23T03:43:19.175Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-25T02:14:28.005320+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-25T02:15:44.544741+00:00",
       "reason": "AI confidentiality flags",
-      "score": 86
+      "score": 86,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "eecb72e5338ecd34d7fa683591339568428dbde7ce4d776623c8e960d8cc192e": {
       "modifiedTime": "2026-07-23T03:43:19.175Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-25T02:16:29.359371+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-25T02:17:50.626249+00:00",
       "reason": "AI confidentiality flags",
-      "score": 88
+      "score": 88,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "0752c5227aaa977486eae36184c398fc06c36feba8538cf03ebfd17eca79df81": {
       "modifiedTime": "2026-07-23T03:43:35.767Z",
@@ -311,9 +365,9 @@
     },
     "d87269283cb8c2d286d34abfac7efe19a7292435a818b0097e067a2d9502f51e": {
       "modifiedTime": "2026-07-23T03:43:52.723Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-26T00:43:41.398733+00:00",
-      "retry_count": 2,
+      "retry_count": 0,
       "finishedAt": "2026-08-26T00:44:49.821455+00:00",
       "reason": "AI confidentiality flags",
       "sourceProcessing": {
@@ -321,76 +375,92 @@
         "sourceTextCharacters": 3695,
         "inputCharacters": 3695
       },
-      "score": 85
+      "score": 85,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "b5541821aa58dac0998c33a34b9b81d632587778b5ddecaa3a893230f0fbac89": {
       "modifiedTime": "2026-07-23T03:43:52.723Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-26T02:16:41.734328+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-26T02:18:02.776075+00:00",
       "reason": "AI confidentiality flags",
-      "score": 88
+      "score": 88,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "c099e680ec7d38ddd1b8e2004eea28c3a058a7cbaf514b3a89ff46131616e5f6": {
       "modifiedTime": "2026-07-23T03:43:52.723Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-26T02:19:04.419531+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-26T02:20:30.280317+00:00",
       "reason": "AI confidentiality flags",
-      "score": 85
+      "score": 85,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "9e2695fee3b24dab3893df4aea180232e091c64d8ef1896629ef03b24a9ed18d": {
       "modifiedTime": "2026-07-23T03:43:52.723Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-26T02:21:09.705337+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-26T02:22:32.098115+00:00",
       "reason": "AI confidentiality flags",
-      "score": 86
+      "score": 86,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "c0d31be90378725a06b51b6373144c03dc9dc737c4e993ebe2a7ba787f5f9380": {
       "modifiedTime": "2026-07-23T03:43:53.195Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-26T02:23:22.731915+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-26T02:24:19.022401+00:00",
       "reason": "AI confidentiality flags",
-      "score": 85
+      "score": 85,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "8bf3b9886be61d259ceaf4c5f224de532409d04c1152d99ce3787140ed65372b": {
       "modifiedTime": "2026-07-23T03:43:53.195Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-26T02:25:15.277146+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-26T02:26:43.526372+00:00",
       "reason": "AI confidentiality flags",
-      "score": 90
+      "score": 90,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "0147e82fc5bed74566cfaf73bb7dbe828b3dec6c7bd8afaa2642bfc0d2ccb5eb": {
       "modifiedTime": "2026-07-23T03:43:53.195Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-26T02:27:25.521991+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-26T02:28:42.193151+00:00",
       "reason": "AI confidentiality flags",
-      "score": 88
+      "score": 88,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "6e38d025e2016c7f1ed23c61d5cf36960671486474e82528323191679f8e82c2": {
       "modifiedTime": "2026-07-23T03:43:53.195Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-27T00:20:50.656462+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-27T00:21:56.176604+00:00",
       "reason": "AI confidentiality flags",
-      "score": 88
+      "score": 88,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "235367fe0a3e5333064ab1c5a111a485b9f03524e7aa204588b45f8529e8357c": {
       "modifiedTime": "2026-07-23T03:44:08.643Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-27T05:24:34.069598+00:00",
-      "retry_count": 1,
+      "retry_count": 0,
       "finishedAt": "2026-08-27T05:25:45.730454+00:00",
       "reason": "AI confidentiality flags",
       "sourceProcessing": {
@@ -398,31 +468,37 @@
         "sourceTextCharacters": 3428,
         "inputCharacters": 3428
       },
-      "score": 88
+      "score": 88,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "064602bbdbb16b339576e704ea52e6ba110dd7afa1deeb72af7cf3021a9d8d71": {
       "modifiedTime": "2026-07-23T03:44:08.643Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-27T05:26:29.018777+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-27T05:27:55.319004+00:00",
       "reason": "AI confidentiality flags",
-      "score": 85
+      "score": 85,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "cfec8260eefc68bc651eb68c38ad736d6321202a540ad04f443b993f9e8fbd4a": {
       "modifiedTime": "2026-07-23T03:44:08.643Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-27T05:28:33.510017+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-27T05:29:42.637634+00:00",
       "reason": "AI confidentiality flags",
-      "score": 86
+      "score": 86,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "3aa0b3977ba77e58464faa02fda6e0b633a81bec52427c533b0fc909de038b3d": {
       "modifiedTime": "2026-07-23T03:44:08.643Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-27T05:31:30.897869+00:00",
-      "retry_count": 1,
+      "retry_count": 0,
       "finishedAt": "2026-08-27T05:32:45.792097+00:00",
       "reason": "AI confidentiality flags",
       "sourceProcessing": {
@@ -430,34 +506,42 @@
         "sourceTextCharacters": 3917,
         "inputCharacters": 3917
       },
-      "score": 85
+      "score": 85,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "ece5edc8f8e32d965518ba85ea3857f2a9b6fddf625f1c2941abbedad337f262": {
       "modifiedTime": "2026-07-23T03:44:08.643Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-27T05:32:54.557967+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-27T05:34:09.293739+00:00",
       "reason": "AI confidentiality flags",
-      "score": 88
+      "score": 88,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "83cec60e219f4338d2daf5ad8a91e72c542dc6c1b7d7ba6becf9a2addd30e348": {
       "modifiedTime": "2026-07-23T03:44:09.768Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-27T05:34:49.440534+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-27T05:35:53.603063+00:00",
       "reason": "AI confidentiality flags",
-      "score": 88
+      "score": 88,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "745daa050cbc12babc5b6c6e76e9fa9b470aa4b51a3a1117a2408ebf180365b2": {
       "modifiedTime": "2026-07-23T03:44:09.768Z",
-      "status": "skipped_confidential",
+      "status": "api_timeout",
       "startedAt": "2026-08-27T05:36:02.343437+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-27T05:37:27.200672+00:00",
       "reason": "AI confidentiality flags",
-      "score": 88
+      "score": 88,
+      "privacyContractVersion": 2,
+      "requeueReason": "privacy_contract_corrected"
     },
     "282fd8549619d6f3efa8dc6b35efcb7132a08b052d4629da0ff23cbceba90f46": {
       "modifiedTime": "2026-07-23T03:44:09.768Z",
@@ -488,5 +572,5 @@
       "score": 88
     }
   },
-  "updatedAt": "2026-08-27T05:47:48.264502+00:00"
+  "updatedAt": "2026-08-27T10:45:56.300453+00:00"
 }
