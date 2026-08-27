@@ -27,6 +27,7 @@ ROTATE_REASONS = {
 STOP_REASONS = {"no_candidate", "dry_run"}
 DEFAULT_MAX_ATTEMPTS = 4
 DEFAULT_BACKOFF_SECONDS = 8
+PRIVACY_CONTRACT_VERSION = 2
 
 
 def parse_args() -> argparse.Namespace:
@@ -75,6 +76,54 @@ def propagate_outputs(parent_output_path: str | None, output_text: str) -> None:
         handle.write(output_text)
         if not output_text.endswith("\n"):
             handle.write("\n")
+
+
+def generator_arg_value(generator_args: list[str], name: str) -> str | None:
+    try:
+        index = generator_args.index(name)
+    except ValueError:
+        return None
+    if index + 1 >= len(generator_args):
+        return None
+    return generator_args[index + 1]
+
+
+def requeue_legacy_false_confidential(state_path: Path) -> int:
+    """Requeue old AI-flag-only privacy skips exactly once under the corrected contract.
+
+    Deterministic privacy-heuristic skips are intentionally untouched. Records carry a
+    migration marker so a genuine residual privacy blocker cannot loop forever.
+    """
+    if not state_path.exists():
+        return 0
+    try:
+        state = json.loads(state_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return 0
+
+    changed = 0
+    for record in state.get("documents", {}).values():
+        if not isinstance(record, dict):
+            continue
+        if record.get("status") != "skipped_confidential":
+            continue
+        if record.get("reason") != "AI confidentiality flags":
+            continue
+        if int(record.get("privacyContractVersion", 0) or 0) >= PRIVACY_CONTRACT_VERSION:
+            continue
+        record.update({
+            "status": "api_timeout",
+            "retry_count": 0,
+            "privacyContractVersion": PRIVACY_CONTRACT_VERSION,
+            "requeueReason": "privacy_contract_corrected",
+        })
+        changed += 1
+
+    if changed:
+        state["updatedAt"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        print(f"Requeued {changed} legacy AI-confidentiality skips for one-time review", flush=True)
+    return changed
 
 
 def should_continue(returncode: int, report: dict[str, Any]) -> tuple[bool, str]:
@@ -129,6 +178,10 @@ def main() -> int:
     generator_args = list(args.generator_args)
     if generator_args and generator_args[0] == "--":
         generator_args = generator_args[1:]
+
+    state_value = generator_arg_value(generator_args, "--state-path")
+    if state_value:
+        requeue_legacy_false_confidential(Path(state_value))
 
     parent_output_path = os.environ.get("GITHUB_OUTPUT")
     last_returncode = 0
