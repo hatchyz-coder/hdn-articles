@@ -41,6 +41,27 @@ class DriveEditorialResilientRunnerTests(unittest.TestCase):
         self.assertTrue(retry)
         self.assertEqual(reason, "generator_error")
 
+    def test_parse_github_outputs_uses_last_value(self):
+        outputs = resilient.parse_github_outputs("selected=false\nreason=api_timeout\nreason=generated\n")
+        self.assertEqual(outputs["selected"], "false")
+        self.assertEqual(outputs["reason"], "generated")
+
+    def test_generator_outputs_supply_reason_missing_from_report(self):
+        report = resilient.apply_generator_outputs(
+            {"selected": False},
+            {"selected": "false", "reason": "api_timeout"},
+        )
+        self.assertFalse(report["selected"])
+        self.assertEqual(report["reason"], "api_timeout")
+
+    def test_generator_outputs_can_mark_selection(self):
+        report = resilient.apply_generator_outputs(
+            {"selected": False},
+            {"selected": "true", "reason": "generated", "slug": "example"},
+        )
+        self.assertTrue(report["selected"])
+        self.assertEqual(report["reason"], "generated")
+
 
 if __name__ == "__main__":
     unittest.main()
