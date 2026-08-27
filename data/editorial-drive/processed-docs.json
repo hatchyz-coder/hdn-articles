@@ -399,7 +399,16 @@
         "inputCharacters": 3428
       },
       "score": 88
+    },
+    "064602bbdbb16b339576e704ea52e6ba110dd7afa1deeb72af7cf3021a9d8d71": {
+      "modifiedTime": "2026-07-23T03:44:08.643Z",
+      "status": "skipped_confidential",
+      "startedAt": "2026-08-27T05:26:29.018777+00:00",
+      "retry_count": 0,
+      "finishedAt": "2026-08-27T05:27:55.319004+00:00",
+      "reason": "AI confidentiality flags",
+      "score": 85
     }
   },
-  "updatedAt": "2026-08-27T05:25:45.730465+00:00"
+  "updatedAt": "2026-08-27T05:27:55.319013+00:00"
 }
