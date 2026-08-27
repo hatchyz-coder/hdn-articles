@@ -440,7 +440,38 @@
       "finishedAt": "2026-08-27T05:34:09.293739+00:00",
       "reason": "AI confidentiality flags",
       "score": 88
+    },
+    "83cec60e219f4338d2daf5ad8a91e72c542dc6c1b7d7ba6becf9a2addd30e348": {
+      "modifiedTime": "2026-07-23T03:44:09.768Z",
+      "status": "skipped_confidential",
+      "startedAt": "2026-08-27T05:34:49.440534+00:00",
+      "retry_count": 0,
+      "finishedAt": "2026-08-27T05:35:53.603063+00:00",
+      "reason": "AI confidentiality flags",
+      "score": 88
+    },
+    "745daa050cbc12babc5b6c6e76e9fa9b470aa4b51a3a1117a2408ebf180365b2": {
+      "modifiedTime": "2026-07-23T03:44:09.768Z",
+      "status": "skipped_confidential",
+      "startedAt": "2026-08-27T05:36:02.343437+00:00",
+      "retry_count": 0,
+      "finishedAt": "2026-08-27T05:37:27.200672+00:00",
+      "reason": "AI confidentiality flags",
+      "score": 88
+    },
+    "282fd8549619d6f3efa8dc6b35efcb7132a08b052d4629da0ff23cbceba90f46": {
+      "modifiedTime": "2026-07-23T03:44:09.768Z",
+      "status": "api_timeout",
+      "startedAt": "2026-08-27T05:39:15.407272+00:00",
+      "retry_count": 2,
+      "finishedAt": "2026-08-27T05:40:45.802601+00:00",
+      "reason": "OpenAI API timed out during editorial generation",
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3869,
+        "inputCharacters": 3869
+      }
     }
   },
-  "updatedAt": "2026-08-27T05:34:09.293749+00:00"
+  "updatedAt": "2026-08-27T05:40:45.802607+00:00"
 }
