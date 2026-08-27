@@ -462,16 +462,31 @@
     "282fd8549619d6f3efa8dc6b35efcb7132a08b052d4629da0ff23cbceba90f46": {
       "modifiedTime": "2026-07-23T03:44:09.768Z",
       "status": "api_timeout",
-      "startedAt": "2026-08-27T05:39:15.407272+00:00",
-      "retry_count": 2,
-      "finishedAt": "2026-08-27T05:40:45.802601+00:00",
+      "startedAt": "2026-08-27T05:41:35.364132+00:00",
+      "retry_count": 3,
+      "finishedAt": "2026-08-27T05:43:05.930228+00:00",
       "reason": "OpenAI API timed out during editorial generation",
       "sourceProcessing": {
         "mode": "full_text",
         "sourceTextCharacters": 3869,
         "inputCharacters": 3869
       }
+    },
+    "e8dd64a04b08a25fd80848780e441e84471623d22830a95bdf0042f62f21e1cb": {
+      "modifiedTime": "2026-07-23T03:44:09.768Z",
+      "status": "generated",
+      "startedAt": "2026-08-27T05:46:25.196647+00:00",
+      "retry_count": 1,
+      "finishedAt": "2026-08-27T05:47:48.264492+00:00",
+      "reason": "OpenAI API timed out during editorial generation",
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3702,
+        "inputCharacters": 3702
+      },
+      "slug": "seiyu-lhub-recording-requests",
+      "score": 88
     }
   },
-  "updatedAt": "2026-08-27T05:40:45.802607+00:00"
+  "updatedAt": "2026-08-27T05:47:48.264502+00:00"
 }
