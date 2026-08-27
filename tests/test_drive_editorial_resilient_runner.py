@@ -1,4 +1,6 @@
+import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -61,6 +63,47 @@ class DriveEditorialResilientRunnerTests(unittest.TestCase):
         )
         self.assertTrue(report["selected"])
         self.assertEqual(report["reason"], "generated")
+
+    def test_generator_arg_value(self):
+        args = ["--folder-id", "folder", "--state-path", "state.json", "--min-score", "72"]
+        self.assertEqual(resilient.generator_arg_value(args, "--state-path"), "state.json")
+        self.assertIsNone(resilient.generator_arg_value(args, "--missing"))
+
+    def test_requeues_only_legacy_ai_confidentiality_once(self):
+        state = {
+            "documents": {
+                "ai-old": {
+                    "status": "skipped_confidential",
+                    "reason": "AI confidentiality flags",
+                    "retry_count": 1,
+                },
+                "heuristic": {
+                    "status": "skipped_confidential",
+                    "reason": "confidentiality heuristic matched",
+                    "retry_count": 0,
+                },
+                "already-migrated": {
+                    "status": "skipped_confidential",
+                    "reason": "AI confidentiality flags",
+                    "privacyContractVersion": resilient.PRIVACY_CONTRACT_VERSION,
+                },
+                "published": {"status": "published", "reason": "generated"},
+            }
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "state.json"
+            path.write_text(json.dumps(state), encoding="utf-8")
+            self.assertEqual(resilient.requeue_legacy_false_confidential(path), 1)
+            updated = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual(updated["documents"]["ai-old"]["status"], "api_timeout")
+            self.assertEqual(updated["documents"]["ai-old"]["retry_count"], 0)
+            self.assertEqual(
+                updated["documents"]["ai-old"]["privacyContractVersion"],
+                resilient.PRIVACY_CONTRACT_VERSION,
+            )
+            self.assertEqual(updated["documents"]["heuristic"]["status"], "skipped_confidential")
+            self.assertEqual(updated["documents"]["already-migrated"]["status"], "skipped_confidential")
+            self.assertEqual(resilient.requeue_legacy_false_confidential(path), 0)
 
 
 if __name__ == "__main__":
