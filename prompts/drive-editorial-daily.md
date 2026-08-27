@@ -16,7 +16,7 @@ Before judging the seed unsuitable:
 5. reframe stale or narrow material around a current management, operations, patient-journey, compliance, technology or business question;
 6. check existing HDN titles and seek a materially different angle before declaring duplicate intent.
 
-Confidentiality in the seed is NOT by itself a reason to reject the article. `confidentiality_flags` should describe what was removed or generalized. Return `should_generate: false` for confidentiality only when the useful thesis itself cannot be separated from confidential facts without becoming misleading or meaningless.
+Confidentiality in the seed is NOT by itself a reason to reject the article. If private material can be removed or generalized and the resulting public article is safe, return `should_generate: true` and an EMPTY `confidentiality_flags` array. `confidentiality_flags` is reserved only for residual privacy/confidentiality blockers that would still make the proposed public article unsafe after sanitization. Therefore a non-empty `confidentiality_flags` array means publication must stop. Return `should_generate: false` for confidentiality only when the useful thesis itself cannot be separated from confidential facts without becoming misleading or meaningless.
 
 Likewise, thin source material is not automatically a rejection. If public research can turn the underlying idea into a useful article, do so.
 
