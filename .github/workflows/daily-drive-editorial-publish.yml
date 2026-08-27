@@ -79,7 +79,6 @@ jobs:
         run: |
           set -euo pipefail
           args=(
-            scripts/generate_from_drive_editorial.py
             --folder-id "$DRIVE_EDITORIAL_FOLDER_ID"
             --service-account-json "$GOOGLE_SERVICE_ACCOUNT_JSON"
             --min-score "$MIN_SCORE"
@@ -88,7 +87,11 @@ jobs:
             --max-drive-files 500
           )
           if [ -n "$DOCUMENT_ID" ]; then args+=(--document-id "$DOCUMENT_ID"); fi
-          python "${args[@]}"
+          python scripts/run_drive_editorial_resilient.py \
+            --max-attempts 4 \
+            --backoff-seconds 8 \
+            --report-path /tmp/editorial-drive-run.json \
+            -- "${args[@]}"
 
       - name: Persist state when no article is suitable
         if: steps.editorial.outputs.selected != 'true'
