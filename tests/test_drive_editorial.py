@@ -86,6 +86,15 @@ class DriveEditorialTests(unittest.TestCase):
         self.assertNotIn("PRIVATE SOURCE TITLE", article)
         self.assertIn("https://hdnjapan.com/", article)
 
+    def test_prompt_requires_empty_flags_after_successful_sanitization(self):
+        prompt = editorial.PROMPT_PATH.read_text(encoding="utf-8")
+        self.assertIn("EMPTY `confidentiality_flags` array", prompt)
+        self.assertIn("residual privacy/confidentiality blockers", prompt)
+
+    def test_deterministic_seed_prefilter_still_blocks_direct_private_data(self):
+        flags = editorial.base.confidentiality_flags("seed", "連絡先 test.person@example.com")
+        self.assertIn("email_address", flags)
+
 
 if __name__ == "__main__":
     unittest.main()
