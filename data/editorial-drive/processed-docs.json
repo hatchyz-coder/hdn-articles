@@ -121,10 +121,10 @@
     },
     "2139b07ad3ec4700691d97a4841eb46890536463625216da0923ece578bfabed": {
       "modifiedTime": "2026-07-23T03:43:35.901Z",
-      "status": "api_timeout",
-      "startedAt": "2026-08-28T08:07:30.887056+00:00",
+      "status": "generated",
+      "startedAt": "2026-08-28T12:24:17.552538+00:00",
       "retry_count": 2,
-      "finishedAt": "2026-08-28T08:09:01.289620+00:00",
+      "finishedAt": "2026-08-28T12:25:12.722587+00:00",
       "reason": "OpenAI API timed out during editorial generation",
       "score": 86,
       "privacyContractVersion": 2,
@@ -133,7 +133,8 @@
         "mode": "full_text",
         "sourceTextCharacters": 3550,
         "inputCharacters": 3550
-      }
+      },
+      "slug": "lhub-handmade-ec-unified-management"
     },
     "6f0b8ccf766d69bd95c49bd73aa8318f182f984c11391294f94d9f95113a95ed": {
       "modifiedTime": "2026-07-23T03:43:35.767Z",
@@ -578,5 +579,5 @@
       "score": 88
     }
   },
-  "updatedAt": "2026-08-28T08:09:01.289628+00:00"
+  "updatedAt": "2026-08-28T12:25:12.722597+00:00"
 }
