@@ -47,14 +47,20 @@
     },
     "17eaf99b781947c5cafc583cb89c02605da07b9bdb00a00ecfd9d4011d27d5b3": {
       "modifiedTime": "2026-07-23T03:43:02.529Z",
-      "status": "api_timeout",
-      "startedAt": "2026-08-20T21:59:26.849166+00:00",
+      "status": "generated",
+      "startedAt": "2026-08-29T22:56:52.458738+00:00",
       "retry_count": 0,
-      "finishedAt": "2026-08-20T22:00:53.772171+00:00",
+      "finishedAt": "2026-08-29T22:57:33.488951+00:00",
       "reason": "AI confidentiality flags",
-      "score": 88,
+      "score": 90,
       "privacyContractVersion": 2,
-      "requeueReason": "privacy_contract_corrected"
+      "requeueReason": "privacy_contract_corrected",
+      "slug": "prevent-patient-forgetfulness-lhub-dental-clinics",
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3511,
+        "inputCharacters": 3511
+      }
     },
     "8c33b6d052868c54934b0d5973bad7c779fcfc67b4d2bb3f66dcb73ecb4fb272": {
       "modifiedTime": "2026-07-23T03:43:35.901Z",
@@ -586,5 +592,5 @@
       "score": 88
     }
   },
-  "updatedAt": "2026-08-29T04:53:12.295483+00:00"
+  "updatedAt": "2026-08-29T22:57:33.488960+00:00"
 }
