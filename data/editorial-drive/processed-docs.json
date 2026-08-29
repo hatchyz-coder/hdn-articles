@@ -151,19 +151,20 @@
     },
     "1841e9772fe9a28b7a55ab04675cd744961a7cab37120c5a393308ccb5753866": {
       "modifiedTime": "2026-07-23T03:43:35.767Z",
-      "status": "api_timeout",
-      "startedAt": "2026-08-22T21:12:34.164206+00:00",
-      "retry_count": 0,
-      "finishedAt": "2026-08-22T21:13:51.208189+00:00",
-      "reason": "AI confidentiality flags",
+      "status": "generated",
+      "startedAt": "2026-08-29T03:01:47.960616+00:00",
+      "retry_count": 2,
+      "finishedAt": "2026-08-29T03:03:17.407444+00:00",
+      "reason": "OpenAI API timed out during editorial generation",
       "sourceProcessing": {
         "mode": "full_text",
         "sourceTextCharacters": 3635,
         "inputCharacters": 3635
       },
-      "score": 82,
+      "score": 88,
       "privacyContractVersion": 2,
-      "requeueReason": "privacy_contract_corrected"
+      "requeueReason": "privacy_contract_corrected",
+      "slug": "lhub-line-consultation-parenting-trust"
     },
     "4e00d281285911e3547339ec3165643268770158a0acb5ad7acff6032426d390": {
       "modifiedTime": "2026-07-23T03:43:35.767Z",
@@ -579,5 +580,5 @@
       "score": 88
     }
   },
-  "updatedAt": "2026-08-28T12:25:12.722597+00:00"
+  "updatedAt": "2026-08-29T03:03:17.407454+00:00"
 }
