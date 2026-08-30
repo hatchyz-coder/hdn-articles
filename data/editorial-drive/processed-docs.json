@@ -191,14 +191,20 @@
     },
     "4be6dd0a6c39c637f356719653b42db9559a5951f49dc9649b64b4ee87d73611": {
       "modifiedTime": "2026-07-23T03:43:02.529Z",
-      "status": "api_timeout",
-      "startedAt": "2026-08-23T02:16:50.319380+00:00",
+      "status": "generated",
+      "startedAt": "2026-08-30T02:33:00.376844+00:00",
       "retry_count": 0,
-      "finishedAt": "2026-08-23T02:17:58.704247+00:00",
+      "finishedAt": "2026-08-30T02:34:03.365312+00:00",
       "reason": "AI confidentiality flags",
-      "score": 90,
+      "score": 85,
       "privacyContractVersion": 2,
-      "requeueReason": "privacy_contract_corrected"
+      "requeueReason": "privacy_contract_corrected",
+      "slug": "lhub-line-salon-reservation",
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3392,
+        "inputCharacters": 3392
+      }
     },
     "53c1bd6048614f76511db9376dc90a25c8d818ce6f5bf027781cac83c06dcc2c": {
       "modifiedTime": "2026-07-23T03:43:02.529Z",
@@ -592,5 +598,5 @@
       "score": 88
     }
   },
-  "updatedAt": "2026-08-29T22:57:33.488960+00:00"
+  "updatedAt": "2026-08-30T02:34:03.365319+00:00"
 }
