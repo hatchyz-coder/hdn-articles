@@ -208,14 +208,20 @@
     },
     "53c1bd6048614f76511db9376dc90a25c8d818ce6f5bf027781cac83c06dcc2c": {
       "modifiedTime": "2026-07-23T03:43:02.529Z",
-      "status": "api_timeout",
-      "startedAt": "2026-08-23T02:18:40.624913+00:00",
+      "status": "generated",
+      "startedAt": "2026-08-30T23:01:08.645930+00:00",
       "retry_count": 0,
-      "finishedAt": "2026-08-23T02:19:31.845799+00:00",
+      "finishedAt": "2026-08-30T23:02:20.312120+00:00",
       "reason": "AI confidentiality flags",
-      "score": 88,
+      "score": 86,
       "privacyContractVersion": 2,
-      "requeueReason": "privacy_contract_corrected"
+      "requeueReason": "privacy_contract_corrected",
+      "slug": "seitai-sekkotsuin-smart-lhub",
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3458,
+        "inputCharacters": 3458
+      }
     },
     "39543cfc08ce742a86ac08c3a8aa8290a113ac207f6bdb43331c03b423aa5471": {
       "modifiedTime": "2026-07-23T03:43:02.529Z",
@@ -598,5 +604,5 @@
       "score": 88
     }
   },
-  "updatedAt": "2026-08-30T02:34:03.365319+00:00"
+  "updatedAt": "2026-08-30T23:02:20.312130+00:00"
 }
