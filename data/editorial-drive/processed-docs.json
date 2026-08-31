@@ -225,14 +225,20 @@
     },
     "39543cfc08ce742a86ac08c3a8aa8290a113ac207f6bdb43331c03b423aa5471": {
       "modifiedTime": "2026-07-23T03:43:02.529Z",
-      "status": "api_timeout",
-      "startedAt": "2026-08-23T02:20:17.867635+00:00",
+      "status": "generated",
+      "startedAt": "2026-08-31T02:28:22.060699+00:00",
       "retry_count": 0,
-      "finishedAt": "2026-08-23T02:21:14.851851+00:00",
+      "finishedAt": "2026-08-31T02:29:46.285230+00:00",
       "reason": "AI confidentiality flags",
-      "score": 85,
+      "score": 88,
       "privacyContractVersion": 2,
-      "requeueReason": "privacy_contract_corrected"
+      "requeueReason": "privacy_contract_corrected",
+      "slug": "lhub-line-for-teachers-practical-guide",
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3330,
+        "inputCharacters": 3330
+      }
     },
     "6a8ef502a61c5f6c8c7d4e7ef639ecb2ed81c50c91d08cbb63bb5b854d267ffd": {
       "modifiedTime": "2026-07-23T03:43:02.540Z",
@@ -604,5 +610,5 @@
       "score": 88
     }
   },
-  "updatedAt": "2026-08-30T23:02:20.312130+00:00"
+  "updatedAt": "2026-08-31T02:29:46.285239+00:00"
 }
