@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-01T23:44:00.025807+00:00",
+  "generated_at": "2026-09-02T23:46:37.546743+00:00",
   "dry_run": false,
   "source_id": "",
   "metrics": {
@@ -14,7 +14,7 @@
     "new_candidates": 0,
     "duplicate_candidates": 50,
     "http_requests": 6,
-    "execution_seconds": 7.186,
+    "execution_seconds": 8.187,
     "source_results": [
       {
         "source_id": "mhlw",
