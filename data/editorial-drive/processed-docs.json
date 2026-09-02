@@ -276,14 +276,20 @@
     },
     "6a5c468fb1f2145d642c7aeeed10c77c8b2ea5b6689e17e6c9f3fa245233eef8": {
       "modifiedTime": "2026-07-23T03:43:02.540Z",
-      "status": "api_timeout",
-      "startedAt": "2026-08-23T02:25:57.510175+00:00",
+      "status": "generated",
+      "startedAt": "2026-09-02T05:22:32.984696+00:00",
       "retry_count": 0,
-      "finishedAt": "2026-08-23T02:27:02.159807+00:00",
+      "finishedAt": "2026-09-02T05:23:46.829170+00:00",
       "reason": "AI confidentiality flags",
-      "score": 86,
+      "score": 88,
       "privacyContractVersion": 2,
-      "requeueReason": "privacy_contract_corrected"
+      "requeueReason": "privacy_contract_corrected",
+      "slug": "lhub-line-sales-reservations-customer-management",
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3722,
+        "inputCharacters": 3722
+      }
     },
     "e8a03c7e3f5f88c4110900e0af39855387ad3f70145218490bef9c30f2b52050": {
       "modifiedTime": "2026-07-23T03:43:02.540Z",
@@ -622,5 +628,5 @@
       "score": 88
     }
   },
-  "updatedAt": "2026-09-01T05:52:42.511591+00:00"
+  "updatedAt": "2026-09-02T05:23:46.829179+00:00"
 }
