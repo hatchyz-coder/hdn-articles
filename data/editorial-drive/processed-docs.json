@@ -328,14 +328,20 @@
     },
     "dffbb0cb96576c2c2223aef3994eb2053576fd35c056d013a541226904f58e35": {
       "modifiedTime": "2026-07-23T03:43:18.472Z",
-      "status": "api_timeout",
-      "startedAt": "2026-08-24T02:14:21.417897+00:00",
+      "status": "generated",
+      "startedAt": "2026-09-03T23:00:51.875018+00:00",
       "retry_count": 0,
-      "finishedAt": "2026-08-24T02:15:26.476674+00:00",
+      "finishedAt": "2026-09-03T23:02:07.204028+00:00",
       "reason": "AI confidentiality flags",
       "score": 85,
       "privacyContractVersion": 2,
-      "requeueReason": "privacy_contract_corrected"
+      "requeueReason": "privacy_contract_corrected",
+      "slug": "lhub-beauty-clinic-unified-ops",
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3521,
+        "inputCharacters": 3521
+      }
     },
     "e08d42f45a85af5cc1ffe750a4b0280d860c6e0dc80cdcafe63fb5f43424df5a": {
       "modifiedTime": "2026-07-23T03:43:18.472Z",
@@ -641,5 +647,5 @@
       "score": 88
     }
   },
-  "updatedAt": "2026-09-03T05:17:33.040765+00:00"
+  "updatedAt": "2026-09-03T23:02:07.204037+00:00"
 }
