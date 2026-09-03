@@ -310,14 +310,20 @@
     },
     "c92c4d06b4520afd571f31d514bbb6b7748713e947f14bedab91bcc2d533a896": {
       "modifiedTime": "2026-07-23T03:43:02.540Z",
-      "status": "api_timeout",
-      "startedAt": "2026-08-24T00:43:22.732135+00:00",
-      "retry_count": 0,
-      "finishedAt": "2026-08-24T00:44:12.419332+00:00",
-      "reason": "AI confidentiality flags",
-      "score": 88,
+      "status": "generated",
+      "startedAt": "2026-09-03T02:10:29.194648+00:00",
+      "retry_count": 1,
+      "finishedAt": "2026-09-03T02:11:38.179518+00:00",
+      "reason": "OpenAI API timed out during editorial generation",
+      "score": 90,
       "privacyContractVersion": 2,
-      "requeueReason": "privacy_contract_corrected"
+      "requeueReason": "privacy_contract_corrected",
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3589,
+        "inputCharacters": 3589
+      },
+      "slug": "lhub-create-vintage-fan-community"
     },
     "dffbb0cb96576c2c2223aef3994eb2053576fd35c056d013a541226904f58e35": {
       "modifiedTime": "2026-07-23T03:43:18.472Z",
@@ -634,5 +640,5 @@
       "score": 88
     }
   },
-  "updatedAt": "2026-09-02T05:31:21.862795+00:00"
+  "updatedAt": "2026-09-03T02:11:38.179529+00:00"
 }
