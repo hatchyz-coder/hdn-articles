@@ -81,6 +81,13 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Verify LLM site guide
+        run: |
+          test -s public/llms.txt
+          grep -q '^# HDN Articles$' public/llms.txt
+          grep -q 'https://article.hdnjapan.com/rss.xml' public/llms.txt
+          test -s dist/llms.txt
+
       - name: Migration check
         run: |
           if npm run | grep -q "migration:check"; then

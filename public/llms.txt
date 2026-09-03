@@ -1,0 +1,30 @@
+# HDN Articles
+
+> HDN Articles is the official editorial platform of HDN Co., Ltd. It publishes practical, evidence-aware resources on clinic management, private medical services, healthcare regulation and operations, patient journeys, LINE/LHub, and AI-enabled operational improvement. Japanese articles are the primary editorial source; published English counterparts are provided where available.
+
+This file covers https://article.hdnjapan.com/. Articles explain general business and operational considerations and do not provide individual medical, legal, compliance, investment, or tax advice. For time-sensitive laws, regulations, platform specifications, and official notices, verify the primary source linked in each article.
+
+## Start here
+
+- [Articles home](https://article.hdnjapan.com/): Latest published Japanese articles and category navigation.
+- [English articles home](https://article.hdnjapan.com/en/): Published English editions and English topic pages.
+- [RSS feed](https://article.hdnjapan.com/rss.xml): Recent published article feed.
+- [Sitemap](https://article.hdnjapan.com/sitemap-index.xml): Full index of published pages. If unavailable, use the site sitemap endpoint linked from robots.txt.
+
+## Editorial themes
+
+- [Clinic management and operational improvement](https://article.hdnjapan.com/topics/clinic-management/): Clinic operations, management decisions, patient experience, AI, and DX.
+- [Private medical services and telemedicine](https://article.hdnjapan.com/topics/private-pay/): Service design, operational readiness, patient communication, and related considerations.
+- [Healthcare systems and compliance](https://article.hdnjapan.com/topics/compliance/): Official announcements, regulatory context, and operational implications.
+- [Patient journeys, LINE, and LHub](https://article.hdnjapan.com/topics/patient-journey/): Patient communication, booking, questionnaires, payments, follow-up, and CRM operations.
+- [Healthcare social media and video](https://article.hdnjapan.com/topics/medical-sns/): Content, video, and the route from awareness to booking.
+
+## Official services
+
+- [HDN corporate site](https://hdnjapan.com/): HDN's clinic-support services and consultation information.
+- [LHub overview](https://hdnjapan.com/lhub.html): Official overview of HDN's LINE-based patient-engagement support.
+- [Private-care support](https://hdnjapan.com/self-pay.html): Official overview of HDN's private medical service support.
+
+## Optional
+
+- [Robots policy](https://article.hdnjapan.com/robots.txt): Crawl guidance and the current sitemap location.
