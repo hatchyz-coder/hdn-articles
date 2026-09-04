@@ -345,19 +345,20 @@
     },
     "e08d42f45a85af5cc1ffe750a4b0280d860c6e0dc80cdcafe63fb5f43424df5a": {
       "modifiedTime": "2026-07-23T03:43:18.472Z",
-      "status": "api_timeout",
-      "startedAt": "2026-09-04T02:14:05.657499+00:00",
-      "retry_count": 1,
-      "finishedAt": "2026-09-04T02:15:36.096729+00:00",
+      "status": "generated",
+      "startedAt": "2026-09-04T05:16:23.687560+00:00",
+      "retry_count": 2,
+      "finishedAt": "2026-09-04T05:17:34.915473+00:00",
       "reason": "OpenAI API timed out during editorial generation",
       "sourceProcessing": {
         "mode": "full_text",
         "sourceTextCharacters": 3684,
         "inputCharacters": 3684
       },
-      "score": 88,
+      "score": 90,
       "privacyContractVersion": 2,
-      "requeueReason": "privacy_contract_corrected"
+      "requeueReason": "privacy_contract_corrected",
+      "slug": "lhub-high-ticket-fortune-sales"
     },
     "e2c8c34d6b9b0d335bd1602f00f459d296caf92ac5d1cbc7dc4d8881d2ce48f0": {
       "modifiedTime": "2026-07-23T03:43:18.472Z",
@@ -647,5 +648,5 @@
       "score": 88
     }
   },
-  "updatedAt": "2026-09-04T02:15:36.096736+00:00"
+  "updatedAt": "2026-09-04T05:17:34.915481+00:00"
 }
