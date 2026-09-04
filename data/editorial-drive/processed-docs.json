@@ -363,10 +363,10 @@
     "e2c8c34d6b9b0d335bd1602f00f459d296caf92ac5d1cbc7dc4d8881d2ce48f0": {
       "modifiedTime": "2026-07-23T03:43:18.472Z",
       "status": "api_timeout",
-      "startedAt": "2026-08-24T02:24:37.207019+00:00",
-      "retry_count": 0,
-      "finishedAt": "2026-08-24T02:25:54.807878+00:00",
-      "reason": "AI confidentiality flags",
+      "startedAt": "2026-09-04T22:42:09.639744+00:00",
+      "retry_count": 1,
+      "finishedAt": "2026-09-04T22:43:39.972994+00:00",
+      "reason": "OpenAI API timed out during editorial generation",
       "sourceProcessing": {
         "mode": "full_text",
         "sourceTextCharacters": 3700,
@@ -648,5 +648,5 @@
       "score": 88
     }
   },
-  "updatedAt": "2026-09-04T05:17:34.915481+00:00"
+  "updatedAt": "2026-09-04T22:43:39.973001+00:00"
 }
