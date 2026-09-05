@@ -362,19 +362,20 @@
     },
     "e2c8c34d6b9b0d335bd1602f00f459d296caf92ac5d1cbc7dc4d8881d2ce48f0": {
       "modifiedTime": "2026-07-23T03:43:18.472Z",
-      "status": "api_timeout",
-      "startedAt": "2026-09-04T22:42:09.639744+00:00",
+      "status": "generated",
+      "startedAt": "2026-09-05T04:59:52.566236+00:00",
       "retry_count": 1,
-      "finishedAt": "2026-09-04T22:43:39.972994+00:00",
+      "finishedAt": "2026-09-05T05:01:23.096876+00:00",
       "reason": "OpenAI API timed out during editorial generation",
       "sourceProcessing": {
         "mode": "full_text",
         "sourceTextCharacters": 3700,
         "inputCharacters": 3700
       },
-      "score": 86,
+      "score": 92,
       "privacyContractVersion": 2,
-      "requeueReason": "privacy_contract_corrected"
+      "requeueReason": "privacy_contract_corrected",
+      "slug": "subscription-model-for-fortune-tellers-lhub-membership"
     },
     "4d5cb5dfe9a54ecfed80ebcc02e15457f1bda43dcdef805e89e37a466f0a0be6": {
       "modifiedTime": "2026-07-23T03:43:18.472Z",
@@ -648,5 +649,5 @@
       "score": 88
     }
   },
-  "updatedAt": "2026-09-04T22:43:39.973001+00:00"
+  "updatedAt": "2026-09-05T05:01:23.096886+00:00"
 }
