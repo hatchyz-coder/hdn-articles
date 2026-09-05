@@ -379,14 +379,20 @@
     },
     "4d5cb5dfe9a54ecfed80ebcc02e15457f1bda43dcdef805e89e37a466f0a0be6": {
       "modifiedTime": "2026-07-23T03:43:18.472Z",
-      "status": "api_timeout",
-      "startedAt": "2026-08-24T21:19:56.496830+00:00",
+      "status": "generated",
+      "startedAt": "2026-09-05T05:03:41.838100+00:00",
       "retry_count": 0,
-      "finishedAt": "2026-08-24T21:21:20.878036+00:00",
+      "finishedAt": "2026-09-05T05:04:55.655472+00:00",
       "reason": "AI confidentiality flags",
-      "score": 86,
+      "score": 85,
       "privacyContractVersion": 2,
-      "requeueReason": "privacy_contract_corrected"
+      "requeueReason": "privacy_contract_corrected",
+      "slug": "lhub-for-rental-management",
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3546,
+        "inputCharacters": 3546
+      }
     },
     "fafbd1fbb243877f9bff916981bb57e51735a22f1048c728887886e0116c6970": {
       "modifiedTime": "2026-07-23T03:43:35.767Z",
@@ -649,5 +655,5 @@
       "score": 88
     }
   },
-  "updatedAt": "2026-09-05T05:01:23.096886+00:00"
+  "updatedAt": "2026-09-05T05:04:55.655481+00:00"
 }
