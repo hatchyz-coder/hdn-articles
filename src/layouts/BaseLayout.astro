@@ -22,6 +22,9 @@ const shareTitle = socialTitle || title;
 const homeHref = lang === 'en' ? `${import.meta.env.BASE_URL}en/` : import.meta.env.BASE_URL;
 const corporateHref = lang === 'en' ? 'https://hdnjapan.com/en/index.html' : 'https://hdnjapan.com/';
 const lhubHref = lang === 'en' ? 'https://hdnjapan.com/en/lhub.html' : 'https://hdnjapan.com/lhub.html';
+const faviconHref = Astro.url.pathname.startsWith('/market-radar')
+  ? `${import.meta.env.BASE_URL}market-radar-favicon.svg`
+  : `${import.meta.env.BASE_URL}favicon.svg`;
 ---
 <!doctype html>
 <html lang={lang}>
@@ -30,6 +33,7 @@ const lhubHref = lang === 'en' ? 'https://hdnjapan.com/en/lhub.html' : 'https://
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="google-site-verification" content="Ip881HYfs6u_GNj9IVge1qsaCQulAB4EbtMHi7I8Psk" />
     <title>{title}</title>
+    <link rel="icon" type="image/svg+xml" href={faviconHref} />
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
     {jaUrl && <link rel="alternate" hreflang="ja" href={jaUrl} />}
