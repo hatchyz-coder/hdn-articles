@@ -1,7 +1,7 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
-const ctaSchema = z.enum(['consultation', 'lhub', 'self-pay', 'sns']).default('consultation');
+const ctaSchema = z.enum(['consultation', 'lhub', 'self-pay', 'sns', 'editorial']).default('consultation');
 const audienceSchema = z.enum(['clinic', 'lhub', 'general']);
 const sectionSchema = z.enum([
   'clinic-private-pay',
