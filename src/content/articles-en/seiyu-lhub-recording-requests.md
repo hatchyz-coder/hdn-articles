@@ -16,6 +16,12 @@ tags:
 author: "Tsuyoshi Hadano"
 draft: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "creator"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 Freelance voice actors increasingly juggle corporate recording jobs and paid fan projects. A LINE-based integrated tool like LHub can centralize bookings, payments, and membership management. This guide gives practical workflows, payment and contract cautions, and a pre-launch checklist to reduce administrative friction and protect creative time.

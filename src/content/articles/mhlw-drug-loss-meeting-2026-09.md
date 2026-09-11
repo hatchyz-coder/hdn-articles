@@ -15,6 +15,13 @@ draft: false
 featured: false
 sourceUrl: "https://www.mhlw.go.jp/stf/shingi2/0000198856_00047.html"
 cta: consultation
+audiences:
+  - "clinic"
+  - "general"
+section: "research"
+industry: "medical"
+series: "official-sources"
+contentType: "news-analysis"
 ---
 
 厚生労働省は2026年9月4日、「第69回 医療上の必要性の高い未承認薬・適応外薬検討会議」を開催しました。

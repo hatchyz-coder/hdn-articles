@@ -15,6 +15,12 @@ author: "羽田野 剛士"
 draft: false
 featured: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "fortune"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 個人で活動する占い師向けに、LINE公式アカウントとLHubを組み合わせて依頼受付・カウンセリング予約・事前決済・リマインド・フォローを一気通貫で自動化する運用設計と実務チェックリストをまとめました。事前決済の導入メリット、LINEの予約機能の扱い方、消費者保護（特定商取引法）への対応ポイントも押さえます。

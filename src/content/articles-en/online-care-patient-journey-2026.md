@@ -14,6 +14,12 @@ tags:
 author: "Tsuyoshi Hadano"
 draft: false
 cta: lhub
+audiences:
+  - "clinic"
+section: "clinic-journey"
+industry: "medical"
+series: "patient-journey"
+contentType: "practical-guide"
 ---
 
 A clinic can introduce telemedicine and still find that day-to-day operations barely improve.

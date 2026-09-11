@@ -14,6 +14,12 @@ author: "羽田野 剛士"
 draft: true
 featured: false
 cta: consultation
+audiences:
+  - "clinic"
+section: "clinic-marketing"
+industry: "medical"
+series: "medical-sns"
+contentType: "opinion"
 ---
 
 医療機関のSNSでは、「無難に作ると見られない。でも強く言いすぎると危ない」という難しさがあります。

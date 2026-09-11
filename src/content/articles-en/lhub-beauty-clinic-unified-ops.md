@@ -16,6 +16,13 @@ tags:
 author: "Tsuyoshi Hadano"
 draft: false
 cta: lhub
+audiences:
+  - "clinic"
+  - "lhub"
+section: "lhub-usecase"
+industry: "medical"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 This article explains how aesthetic clinics can reduce staff workload and prevent lost retail sales by unifying appointment booking, inventory, payments and automated reminders through a LINE-based platform like LHub. It includes a prioritized rollout checklist and compliance reminders relevant to Japan.

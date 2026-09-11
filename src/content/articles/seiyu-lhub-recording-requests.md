@@ -17,6 +17,12 @@ author: "羽田野 剛士"
 draft: false
 featured: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "creator"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 フリーランスの声優・ナレーターは企業収録と個人の有料コンテンツ運営を同時に回す必要が増えています。LINE公式アカウントを基盤にしたLHubを使えば、収録依頼の進行管理、個人企画の予約・決済、継続課金・会員管理を一つの動線で整理できます。本記事では導入メリット、実務フロー、注意点、導入チェックリストを具体的に示します。

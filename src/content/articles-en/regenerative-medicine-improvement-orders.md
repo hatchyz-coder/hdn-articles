@@ -13,6 +13,13 @@ author: "Tsuyoshi Hadano"
 draft: false
 sourceUrl: "https://www.mhlw.go.jp/stf/newpage_74981.html"
 cta: consultation
+audiences:
+  - "clinic"
+  - "general"
+section: "research"
+industry: "medical"
+series: "official-sources"
+contentType: "regulation"
 ---
 
 On July 31, 2026, Japan's Ministry of Health, Labour and Welfare (MHLW) announced administrative actions under the Act on the Safety of Regenerative Medicine involving managers of regenerative medicine providers and operators engaged in processing specified cellular products.

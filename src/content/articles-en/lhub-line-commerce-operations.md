@@ -13,6 +13,12 @@ tags:
 author: "Tsuyoshi Hadano"
 draft: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "retail"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 When businesses use LINE for e-commerce, a common request is to make everything happen inside LINE.

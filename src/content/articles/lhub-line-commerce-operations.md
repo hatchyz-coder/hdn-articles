@@ -14,6 +14,12 @@ author: "羽田野 剛士"
 draft: false
 featured: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "retail"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 ECや物販でLINEを使うとき、「LINEの中で全部できるようにしたい」という要望はよくあります。

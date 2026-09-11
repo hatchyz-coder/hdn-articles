@@ -14,6 +14,12 @@ author: "羽田野 剛士"
 draft: true
 featured: false
 cta: consultation
+audiences:
+  - "clinic"
+section: "clinic-marketing"
+industry: "medical"
+series: "clinic-content"
+contentType: "practical-guide"
 ---
 
 「クリニックで動画を始めたいが、何を撮ればいいか分からない」。この相談は珍しくありません。

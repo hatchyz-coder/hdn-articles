@@ -14,6 +14,13 @@ draft: false
 featured: false
 sourceUrl: "https://www.mhlw.go.jp/stf/newpage_67729.html"
 cta: consultation
+audiences:
+  - "clinic"
+  - "general"
+section: "research"
+industry: "medical"
+series: "official-sources"
+contentType: "regulation"
 ---
 
 厚生労働省は令和8年度診療報酬改定に関する説明資料、施設基準、届出関係資料を公開・更新しています。地方厚生局でも、令和8年度改定に対応した基本診療料・特掲診療料の届出様式や、医科診療所向けの施設基準届出チェックリストが案内されています。

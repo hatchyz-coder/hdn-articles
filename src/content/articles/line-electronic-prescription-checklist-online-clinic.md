@@ -16,6 +16,13 @@ author: "羽田野 剛士"
 draft: false
 featured: false
 cta: lhub
+audiences:
+  - "clinic"
+  - "lhub"
+section: "clinic-compliance"
+industry: "medical"
+series: "clinic-regulation"
+contentType: "practical-guide"
 ---
 
 LINEを中心に予約・問診・決済の導線を作るクリニックが、電子処方箋との混在運用や薬局連携、セキュリティ、患者同意の要件をクリアして「オンライン診療を一貫運用」するための実務チェックリストと現場対応の優先順位を示します。薬局側の電子処方箋導入は進んでいる一方で医療機関側の導入は遅れている点（運用の“混在”）を踏まえた現実的な手順を提示します。

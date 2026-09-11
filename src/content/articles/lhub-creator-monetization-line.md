@@ -15,6 +15,12 @@ author: "羽田野 剛士"
 draft: false
 featured: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "creator"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 動画配信者がLINE＋LHubでファン基盤を自分で育て、グッズ販売・月額会費・先行予約など複数の収益導線をつくるための実務ガイド。機能理解と運用の優先順位、注意点を整理しました。

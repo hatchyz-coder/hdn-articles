@@ -15,6 +15,13 @@ author: "羽田野 剛士"
 draft: false
 featured: false
 cta: consultation
+audiences:
+  - "clinic"
+  - "general"
+section: "research"
+industry: "other"
+series: "advertising-compliance"
+contentType: "regulation"
 ---
 
 健康食品の広告を見ていると、「病名や効果を直接書かなければ大丈夫」「商品の話をせず、まず生活シーンを描けば安全」という発想に出会うことがあります。

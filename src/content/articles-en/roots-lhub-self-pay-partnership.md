@@ -14,6 +14,13 @@ author: "Tsuyoshi Hadano"
 draft: false
 sourceUrl: "https://rts-inc.jp/post-614/"
 cta: lhub
+audiences:
+  - "clinic"
+  - "lhub"
+section: "lhub-usecase"
+industry: "medical"
+series: "lhub-use-cases"
+contentType: "case-study"
 ---
 
 HDN Inc. has begun collaborating with ROOTS Inc. to provide digital operational support for clinics offering self-pay medical services using LHub.

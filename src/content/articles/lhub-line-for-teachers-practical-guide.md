@@ -15,6 +15,12 @@ author: "羽田野 剛士"
 draft: false
 featured: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "other"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 個人や少人数規模のスクール・教室が、LINE連携ツール（LHub）を使って体験申込→決済→月謝管理→リマインドまでを一貫運用するための実務チェックリストと導入フローを解説します。導入前に確認するべき決済仕様や配信シナリオ、現場での運用ルールも提示します。([hdnjapan.com](https://hdnjapan.com/lhub.html))

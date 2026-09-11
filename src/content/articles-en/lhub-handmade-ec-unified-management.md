@@ -15,6 +15,12 @@ tags:
 author: "Tsuyoshi Hadano"
 draft: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "retail"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 Independent makers often get stretched between creating and managing orders, payments, inventory, shipping and customer follow-up. Using a LINE-integrated platform (e.g., via LINE Official Account or LINE Mini App) lets you centralize the customer journey inside LINE, shorten purchase funnels and automate post-purchase follow-up. This article explains practical benefits, a step-by-step small-shop rollout plan, and key checks before deployment.

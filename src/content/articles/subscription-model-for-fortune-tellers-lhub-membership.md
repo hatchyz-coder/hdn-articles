@@ -17,6 +17,12 @@ author: "羽田野 剛士"
 draft: false
 featured: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "fortune"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 占い師が単発鑑定から脱却して安定収益を作るには、会員制（サブスク）がもっとも現実的な選択肢の一つです。本稿は、LINEを窓口にLHubの機能を組み合わせて「会員登録→継続課金→会員限定コンテンツ→イベント・物販」を一貫運用する具体手順、注意すべき消費者保護・表記義務、決済の落とし穴、そして初期KPIを提示します。実装イメージと短期〜中期の運用タスクを示し、導入のハードルを下げます。

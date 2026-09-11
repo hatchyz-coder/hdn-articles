@@ -16,6 +16,12 @@ author: "羽田野 剛士"
 draft: false
 featured: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "retail"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 古着店が“推し店”として常連化を生むには、商品力だけでなく接点設計が必要です。本稿はLINEを基盤にしたLHubの機能を活かし、顧客セグメント別配信、限定／先行販売、購入後フォローの実務フローと計測法を提示します。実装のチェックリストつき。

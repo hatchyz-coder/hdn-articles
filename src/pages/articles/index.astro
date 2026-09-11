@@ -1,0 +1,209 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const articles = (await getCollection('articles', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+
+const articleHref = (id: string) => `${import.meta.env.BASE_URL}articles/${id}/`;
+const sectionLabel = (section?: string) => ({
+  'clinic-private-pay': '自費診療',
+  'clinic-journey': '患者導線',
+  'clinic-marketing': '医療マーケティング',
+  'clinic-compliance': '医療制度・法務',
+  'clinic-management': 'クリニック経営',
+  'lhub-usecase': 'LHub活用',
+  'world-frictions': '世界の違和感',
+  research: '制度・一次情報',
+}[section ?? ''] ?? 'その他');
+---
+<BaseLayout
+  title="記事を探す｜HDN Articles"
+  description="HDN Articlesの公開記事を、キーワード、読者、テーマ、業種で絞り込めます。クリニック経営、LHub、制度・一次情報、世界の違和感を横断して探せます。"
+>
+  <main class="wrap discovery-page">
+    <section class="discovery-intro">
+      <p class="eyebrow">DISCOVER</p>
+      <h1>記事を探す</h1>
+      <p>「自分に必要な記事だけ読みたい」ための一覧です。キーワード、読者、テーマ、LHubの業種から絞り込めます。JavaScriptを無効にしていても、公開記事はすべて一覧できます。</p>
+    </section>
+
+    <section class="discovery-panel" aria-label="記事の絞り込み">
+      <form class="discovery-form" data-article-filters>
+        <div class="discovery-field">
+          <label for="article-search">キーワード</label>
+          <input id="article-search" name="q" type="search" placeholder="例：自費診療、LHub、広告、厚労省" autocomplete="off" />
+        </div>
+        <div class="discovery-field">
+          <label for="audience-filter">読者</label>
+          <select id="audience-filter" name="audience">
+            <option value="all">すべて</option>
+            <option value="clinic">院長・クリニック関係者</option>
+            <option value="lhub">LHub導入検討者</option>
+            <option value="general">一般・編集記事</option>
+          </select>
+        </div>
+        <div class="discovery-field">
+          <label for="section-filter">テーマ</label>
+          <select id="section-filter" name="section">
+            <option value="all">すべて</option>
+            <option value="clinic-private-pay">自費診療</option>
+            <option value="clinic-journey">患者導線</option>
+            <option value="clinic-marketing">医療マーケティング</option>
+            <option value="clinic-compliance">医療制度・法務</option>
+            <option value="clinic-management">クリニック経営</option>
+            <option value="lhub-usecase">LHub活用</option>
+            <option value="world-frictions">世界の違和感</option>
+            <option value="research">制度・一次情報</option>
+          </select>
+        </div>
+        <div class="discovery-field">
+          <label for="industry-filter">LHub業種</label>
+          <select id="industry-filter" name="industry">
+            <option value="all">すべて</option>
+            <option value="medical">医療</option>
+            <option value="dental">歯科</option>
+            <option value="real-estate">不動産</option>
+            <option value="retail">小売・EC</option>
+            <option value="creator">クリエイター</option>
+            <option value="fortune">占い</option>
+            <option value="other">その他</option>
+          </select>
+        </div>
+        <div class="discovery-field">
+          <label for="sort-filter">並び順</label>
+          <select id="sort-filter" name="sort">
+            <option value="newest">新着順</option>
+            <option value="oldest">古い順</option>
+          </select>
+        </div>
+        <button class="discovery-reset" type="button" data-reset-filters>リセット</button>
+      </form>
+    </section>
+
+    <div class="discovery-summary">
+      <p><strong data-result-count>{articles.length}</strong> 件の記事</p>
+      <a class="text-link" href={`${import.meta.env.BASE_URL}rss.xml`}>RSSで購読 <span>→</span></a>
+    </div>
+
+    <section class="discovery-grid" data-article-grid aria-label="記事一覧">
+      {articles.map((article) => (
+        <article
+          class="discovery-card"
+          data-discovery-card
+          data-search={[article.data.title, article.data.description, article.data.category, ...article.data.tags].join(' ').toLocaleLowerCase('ja-JP')}
+          data-audiences={article.data.audiences?.join(',') ?? ''}
+          data-section={article.data.section ?? ''}
+          data-industry={article.data.industry ?? ''}
+          data-date={article.data.publishedAt.toISOString()}
+        >
+          <p class="article-meta"><span>{sectionLabel(article.data.section)}</span><time datetime={article.data.publishedAt.toISOString()}>{article.data.publishedAt.toLocaleDateString('ja-JP')}</time></p>
+          <h2><a href={articleHref(article.id)}>{article.data.title}</a></h2>
+          <p>{article.data.description}</p>
+          <a class="read-more" href={articleHref(article.id)}>続きを読む <span aria-hidden="true">→</span></a>
+        </article>
+      ))}
+    </section>
+    <div class="discovery-empty" data-discovery-empty>条件に一致する記事はありません。条件を減らしてもう一度お試しください。</div>
+  </main>
+
+  <script is:inline>
+    (() => {
+      const form = document.querySelector('[data-article-filters]');
+      const grid = document.querySelector('[data-article-grid]');
+      const count = document.querySelector('[data-result-count]');
+      const empty = document.querySelector('[data-discovery-empty]');
+      const reset = document.querySelector('[data-reset-filters]');
+      if (!(form instanceof HTMLFormElement) || !grid || !count || !empty || !reset) return;
+
+      const search = form.elements.namedItem('q');
+      const audience = form.elements.namedItem('audience');
+      const section = form.elements.namedItem('section');
+      const industry = form.elements.namedItem('industry');
+      const sort = form.elements.namedItem('sort');
+      if (!(search instanceof HTMLInputElement) || !(audience instanceof HTMLSelectElement) || !(section instanceof HTMLSelectElement) || !(industry instanceof HTMLSelectElement) || !(sort instanceof HTMLSelectElement)) return;
+
+      const cards = Array.from(grid.querySelectorAll('[data-discovery-card]'));
+      let searchTimer;
+
+      const setParam = (params, key, value, defaultValue = 'all') => {
+        if (!value || value === defaultValue) params.delete(key);
+        else params.set(key, value);
+      };
+
+      const recordUsage = (resultsCount) => {
+        if (typeof window.gtag !== 'function') return;
+        window.gtag('event', 'article_search_usage', {
+          has_query: Boolean(search.value.trim()),
+          audience_filter: audience.value,
+          section_filter: section.value,
+          industry_filter: industry.value,
+          sort_order: sort.value,
+          results_count: resultsCount,
+        });
+      };
+
+      const apply = ({ updateUrl = true, record = false } = {}) => {
+        const query = search.value.trim().toLocaleLowerCase('ja-JP');
+        const visible = [];
+        for (const card of cards) {
+          const matchesQuery = !query || (card.dataset.search || '').includes(query);
+          const matchesAudience = audience.value === 'all' || (card.dataset.audiences || '').split(',').includes(audience.value);
+          const matchesSection = section.value === 'all' || card.dataset.section === section.value;
+          const matchesIndustry = industry.value === 'all' || card.dataset.industry === industry.value;
+          const show = matchesQuery && matchesAudience && matchesSection && matchesIndustry;
+          card.hidden = !show;
+          if (show) visible.push(card);
+        }
+
+        const direction = sort.value === 'oldest' ? 1 : -1;
+        const ordered = [...cards].sort((a, b) => direction * ((a.dataset.date || '').localeCompare(b.dataset.date || '')));
+        grid.append(...ordered);
+        count.textContent = String(visible.length);
+        empty.dataset.visible = visible.length === 0 ? 'true' : 'false';
+
+        if (updateUrl) {
+          const url = new URL(window.location.href);
+          const params = url.searchParams;
+          const rawQuery = search.value.trim();
+          if (rawQuery) params.set('q', rawQuery); else params.delete('q');
+          setParam(params, 'audience', audience.value);
+          setParam(params, 'section', section.value);
+          setParam(params, 'industry', industry.value);
+          setParam(params, 'sort', sort.value, 'newest');
+          history.replaceState(null, '', `${url.pathname}${params.toString() ? `?${params}` : ''}${url.hash}`);
+        }
+        if (record) recordUsage(visible.length);
+      };
+
+      const syncFromUrl = () => {
+        const params = new URLSearchParams(window.location.search);
+        search.value = params.get('q') || '';
+        audience.value = params.get('audience') || 'all';
+        section.value = params.get('section') || 'all';
+        industry.value = params.get('industry') || 'all';
+        sort.value = params.get('sort') || 'newest';
+        apply({ updateUrl: false, record: false });
+      };
+
+      search.addEventListener('input', () => {
+        window.clearTimeout(searchTimer);
+        searchTimer = window.setTimeout(() => apply({ record: true }), 350);
+      });
+      for (const select of [audience, section, industry, sort]) {
+        select.addEventListener('change', () => {
+          apply({ record: true });
+          if (select === industry && industry.value !== 'all' && typeof window.gtag === 'function') {
+            window.gtag('event', 'lhub_industry_filter', { industry_filter: industry.value });
+          }
+        });
+      }
+      reset.addEventListener('click', () => {
+        form.reset();
+        apply({ record: true });
+      });
+      window.addEventListener('popstate', syncFromUrl);
+      syncFromUrl();
+    })();
+  </script>
+</BaseLayout>

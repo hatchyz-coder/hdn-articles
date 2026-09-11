@@ -14,6 +14,12 @@ author: "羽田野 剛士"
 draft: false
 featured: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "other"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 個人経営・小規模エステサロンが直面する「予約の分散」「ダブルブッキング」「無断キャンセル」といった運用課題に対し、LINE公式アカウントと連携するLHub（エルハブ）は、担当者別の空き枠表示・事前決済・セグメント配信・リマインドまでを一つの管理画面で扱えるソリューションを提供します。本稿は導入メリット、実務上のポイント、運用チェックリスト、注意点（LINEの仕様・個人情報管理・決済条件）を実務目線で整理します。

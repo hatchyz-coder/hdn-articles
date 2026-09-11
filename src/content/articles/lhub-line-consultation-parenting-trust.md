@@ -16,6 +16,12 @@ author: "羽田野 剛士"
 draft: false
 featured: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "other"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 キャリア相談、心理カウンセリング、子育て支援など“信頼構築”が重要な領域では、利用者が日常的に使うLINEを起点に予約〜決済〜継続フォローを設計すると効果的です。LHubはLINE公式アカウントと連携し、予約フォーム・ステップ配信・セグメント配信・継続課金（口座振替含む）などの機能をまとめて運用できるため、安心感のある導線づくりに向いています。

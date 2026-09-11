@@ -14,6 +14,12 @@ tags:
 author: "Tsuyoshi Hadano"
 draft: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "fortune"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 Premium advisors can add product sales without eroding trust by designing messaging-first flows: tag customers by consultation outcome, use delayed scenario messaging for product proposals, provide multiple payment options, and start with small SKU tests. This guide draws on LHub functionality and Japan’s high messaging/payment adoption. ([hdnjapan.com](https://hdnjapan.com/lhub.html))

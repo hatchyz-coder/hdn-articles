@@ -15,6 +15,12 @@ tags:
 author: "Tsuyoshi Hadano"
 draft: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "retail"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 This article shows how sellers of one-off high-value vintage items can reduce missed sales by using a LINE-centered commerce platform (LHub). It covers real-time inventory sync, segmented limited releases (drops), streamlined checkout, trust-building for high-value items, staff workflows, and a practical checklist.

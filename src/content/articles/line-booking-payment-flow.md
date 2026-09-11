@@ -8,6 +8,12 @@ author: "羽田野 剛士"
 draft: false
 featured: true
 cta: "lhub"
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "other"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 ## LINEを導入しただけでは、患者導線はつながりません

@@ -13,6 +13,13 @@ author: "Tsuyoshi Hadano"
 draft: false
 sourceUrl: "https://www.mhlw.go.jp/stf/newpage_67729.html"
 cta: consultation
+audiences:
+  - "clinic"
+  - "general"
+section: "research"
+industry: "medical"
+series: "official-sources"
+contentType: "regulation"
 ---
 
 Japan's Ministry of Health, Labour and Welfare has published and updated explanatory materials, facility standards, and filing documents for the FY2026 medical fee revision. Regional health bureaus have also published updated forms and clinic-specific facility-standard checklists.

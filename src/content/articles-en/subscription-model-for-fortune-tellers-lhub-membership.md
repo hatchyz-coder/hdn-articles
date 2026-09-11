@@ -15,6 +15,12 @@ tags:
 author: "Tsuyoshi Hadano"
 draft: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "fortune"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 For fortune-tellers and solo practitioners, monthly memberships create predictable revenue and stronger client relationships. This guide explains how to use LINE's membership features together with LHub-style management tools to handle recurring billing, segmented messaging, member-only content and events. It also highlights legal/display obligations under Japanese consumer law and key payment-provider checks.

@@ -14,6 +14,12 @@ tags:
 author: "Tsuyoshi Hadano"
 draft: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "other"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 This article explains how small schools and individual tutors can use a LINE-integrated tool (LHub) to create a seamless flow from trial booking to payment and monthly-fee management. It includes a step-by-step implementation checklist, key operational decisions, and risks to watch—especially around payment integrations and platform policy changes.([hdnjapan.com](https://hdnjapan.com/lhub.html))

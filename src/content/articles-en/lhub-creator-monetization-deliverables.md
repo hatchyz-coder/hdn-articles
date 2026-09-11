@@ -14,6 +14,12 @@ tags:
 author: "Tsuyoshi Hadano"
 draft: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "creator"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 For freelance designers, writers and illustrators, the critical pain points are delivery clarity and reliable payment. This guide shows how LHub (LINE-integrated) can centralize deliverable tracking, send payment links at delivery, automate reminders and support subscription offers—plus a rollout checklist and key cautions about platform fees.

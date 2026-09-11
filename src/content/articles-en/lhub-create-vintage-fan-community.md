@@ -15,6 +15,12 @@ tags:
 author: "Tsuyoshi Hadano"
 draft: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "retail"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 Vintage and secondhand clothing sellers can convert buyers into long-term fans by designing tailored touchpoints: segmented messaging, limited/early releases for loyal groups, and consistent post-purchase engagement. This article explains an operational three-step workflow, key metrics to track, and common pitfalls when using a LINE-based tool like LHub.

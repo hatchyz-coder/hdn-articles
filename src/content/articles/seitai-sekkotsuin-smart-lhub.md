@@ -16,6 +16,12 @@ author: "羽田野 剛士"
 draft: false
 featured: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "other"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 整体院・接骨院は「施術履歴の記録」と「タイミングの良い配信」で継続来院を作れる。LINE上で予約・決済・リマインドを完結させる設計と、個人情報・医療情報の取り扱いで院側が押さえるべきポイントを整理する。実務で使える運用術と導入前チェックリストを提示。

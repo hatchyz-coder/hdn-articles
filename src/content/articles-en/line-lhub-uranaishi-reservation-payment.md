@@ -14,6 +14,12 @@ tags:
 author: "Tsuyoshi Hadano"
 draft: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "fortune"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 This guide shows independent fortune‑tellers how to design a practical LINE-based workflow—lead capture, booking calendar, prepayment, reminders and post-session follow-up—using LHub or similar tools. It covers the operational checklist, cancellation policy considerations, and compliance points (e.g., Japan’s Act on Specified Commercial Transactions).

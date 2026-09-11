@@ -16,6 +16,12 @@ author: "羽田野 剛士"
 draft: false
 featured: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "retail"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 ハンドメイド作家や個人雑貨販売者は、SNSやマーケットプレイス依存だけでは利益確保や顧客接点の最適化に限界が出ます。LINEと連携するLHubのようなワンストップ運用プラットフォームを使うと、注文→決済→在庫→発送→フォローまでの導線が短くなり、制作時間を確保しやすくなります。本稿では導入メリット、実務で注意する点、導入チェックリストを実例的に解説します（LINEミニアプリやLINE公式アカウントの最新機能を踏まえた再確認を含む）。

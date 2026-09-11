@@ -15,6 +15,12 @@ author: "羽田野 剛士"
 draft: false
 featured: false
 cta: lhub
+audiences:
+  - "clinic"
+section: "clinic-journey"
+industry: "medical"
+series: "patient-journey"
+contentType: "practical-guide"
 ---
 
 オンライン診療を導入しても、現場が思ったほど楽にならないことがあります。

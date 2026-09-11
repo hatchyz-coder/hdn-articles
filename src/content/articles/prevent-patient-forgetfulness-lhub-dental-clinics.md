@@ -16,6 +16,13 @@ author: "羽田野 剛士"
 draft: false
 featured: false
 cta: lhub
+audiences:
+  - "clinic"
+  - "lhub"
+section: "lhub-usecase"
+industry: "dental"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 歯科の定期検診で起きる「来院忘れ」をLINE×LHubで防ぐための運用設計。セグメント配信、予約・決済導線の一元化、配信タイミング、同意と個人情報対応の実務ポイントを実例と研究に基づいてまとめます。LHubの機能を使った実装例と現場で注意すべき法的・プラットフォーム上の制約も解説します。
