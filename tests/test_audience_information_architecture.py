@@ -43,8 +43,8 @@ class AudienceInformationArchitectureTests(unittest.TestCase):
         for phrase in (
             "院長・クリニック関係者の方",
             "LHub導入を検討している方",
-            "世界の違和感を読む",
-            "制度・一次情報を見る",
+            "「世界の違和感」を読む",
+            "制度・一次情報を確認したい方",
         ):
             self.assertIn(phrase, home)
 
