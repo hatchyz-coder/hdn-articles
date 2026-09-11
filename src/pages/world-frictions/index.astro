@@ -1,0 +1,61 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { isWorldFrictionsArticle } from '../../lib/audiences';
+
+const articles = (await getCollection('articles', ({ data }) => !data.draft))
+  .filter(isWorldFrictionsArticle)
+  .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+const articleHref = (id: string) => `${import.meta.env.BASE_URL}articles/${id}/`;
+---
+<BaseLayout
+  title="世界の違和感｜HDN Articles"
+  description="みんなが何となく「あれ？」と感じる社会のズレを、一次資料・研究・報道まで掘って言語化するHDNの連載です。"
+>
+  <main>
+    <section class="lane-page-intro">
+      <div class="wrap">
+        <p class="eyebrow">WORLD FRICTIONS</p>
+        <h1>世界の違和感</h1>
+        <p>みんなが何となく「あれ？」と感じる社会のズレを、具体例、一次資料、研究、信頼できる報道まで追い、構造として言語化します。AI、働き方、広告、医療、都市、文化。テーマは違っても、問いは同じです。</p>
+        <div class="series-note">違和感 → 具体例 → なぜそう感じるか → 構造 → 一次資料 → 考察 → 読者への問い。単なるニュース要約や炎上集にはしません。</div>
+      </div>
+    </section>
+
+    <section class="wrap topic-page-list">
+      <div class="section-heading">
+        <div><p class="eyebrow">ARTICLES</p><h2>この連載の記事</h2></div>
+        <p class="section-note">一次資料へ辿れること、事実と考察を分けることを基本にします。</p>
+      </div>
+      {articles.length > 0 ? (
+        <div class="article-grid topic-article-grid">
+          {articles.map((article, index) => (
+            <article class="article-card">
+              <div class="card-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</div>
+              <p class="article-meta"><span>{article.data.category}</span><time datetime={article.data.publishedAt.toISOString()}>{article.data.publishedAt.toLocaleDateString('ja-JP')}</time></p>
+              <h3><a href={articleHref(article.id)}>{article.data.title}</a></h3>
+              <p>{article.data.description}</p>
+              <a class="read-more" href={articleHref(article.id)}>続きを読む <span aria-hidden="true">→</span></a>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div class="topic-empty">
+          <h3>「世界の違和感」の正本記事を準備中です。</h3>
+          <p>LinkedIn等で公開してきた調査記事を、出典・一次情報を備えたHDN正本へ順次移します。</p>
+        </div>
+      )}
+    </section>
+
+    <section class="wrap lane-context">
+      <div>
+        <h2>営業記事ではなく、HDNの編集レーベルとして育てます。</h2>
+        <p>記事を読んだ方には、次の記事、著者、関連テーマへ自然に回遊してもらうことを優先します。</p>
+      </div>
+      <div class="cta-actions">
+        <a class="button" href={`${import.meta.env.BASE_URL}#latest`}>新着記事を見る</a>
+        <a class="text-link" href="https://hdnjapan.com/">HDNについて →</a>
+      </div>
+    </section>
+  </main>
+</BaseLayout>
