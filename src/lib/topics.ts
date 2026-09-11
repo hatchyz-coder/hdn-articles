@@ -4,13 +4,20 @@ export type KnowledgeTopic = {
   shortLabel: string;
   description: string;
   keywords: string[];
+  requiredKeywords?: string[];
+  excludedKeywords?: string[];
   en: {
     label: string;
     shortLabel: string;
     description: string;
     keywords: string[];
+    requiredKeywords?: string[];
+    excludedKeywords?: string[];
   };
 };
+
+const medicalContextJa = ['患者', 'クリニック', '医療', '診療', '医院', '医師', '歯科', '院長', '事務長'];
+const medicalContextEn = ['patient', 'clinic', 'healthcare', 'medical', 'doctor', 'dental'];
 
 export const knowledgeTopics: KnowledgeTopic[] = [
   {
@@ -28,15 +35,17 @@ export const knowledgeTopics: KnowledgeTopic[] = [
   },
   {
     slug: 'patient-journey',
-    label: '患者導線・LINE / LHub',
-    shortLabel: '患者導線・LHub',
-    description: 'LINE、予約、問診、決済、患者管理、再診・継続フォローまで、患者が止まらない導線を扱います。',
+    label: 'クリニックの患者導線・LINE',
+    shortLabel: '患者導線・LINE',
+    description: '医療機関のLINE、予約、問診、決済、患者管理、再診・継続フォローを扱います。その他業種のLHub活用はLHub専用ページで分けて案内します。',
     keywords: ['患者導線', 'LINE', 'LHub', '予約', '問診', '決済', 'CRM', '再診', 'フォロー'],
+    requiredKeywords: medicalContextJa,
     en: {
-      label: 'Patient Journey & LINE / LHub',
+      label: 'Clinic Patient Journey & LINE',
       shortLabel: 'Patient Journey',
-      description: 'How to connect LINE, booking, questionnaires, payments, CRM, follow-up, and repeat visits into one patient journey.',
+      description: 'How healthcare organizations connect LINE, booking, questionnaires, payments, CRM, follow-up, and repeat visits.',
       keywords: ['patient journey', 'LINE', 'LHub', 'booking', 'appointment', 'questionnaire', 'payment', 'CRM', 'follow-up', 'repeat visit'],
+      requiredKeywords: medicalContextEn,
     },
   },
   {
@@ -45,11 +54,13 @@ export const knowledgeTopics: KnowledgeTopic[] = [
     shortLabel: '医療SNS・動画',
     description: 'SNS、YouTube、動画企画、患者心理、認知から予約までの接続を医療機関向けに整理します。',
     keywords: ['SNS', 'YouTube', '動画', '医療マーケティング', '集患', 'コンテンツ'],
+    requiredKeywords: medicalContextJa,
     en: {
       label: 'Healthcare Social Media & Video',
       shortLabel: 'Social & Video',
       description: 'Practical content strategy for healthcare social media, YouTube, patient psychology, and the path from awareness to booking.',
       keywords: ['social media', 'SNS', 'YouTube', 'video', 'healthcare marketing', 'content', 'patient acquisition'],
+      requiredKeywords: medicalContextEn,
     },
   },
   {
@@ -71,11 +82,13 @@ export const knowledgeTopics: KnowledgeTopic[] = [
     shortLabel: 'クリニック経営',
     description: '院長・事務長の経営判断、業務改善、数値管理、AI・DX活用など、診療以外の運営課題を扱います。',
     keywords: ['クリニック経営', '業務改善', '事務長', 'AI', 'DX', '経営', '運営', '収益'],
+    requiredKeywords: medicalContextJa,
     en: {
       label: 'Clinic Management & Operations',
       shortLabel: 'Clinic Management',
       description: 'Decision-making, workflow improvement, management metrics, AI, DX, and other operational issues outside clinical care.',
       keywords: ['clinic management', 'operations', 'workflow', 'business improvement', 'AI', 'DX', 'management', 'revenue'],
+      requiredKeywords: medicalContextEn,
     },
   },
 ];
@@ -92,10 +105,15 @@ type TopicArticle = {
 const articleText = (article: TopicArticle) =>
   [article.data.title, article.data.description ?? '', article.data.category, ...article.data.tags].join(' ').toLowerCase();
 
+const includesAny = (haystack: string, values: string[]) => values.some((value) => haystack.includes(value.toLowerCase()));
+
 export const matchesTopic = (article: TopicArticle, topic: KnowledgeTopic, lang: 'ja' | 'en' = 'ja') => {
   const haystack = articleText(article);
-  const keywords = lang === 'en' ? topic.en.keywords : topic.keywords;
-  return keywords.some((keyword) => haystack.includes(keyword.toLowerCase()));
+  const config = lang === 'en' ? topic.en : topic;
+  if (!includesAny(haystack, config.keywords)) return false;
+  if (config.requiredKeywords?.length && !includesAny(haystack, config.requiredKeywords)) return false;
+  if (config.excludedKeywords?.length && includesAny(haystack, config.excludedKeywords)) return false;
+  return true;
 };
 
 export const topicsForArticle = (article: TopicArticle, lang: 'ja' | 'en' = 'ja') =>
