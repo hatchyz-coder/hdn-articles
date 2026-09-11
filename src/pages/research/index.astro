@@ -1,0 +1,56 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { isResearchArticle } from '../../lib/audiences';
+
+const articles = (await getCollection('articles', ({ data }) => !data.draft))
+  .filter(isResearchArticle)
+  .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+const articleHref = (id: string) => `${import.meta.env.BASE_URL}articles/${id}/`;
+---
+<BaseLayout
+  title="制度・一次情報｜HDN Articles"
+  description="厚生労働省、PMDA、消費者庁などの一次情報を起点に、制度変更・行政通知・規制の論点を実務目線で整理します。"
+>
+  <main>
+    <section class="lane-page-intro">
+      <div class="wrap">
+        <p class="eyebrow">PRIMARY SOURCES & REGULATION</p>
+        <h1>制度・一次情報</h1>
+        <p>厚生労働省、PMDA、消費者庁、行政通知、検討会資料などの一次情報を起点に、何が決まり、何がまだ決まっていないのか、現場で何を確認すべきかを整理します。</p>
+      </div>
+    </section>
+
+    <section class="wrap topic-page-list">
+      <div class="section-heading">
+        <div><p class="eyebrow">ARTICLES</p><h2>制度・行政・一次情報の記事</h2></div>
+        <p class="section-note">ニュースの見出しだけでなく、原資料まで辿れる記事を優先します。</p>
+      </div>
+      {articles.length > 0 ? (
+        <div class="article-grid topic-article-grid">
+          {articles.map((article, index) => (
+            <article class="article-card">
+              <div class="card-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</div>
+              <p class="article-meta"><span>{article.data.category}</span><time datetime={article.data.publishedAt.toISOString()}>{article.data.publishedAt.toLocaleDateString('ja-JP')}</time></p>
+              <h3><a href={articleHref(article.id)}>{article.data.title}</a></h3>
+              <p>{article.data.description}</p>
+              <a class="read-more" href={articleHref(article.id)}>続きを読む <span aria-hidden="true">→</span></a>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div class="topic-empty"><p>制度・一次情報の記事は準備中です。</p></div>
+      )}
+    </section>
+
+    <section class="wrap lane-context">
+      <div>
+        <h2>制度を、自院や事業の判断に落とし込みたい方へ。</h2>
+        <p>一般論と個別判断を分け、必要に応じて実務上の確認項目まで整理します。</p>
+      </div>
+      <div class="cta-actions">
+        <a class="button" href="https://hdnjapan.com/consultation.html">相談する</a>
+      </div>
+    </section>
+  </main>
+</BaseLayout>
