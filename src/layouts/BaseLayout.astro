@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import '../styles/knowledge-hub.css';
+import '../styles/discovery.css';
 const {
   title = 'HDN Articles',
   socialTitle,
@@ -26,6 +27,7 @@ const clinicHref = `${import.meta.env.BASE_URL}clinic/`;
 const lhubArticlesHref = `${import.meta.env.BASE_URL}lhub/`;
 const frictionsHref = `${import.meta.env.BASE_URL}world-frictions/`;
 const researchHref = `${import.meta.env.BASE_URL}research/`;
+const allArticlesHref = `${import.meta.env.BASE_URL}articles/`;
 ---
 <!doctype html>
 <html lang={lang}>
@@ -72,6 +74,7 @@ const researchHref = `${import.meta.env.BASE_URL}research/`;
           '/lhub/',
           '/world-frictions/',
           '/research/',
+          '/articles/',
         ].some((lane) => destination.pathname.endsWith(lane));
 
         if (isAudienceLane) {
@@ -79,6 +82,29 @@ const researchHref = `${import.meta.env.BASE_URL}research/`;
             source_path: window.location.pathname,
             destination_path: destination.pathname,
             link_text: (link.textContent || '').trim().slice(0, 100),
+          });
+        }
+
+        const distributionChannel = link.getAttribute('data-distribution-channel');
+        if (distributionChannel) {
+          const distributionEvent = {
+            newsletter: 'article_to_newsletter_click',
+            note: 'article_to_note_click',
+            linkedin: 'article_to_linkedin_click',
+          }[distributionChannel];
+          if (distributionEvent) {
+            gtag('event', distributionEvent, {
+              source_path: window.location.pathname,
+              destination_host: destination.hostname,
+              content_language: document.documentElement.lang || 'ja',
+            });
+          }
+        }
+
+        if (link.hasAttribute('data-world-frictions-related')) {
+          gtag('event', 'world_frictions_related_click', {
+            source_path: window.location.pathname,
+            destination_path: destination.pathname,
           });
         }
 
@@ -123,7 +149,7 @@ const researchHref = `${import.meta.env.BASE_URL}research/`;
             <a href={lhubArticlesHref}>LHub活用</a>
             <a href={frictionsHref}>世界の違和感</a>
             <a href={researchHref}>制度・一次情報</a>
-            <a href={`${homeHref}#latest`}>新着</a>
+            <a href={allArticlesHref}>記事を探す</a>
             <a href={corporateHref}>HDN Japan</a>
           </nav>
         )}
