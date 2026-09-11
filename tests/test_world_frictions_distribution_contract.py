@@ -27,23 +27,28 @@ class WorldFrictionsDistributionContractTests(unittest.TestCase):
         article = self.article_dir / f"{slug}.md"
         article.write_text(
             """---
-"
-            "title: \"【テスト】世界の違和感\"\n"
-            "description: \"一次資料を確認しながら社会の違和感を構造として読み解くテスト用の記事説明です。読者が論点を理解できる長さを確保します。\"\n"
-            "publishedAt: 2026-09-11\n"
-            "category: \"世界の違和感\"\n"
-            "tags:\n  - \"世界の違和感\"\n"
-            "author: \"羽田野 剛士\"\n"
-            "draft: true\n"
-            "cta: editorial\n"
-            "audiences:\n  - general\n"
-            "section: world-frictions\n"
-            "series: world-frictions\n"
-            "contentType: news-analysis\n"
-            "---\n\n"
-            "本文です。\n\n"
-            "## 出典・一次情報・参考文献\n\n"
-            "- Example Source: https://example.com/source\n",
+title: "【テスト】世界の違和感"
+description: "一次資料を確認しながら社会の違和感を構造として読み解くテスト用の記事説明です。読者が論点を理解できる長さを確保します。"
+publishedAt: 2026-09-11
+category: "世界の違和感"
+tags:
+  - "世界の違和感"
+author: "羽田野 剛士"
+draft: true
+cta: editorial
+audiences:
+  - general
+section: world-frictions
+series: world-frictions
+contentType: news-analysis
+---
+
+本文です。
+
+## 出典・一次情報・参考文献
+
+- Example Source: https://example.com/source
+""",
             encoding="utf-8",
         )
 
@@ -82,7 +87,10 @@ class WorldFrictionsDistributionContractTests(unittest.TestCase):
     def test_wrong_cta_fails(self):
         slug = self.write_valid_bundle()
         article = self.article_dir / f"{slug}.md"
-        article.write_text(article.read_text(encoding="utf-8").replace("cta: editorial", "cta: consultation"), encoding="utf-8")
+        article.write_text(
+            article.read_text(encoding="utf-8").replace("cta: editorial", "cta: consultation"),
+            encoding="utf-8",
+        )
         with self.assertRaisesRegex(ValueError, "cta: editorial"):
             validator.validate_bundle(slug, "draft")
 
