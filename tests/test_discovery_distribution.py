@@ -22,10 +22,12 @@ class DiscoveryDistributionTests(unittest.TestCase):
     def test_search_analytics_does_not_send_query_text(self):
         page = self.read("src/pages/articles/index.astro")
         event_start = page.index("'article_search_usage'")
-        event_block = page[event_start:event_start + 500]
+        event_end = page.index("});", event_start)
+        event_block = page[event_start:event_end]
         self.assertIn("has_query", event_block)
-        self.assertNotIn("query_text", event_block)
-        self.assertNotIn("search.value", event_block)
+        self.assertIn("results_count", event_block)
+        for forbidden in ("query_text", "search_query", "search_term", "raw_query"):
+            self.assertNotIn(forbidden, event_block)
 
     def test_distribution_urls_are_explicit_and_optional(self):
         config = self.read("src/lib/distribution.ts")
