@@ -1,0 +1,78 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { isClinicArticle, isLHubArticle } from '../../lib/audiences';
+
+const articles = (await getCollection('articles', ({ data }) => !data.draft))
+  .filter(isClinicArticle)
+  .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+const articleHref = (id: string) => `${import.meta.env.BASE_URL}articles/${id}/`;
+const categories = [
+  ['自費診療・オンライン診療', ['自費', '自由診療', 'オンライン診療', 'AGA', 'ED', 'GLP-1']],
+  ['患者導線・LINE', ['患者導線', 'LINE', '予約', '問診', '決済', '再診', 'CRM']],
+  ['医療SNS・集患', ['SNS', 'YouTube', '動画', '集患', '医療マーケティング']],
+  ['制度・コンプライアンス', ['医療広告', '薬機法', '景品表示法', '制度', '厚生労働省', 'PMDA']],
+  ['クリニック経営・業務改善', ['経営', '業務改善', '院長', '事務長', 'AI', 'DX']],
+] as const;
+const text = (article: (typeof articles)[number]) => [article.data.title, article.data.description, article.data.category, ...article.data.tags].join(' ').toLowerCase();
+const grouped = categories.map(([label, terms]) => ({
+  label,
+  items: articles.filter((article) => terms.some((term) => text(article).includes(term.toLowerCase()))).slice(0, 4),
+}));
+const clinicLhubCount = articles.filter(isLHubArticle).length;
+---
+<BaseLayout
+  title="クリニック経営・実務｜HDN Articles"
+  description="院長・事務長向けに、自費診療、患者導線、医療DX、医療広告、経営・業務改善の記事をまとめています。"
+>
+  <main>
+    <section class="lane-page-intro">
+      <div class="wrap">
+        <p class="eyebrow">FOR CLINICS</p>
+        <h1>院長・クリニック関係者の方へ。</h1>
+        <p>自費診療、患者導線、LINE、医療広告、AI・DX、経営判断。非医療のLHub事例と混ぜず、クリニックの実務に関係する記事だけをまとめます。</p>
+        <div class="lane-subnav">
+          {categories.map(([label], index) => <a href={`#clinic-topic-${index + 1}`}>{label}</a>)}
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap topic-page-list">
+      <div class="section-heading">
+        <div><p class="eyebrow">CLINIC KNOWLEDGE</p><h2>クリニック向け記事</h2></div>
+        <p class="section-note">現在 {articles.length} 件。うちLHub関連 {clinicLhubCount} 件。</p>
+      </div>
+
+      {grouped.map((group, groupIndex) => (
+        <section id={`clinic-topic-${groupIndex + 1}`} class="lane-block">
+          <div class="lane-heading"><h2>{group.label}</h2></div>
+          {group.items.length > 0 ? (
+            <div class="article-grid topic-article-grid">
+              {group.items.map((article, index) => (
+                <article class="article-card">
+                  <div class="card-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</div>
+                  <p class="article-meta"><span>{article.data.category}</span><time datetime={article.data.publishedAt.toISOString()}>{article.data.publishedAt.toLocaleDateString('ja-JP')}</time></p>
+                  <h3><a href={articleHref(article.id)}>{article.data.title}</a></h3>
+                  <p>{article.data.description}</p>
+                  <a class="read-more" href={articleHref(article.id)}>続きを読む <span aria-hidden="true">→</span></a>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div class="topic-empty"><p>このテーマの公開記事は準備中です。</p></div>
+          )}
+        </section>
+      ))}
+    </section>
+
+    <section class="wrap lane-context" data-contextual-service-cta="clinic-lane">
+      <div>
+        <h2>自院の課題として整理したい方へ。</h2>
+        <p>記事の一般論をそのまま導入せず、現在の患者導線・収益構造・院内運用を確認して優先順位を整理します。</p>
+      </div>
+      <div class="cta-actions">
+        <a class="button" href="https://hdnjapan.com/consultation.html">無料相談・患者導線診断</a>
+      </div>
+    </section>
+  </main>
+</BaseLayout>
