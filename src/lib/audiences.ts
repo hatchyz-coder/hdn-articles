@@ -59,31 +59,30 @@ const researchTerms = [
 ];
 
 export const isWorldFrictionsArticle = (article: ArticleLike) => {
-  if (article.data.section === 'world-frictions') return true;
-  if (article.data.series?.toLowerCase() === 'world-frictions') return true;
-  const value = text(article);
-  return includesAny(value, ['世界の違和感', 'frictions in the world']);
+  if (article.data.section) return article.data.section === 'world-frictions';
+  if (article.data.series) return article.data.series.toLowerCase() === 'world-frictions';
+  return includesAny(text(article), ['世界の違和感', 'frictions in the world']);
 };
 
 export const isLHubArticle = (article: ArticleLike) => {
-  if (article.data.audiences?.includes('lhub')) return true;
-  if (article.data.section === 'lhub-usecase') return true;
+  if (article.data.audiences) return article.data.audiences.includes('lhub');
+  if (article.data.section) return article.data.section === 'lhub-usecase';
   return text(article).includes('lhub');
 };
 
 export const isClinicArticle = (article: ArticleLike) => {
-  if (article.data.audiences?.includes('clinic')) return true;
-  if (article.data.section?.startsWith('clinic-')) return true;
+  if (article.data.audiences) return article.data.audiences.includes('clinic');
+  if (article.data.section) return article.data.section.startsWith('clinic-');
   return includesAny(text(article), clinicTerms);
 };
 
 export const isResearchArticle = (article: ArticleLike) => {
-  if (article.data.section === 'research' || article.data.section === 'clinic-compliance') return true;
+  if (article.data.section) return article.data.section === 'research' || article.data.section === 'clinic-compliance';
   return includesAny(text(article), researchTerms);
 };
 
 export const isGeneralArticle = (article: ArticleLike) =>
-  article.data.audiences?.includes('general') || isWorldFrictionsArticle(article);
+  article.data.audiences ? article.data.audiences.includes('general') : isWorldFrictionsArticle(article);
 
 export const articleLane = (article: ArticleLike) => {
   if (isWorldFrictionsArticle(article)) return 'world-frictions';
