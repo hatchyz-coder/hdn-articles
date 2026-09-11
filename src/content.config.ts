@@ -2,6 +2,19 @@ import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
 const ctaSchema = z.enum(['consultation', 'lhub', 'self-pay', 'sns']).default('consultation');
+const audienceSchema = z.enum(['clinic', 'lhub', 'general']);
+const sectionSchema = z.enum([
+  'clinic-private-pay',
+  'clinic-journey',
+  'clinic-marketing',
+  'clinic-compliance',
+  'clinic-management',
+  'lhub-usecase',
+  'world-frictions',
+  'research',
+]);
+const industrySchema = z.enum(['medical', 'dental', 'real-estate', 'retail', 'creator', 'fortune', 'other']);
+const contentTypeSchema = z.enum(['practical-guide', 'news-analysis', 'opinion', 'case-study', 'regulation']);
 
 const articles = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/articles' }),
@@ -19,6 +32,11 @@ const articles = defineCollection({
     featured: z.boolean().default(false),
     sourceUrl: z.string().url().optional(),
     cta: ctaSchema,
+    audiences: z.array(audienceSchema).optional(),
+    section: sectionSchema.optional(),
+    industry: industrySchema.optional(),
+    series: z.string().optional(),
+    contentType: contentTypeSchema.optional(),
   }),
 });
 
@@ -36,6 +54,11 @@ const articlesEn = defineCollection({
     draft: z.boolean().default(false),
     sourceUrl: z.string().url().optional(),
     cta: ctaSchema,
+    audiences: z.array(audienceSchema).optional(),
+    section: sectionSchema.optional(),
+    industry: industrySchema.optional(),
+    series: z.string().optional(),
+    contentType: contentTypeSchema.optional(),
   }),
 });
 
