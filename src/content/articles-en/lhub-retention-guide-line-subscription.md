@@ -14,6 +14,12 @@ tags:
 author: "Tsuyoshi Hadano"
 draft: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "other"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 For small businesses and clinics, subscription income is attractive but depends on retention. This playbook explains how to use LINE (via LHub) to minimize friction, run segmented communications, automate payment recovery flows, and measure the KPIs that matter for subscription health.

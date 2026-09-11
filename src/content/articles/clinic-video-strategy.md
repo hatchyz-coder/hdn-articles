@@ -15,6 +15,12 @@ author: "羽田野 剛士"
 draft: false
 featured: false
 cta: consultation
+audiences:
+  - "clinic"
+section: "clinic-marketing"
+industry: "medical"
+series: "clinic-content"
+contentType: "practical-guide"
 ---
 
 クリニックがSNSやYouTubeを始めるとき、「とりあえず院内紹介を撮る」「診療メニューを説明する」「投稿本数を増やす」ことが目的になりがちです。

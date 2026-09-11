@@ -14,6 +14,13 @@ tags:
 author: "Tsuyoshi Hadano"
 draft: false
 cta: consultation
+audiences:
+  - "clinic"
+  - "general"
+section: "research"
+industry: "other"
+series: "advertising-compliance"
+contentType: "regulation"
 ---
 
 In health-food advertising, a common assumption is that a message becomes safe if it avoids naming a disease, avoids an explicit efficacy claim, or starts with an ordinary lifestyle story rather than with the product itself.

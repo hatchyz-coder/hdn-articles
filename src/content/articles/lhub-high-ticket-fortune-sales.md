@@ -16,6 +16,12 @@ author: "羽田野 剛士"
 draft: false
 featured: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "fortune"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 占い鑑定と関連グッズ販売を“押し売り”に見せず自然に組み込むための実務ガイド。LINE上で予約・顧客管理・決済・シナリオ配信を一貫させ、心理的抵抗を下げる導線と運用チェックリストを提示します。主要根拠はLHubの機能と日本におけるLINE／キャッシュレス普及の公表データです。 ([hdnjapan.com](https://hdnjapan.com/lhub.html))

@@ -15,6 +15,12 @@ author: "羽田野 剛士"
 draft: false
 featured: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "real-estate"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 LHubはLINE公式アカウント上で内見予約・契約案内・決済までを一連で行える業務基盤です。導入前の設計ポイント、決済連携・家賃回収の注意点、運用KPIとパイロット運用の進め方を実務ベースで解説します。([metaps-payment.com](https://www.metaps-payment.com/company/newsrelease20250603.html?utm_source=openai))

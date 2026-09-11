@@ -14,6 +14,12 @@ tags:
 author: "Tsuyoshi Hadano"
 draft: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "other"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 Chiropractic and osteopathic clinics increase patient retention by combining per-patient treatment records with timely automated reminders. Messaging-based reservation tools (e.g., LINE integrations via platforms like LHub) can centralize bookings, payments and follow-ups. This article outlines practical operations, a privacy checklist aligned with Japanese guidance, and KPIs to measure impact.

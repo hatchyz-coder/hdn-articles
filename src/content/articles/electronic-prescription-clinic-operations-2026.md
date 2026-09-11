@@ -14,6 +14,12 @@ draft: false
 featured: false
 sourceUrl: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/denshishohousen_taioushisetsu.html"
 cta: consultation
+audiences:
+  - "clinic"
+section: "clinic-compliance"
+industry: "medical"
+series: "clinic-regulation"
+contentType: "regulation"
 ---
 
 厚生労働省は、2026年5月時点で電子処方箋が9割以上の薬局に導入されていると案内しています。さらに、電子処方箋に対応する医療機関・薬局のリストを継続的に更新しており、2026年8月16日時点の対応施設情報も公開されています。

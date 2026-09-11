@@ -18,6 +18,13 @@ author: "羽田野 剛士"
 draft: false
 featured: false
 cta: lhub
+audiences:
+  - "clinic"
+  - "lhub"
+section: "lhub-usecase"
+industry: "medical"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 美容クリニック向けに、施術予約・物販・在庫・決済・リマインドをLINEで一貫させる運用設計を解説。導入の優先順位、具体的な運用アイデア、医療広告や個人情報保護で注意すべき点をまとめます。

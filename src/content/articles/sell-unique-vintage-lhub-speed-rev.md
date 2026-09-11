@@ -16,6 +16,12 @@ author: "羽田野 剛士"
 draft: false
 featured: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "retail"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 一点ものを扱う古着業者向けに、LHub（LINE基盤）を使って「売り逃し」を減らす具体的な運用設計を提示します。リアルタイム在庫連携、セグメント限定配信（ドロップ）、決済と確認フロー、店頭オペの注意点、顧客リピートにつなげる施策を実務レベルで整理しました。

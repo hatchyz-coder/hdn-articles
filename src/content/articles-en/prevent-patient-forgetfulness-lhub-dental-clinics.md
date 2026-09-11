@@ -15,6 +15,13 @@ tags:
 author: "Tsuyoshi Hadano"
 draft: false
 cta: lhub
+audiences:
+  - "clinic"
+  - "lhub"
+section: "lhub-usecase"
+industry: "dental"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 Missed appointments and low recall adherence harm preventive dental care and clinic revenue. This article outlines how to use LINE with an operational platform (LHub) to connect booking, questionnaires, payments and automated reminders. It covers evidence for reminders, suggested timing and message design, privacy and platform constraints, KPIs and practical implementation checklists.

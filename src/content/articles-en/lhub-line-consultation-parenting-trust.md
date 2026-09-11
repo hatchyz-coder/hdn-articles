@@ -15,6 +15,12 @@ tags:
 author: "Tsuyoshi Hadano"
 draft: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "other"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 Counseling and parenting-support services rely on trust. Using LINE as the primary touchpoint—and a platform that integrates booking, payments (including bank-direct debit) and staged messaging—reduces friction for clients and operational load for providers. This piece explains features, evidence for reminders, a practical checklist and key legal/privacy considerations.

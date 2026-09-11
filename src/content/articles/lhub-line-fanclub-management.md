@@ -16,6 +16,12 @@ author: "羽田野 剛士"
 draft: false
 featured: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "creator"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 個人・少人数運営のファンクラブで起きやすい「管理疲れ」を、LINEを中心とした導線設計とLHubの機能で解消する実務ガイド。会費徴収、チケット・物販の一元管理、セグメント配信、チケット発券（LINEミニアプリ）など、現場で使えるチェック項目と運用上の注意点をまとめます。([hdnjapan.com](https://hdnjapan.com/lhub.html))

@@ -14,6 +14,12 @@ tags:
 author: "Tsuyoshi Hadano"
 draft: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "real-estate"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 LHub (launched 2025) integrates LINE Official Account workflows with booking, contract guidance and payments. This guide outlines practical setup steps, payment and compliance considerations, a 90‑day pilot plan and KPIs to measure impact in rental operations.([metaps-payment.com](https://www.metaps-payment.com/company/newsrelease20250603.html?utm_source=openai))

@@ -13,6 +13,12 @@ tags:
 author: "Tsuyoshi Hadano"
 draft: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "other"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 Small beauty salons often suffer from fragmented bookings, double-bookings and no-shows. LHub (a LINE-integrated platform) centralizes staff- and course-specific booking, prepayments, reminders and segmented coupon campaigns in a single dashboard. This article outlines practical benefits, an implementation checklist, operational pitfalls (pricing, LINE policy, data handling), and short-term tests to measure impact.

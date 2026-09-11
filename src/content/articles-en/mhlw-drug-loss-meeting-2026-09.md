@@ -15,6 +15,13 @@ draft: false
 featured: false
 sourceUrl: "https://www.mhlw.go.jp/stf/shingi2/0000198856_00047.html"
 cta: consultation
+audiences:
+  - "clinic"
+  - "general"
+section: "research"
+industry: "medical"
+series: "official-sources"
+contentType: "news-analysis"
 ---
 
 On September 4, 2026, Japan's Ministry of Health, Labour and Welfare (MHLW) held the 69th Meeting on Unapproved and Off-label Drugs with High Medical Needs.

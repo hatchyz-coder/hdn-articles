@@ -15,6 +15,13 @@ tags:
 author: "Tsuyoshi Hadano"
 draft: false
 cta: lhub
+audiences:
+  - "clinic"
+  - "lhub"
+section: "clinic-compliance"
+industry: "medical"
+series: "clinic-regulation"
+contentType: "practical-guide"
 ---
 
 This guide gives clinic managers an operational checklist to run online consultations tied to messaging-based patient flows and electronic prescriptions. It highlights that pharmacies’ e-prescription adoption is advanced while many medical institutions lag — so clinics must design workflows that handle mixed (electronic + paper) prescriptions, confirm pharmacy partnerships, secure patient consent and data, and train staff. The guide references Japan’s MHLW guidance and practical platform examples and lists verification points to complete before vendor selection.

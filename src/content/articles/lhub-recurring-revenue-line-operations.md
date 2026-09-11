@@ -14,6 +14,12 @@ author: "羽田野 剛士"
 draft: false
 featured: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "other"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 定期販売や会費制サービスを始めるとき、最初に「毎月課金できるか」を考えがちです。

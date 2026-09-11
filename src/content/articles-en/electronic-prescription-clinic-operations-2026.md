@@ -13,6 +13,12 @@ author: "Tsuyoshi Hadano"
 draft: false
 sourceUrl: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/denshishohousen_taioushisetsu.html"
 cta: consultation
+audiences:
+  - "clinic"
+section: "clinic-compliance"
+industry: "medical"
+series: "clinic-regulation"
+contentType: "regulation"
 ---
 
 Japan's Ministry of Health, Labour and Welfare states that electronic prescriptions had been introduced at more than 90% of pharmacies as of May 2026. The ministry also continues to publish and update lists of participating medical institutions and pharmacies, including facility information current as of August 16, 2026.

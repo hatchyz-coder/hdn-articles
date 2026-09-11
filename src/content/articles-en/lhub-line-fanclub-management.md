@@ -15,6 +15,12 @@ tags:
 author: "Tsuyoshi Hadano"
 draft: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "creator"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 For artists and small management teams in Japan, using LINE as the primary touchpoint—combined with a tool like LHub—reduces friction across membership fees, ticket sales, merchandise and targeted messaging. This article explains practical setup steps, LINE Mini App ticketing options, and operational checks to run a sustainable fanclub. ([prtimes.jp](https://prtimes.jp/main/html/rd/p/000001600.000129774.html?utm_source=openai))

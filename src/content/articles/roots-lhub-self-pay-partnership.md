@@ -15,6 +15,13 @@ draft: false
 featured: false
 sourceUrl: "https://rts-inc.jp/post-614/"
 cta: lhub
+audiences:
+  - "clinic"
+  - "lhub"
+section: "lhub-usecase"
+industry: "medical"
+series: "lhub-use-cases"
+contentType: "case-study"
 ---
 
 株式会社HDNは、ROOTS株式会社と連携し、LHubを活用した自費診療クリニック向けのデジタル運用支援を開始しました。

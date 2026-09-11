@@ -14,6 +14,13 @@ draft: false
 featured: false
 sourceUrl: "https://www.mhlw.go.jp/stf/newpage_74981.html"
 cta: consultation
+audiences:
+  - "clinic"
+  - "general"
+section: "research"
+industry: "medical"
+series: "official-sources"
+contentType: "regulation"
 ---
 
 2026年7月31日、厚生労働省は「再生医療等の安全性の確保等に関する法律」に基づき、複数の再生医療等提供機関の管理者や特定細胞加工物等製造事業者に対する改善命令等を公表しました。

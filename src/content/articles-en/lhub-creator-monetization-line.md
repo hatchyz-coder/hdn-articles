@@ -13,6 +13,12 @@ tags:
 author: "Tsuyoshi Hadano"
 draft: false
 cta: lhub
+audiences:
+  - "lhub"
+section: "lhub-usecase"
+industry: "creator"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 For creators in Japan, LINE is a daily communication channel with high engagement. Paired with tools like LHub, it enables centralized management of merchandise sales, subscriptions, reservations and segmented messaging. This article explains practical use cases, a 30-day rollout plan, and operational cautions.

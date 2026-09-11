@@ -14,6 +14,12 @@ tags:
 author: "Tsuyoshi Hadano"
 draft: false
 cta: consultation
+audiences:
+  - "clinic"
+section: "clinic-marketing"
+industry: "medical"
+series: "clinic-content"
+contentType: "practical-guide"
 ---
 
 When a clinic starts using social media or YouTube, it is easy to make the activity itself the goal: film a clinic tour, explain treatment menus, or simply increase the number of posts.
