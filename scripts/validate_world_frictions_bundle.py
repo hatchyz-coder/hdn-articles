@@ -75,7 +75,7 @@ def validate_article(slug: str) -> Path:
     require_metadata(frontmatter(text))
 
     if "*" in text:
-        raise ValueError("Asterisks are not allowed in the canonical article")
+        raise ValueError("Markdown asterisk emphasis is not allowed in the canonical article")
     if not any(heading in text for heading in SOURCE_HEADINGS):
         raise ValueError("Canonical article must include a source/reference section")
     if "http://" not in text and "https://" not in text:
@@ -97,7 +97,7 @@ def validate_derivatives(slug: str, phase: str) -> list[Path]:
         if not text:
             raise ValueError(f"Distribution file is empty: {path}")
         if "*" in text:
-            raise ValueError(f"Asterisks are not allowed: {path}")
+            raise ValueError(f"Markdown asterisk emphasis is not allowed: {path}")
         if phase == "final" and name != "reposts.md" and url not in text:
             raise ValueError(f"Final distribution file must link back to canonical article: {path}")
         checked.append(path)
