@@ -19,14 +19,14 @@ const articleHref = (id: string) => `${import.meta.env.BASE_URL}articles/${id}/`
         <p class="eyebrow">WORLD FRICTIONS</p>
         <h1>世界の違和感</h1>
         <p>みんなが何となく「あれ？」と感じる社会のズレを、具体例、一次資料、研究、信頼できる報道まで追い、構造として言語化します。AI、働き方、広告、医療、都市、文化。テーマは違っても、問いは同じです。</p>
-        <div class="series-note">違和感 → 具体例 → なぜそう感じるか → 構造 → 一次資料 → 考察 → 読者への問い。単なるニュース要約や炎上集にはしません。</div>
+        <div class="series-note">違和感 → 具体例 → なぜそう感じるか → 構造 → 一次資料 → 考察 → 読者への問い。単なるニュース要約や炎上集ではなく、「なぜそうなっているのか」まで掘ります。</div>
       </div>
     </section>
 
     <section class="wrap topic-page-list">
       <div class="section-heading">
         <div><p class="eyebrow">ARTICLES</p><h2>この連載の記事</h2></div>
-        <p class="section-note">一次資料へ辿れること、事実と考察を分けることを基本にします。</p>
+        <p class="section-note">一次資料へ辿れること、事実と考察を分けることを基本にしています。</p>
       </div>
       {articles.length > 0 ? (
         <div class="article-grid topic-article-grid">
@@ -42,8 +42,8 @@ const articleHref = (id: string) => `${import.meta.env.BASE_URL}articles/${id}/`
         </div>
       ) : (
         <div class="topic-empty">
-          <h3>「世界の違和感」の正本記事を準備中です。</h3>
-          <p>LinkedIn等で公開してきた調査記事を、出典・一次情報を備えたHDN正本へ順次移します。</p>
+          <h3>現在、公開中の記事はありません。</h3>
+          <p>新しい記事を公開次第、このページに追加します。</p>
         </div>
       )}
     </section>
@@ -51,41 +51,39 @@ const articleHref = (id: string) => `${import.meta.env.BASE_URL}articles/${id}/`
     <section class="wrap distribution-panel" aria-labelledby="distribution-heading">
       <div class="distribution-panel-head">
         <div>
-          <p class="eyebrow">DISTRIBUTION</p>
-          <h2 id="distribution-heading">正本はHDN。外部媒体は、新しい読者との入口です。</h2>
+          <p class="eyebrow">FOLLOW</p>
+          <h2 id="distribution-heading">読みやすい場所で、続きを追えます。</h2>
         </div>
-        <p>同じ全文を一斉コピーするのではなく、媒体ごとに冒頭、長さ、視点を再編集します。一次情報と完全版はHDN Articlesへ集約します。</p>
+        <p>HDN Articlesでは一次資料や参考文献まで含めた記事を公開しています。LinkedInでは、経営や仕事に関わるテーマを中心に紹介しています。</p>
       </div>
       <div class="distribution-grid">
         <div class="distribution-card">
-          <small>CANONICAL</small>
-          <h3>HDN Articles</h3>
-          <p>完全版、一次資料、参考文献、関連記事を置く正本です。検索資産と記事間の回遊もここへ集約します。</p>
-          <a href={distributionChannels.canonicalBase}>正本トップを見る →</a>
+          <small>HDN ARTICLES</small>
+          <h3>このサイトで読む</h3>
+          <p>一次資料、参考文献、関連記事まで含めて、テーマを深く読みたい方はこちらから。</p>
+          <a href={distributionChannels.canonicalBase}>HDN Articlesトップを見る →</a>
         </div>
         <div class="distribution-card">
-          <small>PROFESSIONAL</small>
-          <h3>LinkedIn</h3>
-          <p>経営者・専門職向けに再編集して届けます。Newsletterの購読URLを設定するまでは、著者プロフィールへ案内します。</p>
+          <small>LINKEDIN</small>
+          <h3>LinkedInで読む</h3>
+          <p>経営、働き方、AI、医療など、専門職や経営者にも関わるテーマを紹介しています。</p>
           <a href={activeLinkedInDestination} data-distribution-channel={activeLinkedInChannel} rel="me">LinkedInでフォロー →</a>
         </div>
-        <div class="distribution-card">
-          <small>DISCOVERY</small>
-          <h3>note</h3>
-          <p>日本語の新規読者に発見してもらうための編集版です。正本を置き換えず、興味を持った読者をHDNへつなぎます。</p>
-          {distributionChannels.note ? (
+        {distributionChannels.note && (
+          <div class="distribution-card">
+            <small>NOTE</small>
+            <h3>noteで読む</h3>
+            <p>社会や日常の違和感を、より読みやすい形で届けています。</p>
             <a href={distributionChannels.note} data-distribution-channel="note">noteで読む →</a>
-          ) : (
-            <span class="distribution-status">公開導線を準備中</span>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </section>
 
     <section class="wrap lane-context">
       <div>
-        <h2>営業記事ではなく、HDNの編集レーベルとして育てます。</h2>
-        <p>記事を読んだ方には、次の記事、著者、関連テーマへ自然に回遊してもらうことを優先します。</p>
+        <h2>気になったテーマから、次の「違和感」へ。</h2>
+        <p>記事一覧では、テーマやキーワードから関連する記事を探せます。</p>
       </div>
       <div class="cta-actions">
         <a class="button" href={`${import.meta.env.BASE_URL}articles/?section=world-frictions`}>記事を探す</a>

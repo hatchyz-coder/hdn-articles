@@ -36,12 +36,20 @@ class DiscoveryDistributionTests(unittest.TestCase):
         self.assertIn("PUBLIC_LINKEDIN_NEWSLETTER_URL", config)
         self.assertIn("PUBLIC_NOTE_URL", config)
 
-    def test_world_frictions_explains_canonical_distribution_roles(self):
+    def test_world_frictions_distribution_is_reader_facing(self):
         page = self.read("src/pages/world-frictions/index.astro")
-        self.assertIn("正本はHDN", page)
+        self.assertIn("読みやすい場所で、続きを追えます。", page)
         self.assertIn("LinkedIn", page)
         self.assertIn("note", page)
         self.assertIn('data-distribution-channel="note"', page)
+        for internal_copy in (
+            "正本はHDN",
+            "Newsletterの購読URLを設定するまでは",
+            "公開導線を準備中",
+            "営業記事ではなく",
+            "順次移します",
+        ):
+            self.assertNotIn(internal_copy, page)
 
     def test_primary_navigation_links_to_discovery(self):
         layout = self.read("src/layouts/BaseLayout.astro")
