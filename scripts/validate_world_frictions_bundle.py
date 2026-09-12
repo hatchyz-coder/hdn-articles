@@ -48,15 +48,15 @@ def require_metadata(fm: str) -> None:
         "cta": "editorial",
     }
     for key, value in required_scalars.items():
-        if not re.search(rf"(?m)^{re.escape(key)}:\s*{re.escape(value)}\s*$", fm):
+        if not re.search(rf"(?m)^{re.escape(key)}:\s*[\"']?{re.escape(value)}[\"']?\s*$", fm):
             raise ValueError(f"Missing required metadata: {key}: {value}")
 
-    if not re.search(r"(?ms)^audiences:\s*\n(?:\s+-\s+.*\n)*\s+-\s+general\s*$", fm):
+    if not re.search(r"(?ms)^audiences:\s*\n(?:\s+-\s+.*\n)*\s+-\s+[\"']?general[\"']?\s*$", fm):
         if not re.search(r"(?m)^audiences:\s*\[.*\bgeneral\b.*\]\s*$", fm):
             raise ValueError("World Frictions audiences must include general")
 
     if not re.search(
-        r"(?m)^contentType:\s*(news-analysis|opinion|case-study|practical-guide|regulation)\s*$",
+        r"(?m)^contentType:\s*[\"']?(news-analysis|opinion|case-study|practical-guide|regulation)[\"']?\s*$",
         fm,
     ):
         raise ValueError("World Frictions contentType is missing or invalid")
@@ -74,7 +74,7 @@ def validate_article(slug: str) -> Path:
     text = path.read_text(encoding="utf-8")
     require_metadata(frontmatter(text))
 
-    if "**" in text:
+    if "*" in text:
         raise ValueError("Markdown asterisk emphasis is not allowed in the canonical article")
     if not any(heading in text for heading in SOURCE_HEADINGS):
         raise ValueError("Canonical article must include a source/reference section")
@@ -96,7 +96,7 @@ def validate_derivatives(slug: str, phase: str) -> list[Path]:
         text = path.read_text(encoding="utf-8").strip()
         if not text:
             raise ValueError(f"Distribution file is empty: {path}")
-        if "**" in text:
+        if "*" in text:
             raise ValueError(f"Markdown asterisk emphasis is not allowed: {path}")
         if phase == "final" and name != "reposts.md" and url not in text:
             raise ValueError(f"Final distribution file must link back to canonical article: {path}")
