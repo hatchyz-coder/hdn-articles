@@ -51,8 +51,8 @@ class WorldFrictionsAutoPublishTests(unittest.TestCase):
         self.assertIn('"facebook": "facebook.md"', text)
         self.assertIn('"x": "x.md"', text)
         self.assertIn('"reposts": "reposts.md"', text)
-        self.assertIn('"section: \\\"world-frictions\\\""', text)
-        self.assertIn('"series: \\\"world-frictions\\\""', text)
+        self.assertIn('section: "world-frictions"', text)
+        self.assertIn('series: "world-frictions"', text)
         self.assertIn("cta: editorial", text)
 
     def test_generator_has_duplicate_and_source_grounding_gates(self):
