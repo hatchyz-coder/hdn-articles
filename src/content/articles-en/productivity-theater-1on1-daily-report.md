@@ -1,7 +1,7 @@
 ---
 title: "The Theater of Looking Productive — 1:1s, Daily Reports, and the Work That Proves We Are Working"
 socialTitle: "When proving that you are working becomes a second job"
-description: "1:1 meetings, daily reports, recurring meetings and employee monitoring are meant to improve work. But they can also turn into a second layer of work whose purpose is to prove that work is happening."
+description: "How 1:1s, daily reports, recurring meetings and employee monitoring can become a second layer of work: proving that work is happening."
 publishedAt: 2026-09-12
 category: "World Frictions"
 tags:
