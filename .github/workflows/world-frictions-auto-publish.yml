@@ -2,8 +2,25 @@ name: World Frictions Auto Publish
 
 on:
   schedule:
-    # Monday / Wednesday / Friday at 17:30 JST (08:30 UTC).
-    - cron: '30 8 * * 1,3,5'
+    # Primary slot plus staggered retry slots. Off-peak minutes reduce scheduler congestion risk.
+    # Monday / Wednesday / Friday at 17:17, 19:17, 21:17, 23:17 JST.
+    - cron: '17 8 * * 1,3,5'
+    - cron: '17 10 * * 1,3,5'
+    - cron: '17 12 * * 1,3,5'
+    - cron: '17 14 * * 1,3,5'
+  workflow_run:
+    # Secondary heartbeat: if the repository scheduler delivers another known workflow,
+    # use its completion as an independent chance to run World Frictions.
+    workflows:
+      - Official Source Daily Publish
+    types:
+      - completed
+  push:
+    # A workflow change on main doubles as an immediate activation/self-test.
+    branches:
+      - main
+    paths:
+      - '.github/workflows/world-frictions-auto-publish.yml'
   workflow_dispatch:
 
 permissions:
@@ -33,17 +50,87 @@ jobs:
           ref: main
           fetch-depth: 0
 
+      - name: Resolve run eligibility and daily idempotency
+        id: daily_guard
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          python - <<'PY'
+          import os
+          import re
+          from datetime import datetime, timedelta, timezone
+          from pathlib import Path
+
+          jst = timezone(timedelta(hours=9))
+          now = datetime.now(jst)
+          target_date = now.date().isoformat()
+          weekday = now.isoweekday()
+          event_name = os.environ.get('EVENT_NAME', '')
+
+          # Scheduled, workflow_run and push activations must still belong to a normal
+          # Mon/Wed/Fri publication day. This prevents a heavily delayed run from
+          # drifting across midnight and creating an unintended next-day article.
+          normal_day = weekday in {1, 3, 5}
+          eligible_event = event_name == 'workflow_dispatch' or normal_day
+
+          already_published = False
+          existing_slug = ''
+          if eligible_event:
+              for path in sorted(Path('src/content/articles').glob('*.md')):
+                  text = path.read_text(encoding='utf-8')
+                  if 'section: "world-frictions"' not in text and 'series: "world-frictions"' not in text:
+                      continue
+                  match = re.search(r'^publishedAt:\s*["\']?(\d{4}-\d{2}-\d{2})', text, flags=re.MULTILINE)
+                  if match and match.group(1) == target_date:
+                      already_published = True
+                      existing_slug = path.stem
+                      break
+
+          run = eligible_event and not already_published
+          if not eligible_event:
+              reason = f'outside-normal-publication-day:{target_date}'
+          elif already_published:
+              reason = f'already-published:{existing_slug}'
+          else:
+              reason = f'eligible:{event_name}:{target_date}'
+
+          output = os.environ['GITHUB_OUTPUT']
+          with open(output, 'a', encoding='utf-8') as handle:
+              handle.write(f'run={str(run).lower()}\n')
+              handle.write(f'target_date={target_date}\n')
+              handle.write(f'reason={reason}\n')
+
+          summary = os.environ.get('GITHUB_STEP_SUMMARY')
+          if summary:
+              with open(summary, 'a', encoding='utf-8') as handle:
+                  handle.write('## World Frictions resilience guard\n\n')
+                  handle.write(f'- Event: {event_name}\n')
+                  handle.write(f'- JST date: {target_date}\n')
+                  handle.write(f'- Eligible: {run}\n')
+                  handle.write(f'- Reason: {reason}\n')
+          print(reason)
+          PY
+
+      - name: Stop duplicate or out-of-window retry cleanly
+        if: steps.daily_guard.outputs.run != 'true'
+        run: |
+          echo "World Frictions retry skipped by daily idempotency guard."
+          echo "Reason: ${{ steps.daily_guard.outputs.reason }}"
+
       - name: Setup Node.js
+        if: steps.daily_guard.outputs.run == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
       - name: Setup Python
+        if: steps.daily_guard.outputs.run == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
       - name: Install dependencies
+        if: steps.daily_guard.outputs.run == 'true'
         run: |
           npm install --no-audit --no-fund
           python -m pip install --disable-pip-version-check requests pillow
@@ -51,11 +138,12 @@ jobs:
           sudo apt-get install -y --no-install-recommends fonts-noto-cjk
 
       - name: Research, generate, and independently review
+        if: steps.daily_guard.outputs.run == 'true'
         id: generate
         run: python scripts/generate_world_frictions.py
 
       - name: Stop cleanly when no topic clears the gates
-        if: steps.generate.outputs.publish != 'true'
+        if: steps.daily_guard.outputs.run == 'true' && steps.generate.outputs.publish != 'true'
         run: |
           echo "No World Frictions article cleared the automated editorial gates."
           echo "Reason: ${{ steps.generate.outputs.reason }}"
