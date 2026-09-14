@@ -9,13 +9,29 @@ CONTRACT = ROOT / "docs" / "editorial" / "world-frictions-publishing-contract.md
 
 
 class WorldFrictionsAutoPublishTests(unittest.TestCase):
-    def test_workflow_has_fixed_quality_first_schedule_and_manual_entrypoint(self):
+    def test_workflow_has_resilient_retry_schedule_and_manual_entrypoint(self):
         text = WORKFLOW.read_text(encoding="utf-8")
-        self.assertIn("cron: '30 8 * * 1,3,5'", text)
+        self.assertIn("cron: '17 8 * * 1,3,5'", text)
+        self.assertIn("cron: '17 10 * * 1,3,5'", text)
+        self.assertIn("cron: '17 12 * * 1,3,5'", text)
+        self.assertIn("cron: '17 14 * * 1,3,5'", text)
+        self.assertIn("workflow_run:", text)
+        self.assertIn("Official Source Daily Publish", text)
+        self.assertIn("push:", text)
         self.assertIn("workflow_dispatch:", text)
         self.assertIn("cancel-in-progress: false", text)
         self.assertIn("WORLD_FRICTIONS_SCORE_THRESHOLD: '86'", text)
         self.assertIn("WORLD_FRICTIONS_REVIEW_THRESHOLD: '88'", text)
+
+    def test_workflow_has_daily_idempotency_and_midnight_drift_guard(self):
+        text = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("Resolve run eligibility and daily idempotency", text)
+        self.assertIn("publishedAt:", text)
+        self.assertIn("already_published", text)
+        self.assertIn("weekday in {1, 3, 5}", text)
+        self.assertIn("outside-normal-publication-day", text)
+        self.assertIn("Stop duplicate or out-of-window retry cleanly", text)
+        self.assertIn("steps.daily_guard.outputs.run == 'true'", text)
 
     def test_no_human_confirmation_is_required_after_automated_gates(self):
         text = WORKFLOW.read_text(encoding="utf-8")
@@ -67,6 +83,8 @@ class WorldFrictionsAutoPublishTests(unittest.TestCase):
         self.assertIn("自動公開", text)
         self.assertIn("ハッチの事前確認を必須としません", text)
         self.assertIn("基準を満たさなければ公開しません", text)
+        self.assertIn("再試行", text)
+        self.assertIn("1日最大1本", text)
 
 
 if __name__ == "__main__":
