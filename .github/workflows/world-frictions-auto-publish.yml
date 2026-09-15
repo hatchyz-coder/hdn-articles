@@ -39,13 +39,9 @@ jobs:
     timeout-minutes: 40
     env:
       GH_TOKEN: ${{ github.token }}
-      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      WORLD_FRICTIONS_PROVIDER_CHAIN: ${{ vars.WORLD_FRICTIONS_PROVIDER_CHAIN || 'gemini,groq,openai' }}
-      WORLD_FRICTIONS_GEMINI_MODEL: ${{ vars.WORLD_FRICTIONS_GEMINI_MODEL || 'gemini-2.5-flash' }}
+      WORLD_FRICTIONS_PROVIDER_CHAIN: ${{ vars.WORLD_FRICTIONS_PROVIDER_CHAIN || 'groq' }}
       WORLD_FRICTIONS_GROQ_MODEL: ${{ vars.WORLD_FRICTIONS_GROQ_MODEL || 'groq/compound' }}
-      WORLD_FRICTIONS_MODEL: ${{ vars.WORLD_FRICTIONS_MODEL || 'gpt-5.6-terra' }}
       WORLD_FRICTIONS_SCORE_THRESHOLD: '86'
       WORLD_FRICTIONS_REVIEW_THRESHOLD: '88'
     steps:
