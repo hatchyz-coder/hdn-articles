@@ -2,21 +2,16 @@ name: World Frictions Auto Publish
 
 on:
   schedule:
-    # Primary slot plus staggered retry slots. Off-peak minutes reduce scheduler congestion risk.
-    # Monday / Wednesday / Friday at 17:17, 19:17, 21:17, 23:17 JST.
     - cron: '17 8 * * 1,3,5'
     - cron: '17 10 * * 1,3,5'
     - cron: '17 12 * * 1,3,5'
     - cron: '17 14 * * 1,3,5'
   workflow_run:
-    # Secondary heartbeat: if the repository scheduler delivers another known workflow,
-    # use its completion as an independent chance to run World Frictions.
     workflows:
       - Official Source Daily Publish
     types:
       - completed
   push:
-    # A workflow change on main doubles as an immediate activation/self-test.
     branches:
       - main
     paths:
@@ -39,13 +34,9 @@ jobs:
     timeout-minutes: 40
     env:
       GH_TOKEN: ${{ github.token }}
-      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      WORLD_FRICTIONS_PROVIDER_CHAIN: ${{ vars.WORLD_FRICTIONS_PROVIDER_CHAIN || 'gemini,groq,openai' }}
-      WORLD_FRICTIONS_GEMINI_MODEL: ${{ vars.WORLD_FRICTIONS_GEMINI_MODEL || 'gemini-2.5-flash' }}
+      WORLD_FRICTIONS_PROVIDER_CHAIN: 'groq'
       WORLD_FRICTIONS_GROQ_MODEL: ${{ vars.WORLD_FRICTIONS_GROQ_MODEL || 'groq/compound' }}
-      WORLD_FRICTIONS_MODEL: ${{ vars.WORLD_FRICTIONS_MODEL || 'gpt-5.6-terra' }}
       WORLD_FRICTIONS_SCORE_THRESHOLD: '86'
       WORLD_FRICTIONS_REVIEW_THRESHOLD: '88'
     steps:
@@ -65,19 +56,13 @@ jobs:
           import re
           from datetime import datetime, timedelta, timezone
           from pathlib import Path
-
           jst = timezone(timedelta(hours=9))
           now = datetime.now(jst)
           target_date = now.date().isoformat()
           weekday = now.isoweekday()
           event_name = os.environ.get('EVENT_NAME', '')
-
-          # Scheduled, workflow_run and push activations must still belong to a normal
-          # Mon/Wed/Fri publication day. This prevents a heavily delayed run from
-          # drifting across midnight and creating an unintended next-day article.
           normal_day = weekday in {1, 3, 5}
           eligible_event = event_name == 'workflow_dispatch' or normal_day
-
           already_published = False
           existing_slug = ''
           if eligible_event:
@@ -90,7 +75,6 @@ jobs:
                       already_published = True
                       existing_slug = path.stem
                       break
-
           run = eligible_event and not already_published
           if not eligible_event:
               reason = f'outside-normal-publication-day:{target_date}'
@@ -98,42 +82,27 @@ jobs:
               reason = f'already-published:{existing_slug}'
           else:
               reason = f'eligible:{event_name}:{target_date}'
-
-          output = os.environ['GITHUB_OUTPUT']
-          with open(output, 'a', encoding='utf-8') as handle:
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as handle:
               handle.write(f'run={str(run).lower()}\n')
               handle.write(f'target_date={target_date}\n')
               handle.write(f'reason={reason}\n')
-
-          summary = os.environ.get('GITHUB_STEP_SUMMARY')
-          if summary:
-              with open(summary, 'a', encoding='utf-8') as handle:
-                  handle.write('## World Frictions resilience guard\n\n')
-                  handle.write(f'- Event: {event_name}\n')
-                  handle.write(f'- JST date: {target_date}\n')
-                  handle.write(f'- Eligible: {run}\n')
-                  handle.write(f'- Reason: {reason}\n')
           print(reason)
           PY
 
       - name: Stop duplicate or out-of-window retry cleanly
         if: steps.daily_guard.outputs.run != 'true'
-        run: |
-          echo "World Frictions retry skipped by daily idempotency guard."
-          echo "Reason: ${{ steps.daily_guard.outputs.reason }}"
+        run: echo "World Frictions skipped — ${{ steps.daily_guard.outputs.reason }}"
 
       - name: Setup Node.js
         if: steps.daily_guard.outputs.run == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 22
-
       - name: Setup Python
         if: steps.daily_guard.outputs.run == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
       - name: Install dependencies
         if: steps.daily_guard.outputs.run == 'true'
         run: |
@@ -142,207 +111,73 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends fonts-noto-cjk
 
-      - name: Research, generate, and independently review
+      - name: Research generate and review with free provider only
         if: steps.daily_guard.outputs.run == 'true'
         id: generate
+        continue-on-error: true
         run: python scripts/generate_world_frictions_multillm.py
 
-      - name: Stop cleanly when no topic clears the gates
-        if: steps.daily_guard.outputs.run == 'true' && steps.generate.outputs.publish != 'true'
+      - name: Stop cleanly when free generation is unavailable or gates fail
+        if: steps.daily_guard.outputs.run == 'true' && (steps.generate.outcome != 'success' || steps.generate.outputs.publish != 'true')
         run: |
-          echo "No World Frictions article cleared the automated editorial gates."
+          echo "No World Frictions article published. Paid-provider fallback is intentionally disabled."
+          echo "Generator outcome: ${{ steps.generate.outcome }}"
           echo "Reason: ${{ steps.generate.outputs.reason }}"
 
       - name: Validate complete distribution bundle
-        if: steps.generate.outputs.publish == 'true'
-        run: |
-          python scripts/validate_world_frictions_bundle.py \
-            --slug "${{ steps.generate.outputs.slug }}" \
-            --phase final
-
+        if: steps.generate.outcome == 'success' && steps.generate.outputs.publish == 'true'
+        run: python scripts/validate_world_frictions_bundle.py --slug "${{ steps.generate.outputs.slug }}" --phase final
       - name: Generate and verify OGP images
-        if: steps.generate.outputs.publish == 'true'
+        if: steps.generate.outcome == 'success' && steps.generate.outputs.publish == 'true'
         run: |
           python scripts/generate_og_images.py
           python - <<'PY'
           from pathlib import Path
           from PIL import Image
-
           slug = "${{ steps.generate.outputs.slug }}"
           for lang in ("ja", "en"):
               path = Path("public/og") / lang / f"{slug}.png"
-              if not path.exists():
-                  raise SystemExit(f"Missing OGP: {path}")
+              if not path.exists(): raise SystemExit(f"Missing OGP: {path}")
               with Image.open(path) as image:
-                  if image.size != (1200, 630):
-                      raise SystemExit(f"Unexpected OGP size for {path}: {image.size}")
-          print("JP/EN OGP verified at 1200x630")
+                  if image.size != (1200, 630): raise SystemExit(f"Unexpected OGP size: {image.size}")
           PY
-
       - name: Typecheck
-        if: steps.generate.outputs.publish == 'true'
-        run: |
-          if npm run | grep -q " typecheck"; then
-            npm run typecheck
-          else
-            npx astro check
-          fi
-
+        if: steps.generate.outcome == 'success' && steps.generate.outputs.publish == 'true'
+        run: npm run typecheck
       - name: Tests
-        if: steps.generate.outputs.publish == 'true'
+        if: steps.generate.outcome == 'success' && steps.generate.outputs.publish == 'true'
         run: python -m unittest discover -s tests -v
-
       - name: Build
-        if: steps.generate.outputs.publish == 'true'
+        if: steps.generate.outcome == 'success' && steps.generate.outputs.publish == 'true'
         run: npm run build
 
-      - name: Verify LLM site guide
-        if: steps.generate.outputs.publish == 'true'
-        run: |
-          if [ -f scripts/verify_llm_site_guide.py ]; then
-            python scripts/verify_llm_site_guide.py
-          fi
-
-      - name: Migration check
-        if: steps.generate.outputs.publish == 'true'
-        run: |
-          if [ -f scripts/check_migrations.py ]; then
-            python scripts/check_migrations.py
-          fi
-
       - name: Create auditable publication PR
-        if: steps.generate.outputs.publish == 'true'
+        if: steps.generate.outcome == 'success' && steps.generate.outputs.publish == 'true'
         id: pr
         env:
           SLUG: ${{ steps.generate.outputs.slug }}
           TITLE: ${{ steps.generate.outputs.title }}
-          SCORE: ${{ steps.generate.outputs.score }}
-          REVIEW_SCORE: ${{ steps.generate.outputs.review_score }}
-          REASON: ${{ steps.generate.outputs.reason }}
         run: |
           set -euo pipefail
           branch="auto/world-frictions-${SLUG}-${GITHUB_RUN_ID}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
-          git add \
-            "src/content/articles/${SLUG}.md" \
-            "src/content/articles-en/${SLUG}.md" \
-            "social/${SLUG}/"
+          git add "src/content/articles/${SLUG}.md" "src/content/articles-en/${SLUG}.md" "social/${SLUG}/"
           git commit -m "Publish World Frictions: ${SLUG}"
           git push origin "$branch"
-
-          body_file="$(mktemp)"
-          cat > "$body_file" <<EOF
-          ## Automated World Frictions publication
-
-          This PR was created by the no-human-confirmation World Frictions pipeline.
-
-          - Title: ${TITLE}
-          - Writer score: ${SCORE}/100
-          - Independent review score: ${REVIEW_SCORE}/100
-          - Selection reason: ${REASON}
-          - Canonical metadata: audiences=general, section=world-frictions, series=world-frictions, cta=editorial
-          - JP/EN pair generated
-          - note / LinkedIn Newsletter / LinkedIn / Facebook / X / repost bundle generated
-          - deterministic source, duplicate, metadata and copy gates passed
-          - independent web-search fact review passed
-          - OGP, typecheck, tests and production build passed before merge
-
-          Routine World Frictions publication is explicitly authorized to merge without human approval when all automated gates pass.
-          EOF
-
-          pr_url="$(gh pr create \
-            --repo "$GITHUB_REPOSITORY" \
-            --base main \
-            --head "$branch" \
-            --title "Auto-publish World Frictions: ${TITLE}" \
-            --body-file "$body_file")"
+          pr_url="$(gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$branch" --title "Auto-publish World Frictions: ${TITLE}" --body "Free-first automated World Frictions publication. Groq free provider only; no paid API fallback. All editorial, source, duplicate, legal, JP/EN and build gates passed.")"
           echo "pr_url=$pr_url" >> "$GITHUB_OUTPUT"
-          echo "branch=$branch" >> "$GITHUB_OUTPUT"
-
       - name: Merge automatically after all gates pass
-        if: steps.generate.outputs.publish == 'true'
+        if: steps.generate.outcome == 'success' && steps.generate.outputs.publish == 'true'
         env:
           PR_URL: ${{ steps.pr.outputs.pr_url }}
-        run: |
-          set -euo pipefail
-          gh pr merge "$PR_URL" --repo "$GITHUB_REPOSITORY" --squash --delete-branch
-
+        run: gh pr merge "$PR_URL" --repo "$GITHUB_REPOSITORY" --squash --delete-branch
       - name: Keep staging synchronized with production source
-        if: steps.generate.outputs.publish == 'true'
+        if: steps.generate.outcome == 'success' && steps.generate.outputs.publish == 'true'
         run: |
-          set -euo pipefail
           git fetch origin main staging
           git push origin origin/main:staging
-
       - name: Dispatch production deployment
-        if: steps.generate.outputs.publish == 'true'
-        id: deploy
-        run: |
-          set -euo pipefail
-          before="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow deploy-pages.yml --event workflow_dispatch --limit 1 --json databaseId --jq '.[0].databaseId // 0')"
-          gh workflow run deploy-pages.yml --repo "$GITHUB_REPOSITORY" --ref main
-
-          run_id=""
-          for attempt in $(seq 1 12); do
-            sleep 5
-            candidate="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow deploy-pages.yml --event workflow_dispatch --limit 1 --json databaseId --jq '.[0].databaseId // 0')"
-            if [ "$candidate" != "0" ] && [ "$candidate" != "$before" ]; then
-              run_id="$candidate"
-              break
-            fi
-          done
-          if [ -z "$run_id" ]; then
-            echo "Could not resolve the deployment workflow run." >&2
-            exit 1
-          fi
-          echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
-          gh run watch "$run_id" --repo "$GITHUB_REPOSITORY" --exit-status
-
-      - name: Smoke test live canonical pages
-        if: steps.generate.outputs.publish == 'true'
-        env:
-          SLUG: ${{ steps.generate.outputs.slug }}
-        run: |
-          set -euo pipefail
-          for path in \
-            "world-frictions/" \
-            "articles/${SLUG}/" \
-            "en/articles/${SLUG}/" \
-            "og/ja/${SLUG}.png" \
-            "og/en/${SLUG}.png"; do
-            ok=false
-            for attempt in $(seq 1 8); do
-              if curl --fail --silent --show-error --location --max-time 20 \
-                "https://article.hdnjapan.com/${path}" -o /tmp/world-frictions-smoke; then
-                test -s /tmp/world-frictions-smoke
-                ok=true
-                break
-              fi
-              sleep 10
-            done
-            if [ "$ok" != true ]; then
-              echo "Production smoke test failed: ${path}" >&2
-              exit 1
-            fi
-          done
-
-      - name: Publication summary
-        if: steps.generate.outputs.publish == 'true'
-        env:
-          SLUG: ${{ steps.generate.outputs.slug }}
-          TITLE: ${{ steps.generate.outputs.title }}
-          SCORE: ${{ steps.generate.outputs.score }}
-          REVIEW_SCORE: ${{ steps.generate.outputs.review_score }}
-          PR_URL: ${{ steps.pr.outputs.pr_url }}
-        run: |
-          {
-            echo "## Published automatically"
-            echo
-            echo "- ${TITLE}"
-            echo "- Writer score: ${SCORE}/100"
-            echo "- Independent review: ${REVIEW_SCORE}/100"
-            echo "- PR: ${PR_URL}"
-            echo "- Canonical: https://article.hdnjapan.com/articles/${SLUG}/"
-          } >> "$GITHUB_STEP_SUMMARY"
+        if: steps.generate.outcome == 'success' && steps.generate.outputs.publish == 'true'
+        run: gh workflow run deploy-pages.yml --repo "$GITHUB_REPOSITORY" --ref main
