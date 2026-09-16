@@ -52,24 +52,14 @@ def _gemini_call(*, instructions: str, input_text: str, max_output_tokens: int, 
     body: dict[str, Any] = {
         "systemInstruction": {"parts": [{"text": instructions}]},
         "contents": [{"role": "user", "parts": [{"text": input_text}]}],
-        "generationConfig": {
-            "responseMimeType": "application/json",
-            "maxOutputTokens": max_output_tokens,
-        },
+        "generationConfig": {"responseMimeType": "application/json", "maxOutputTokens": max_output_tokens},
     }
     if web_search:
         body["tools"] = [{"google_search": {}}]
-
-    response = requests.post(
-        url,
-        timeout=600,
-        headers={"x-goog-api-key": key, "Content-Type": "application/json"},
-        json=body,
-    )
+    response = requests.post(url, timeout=600, headers={"x-goog-api-key": key, "Content-Type": "application/json"}, json=body)
     if not response.ok:
         raise RuntimeError(f"Gemini API failed ({response.status_code}): {response.text[:1000]}")
-    payload = response.json()
-    candidates = payload.get("candidates") or []
+    payload = response.json(); candidates = payload.get("candidates") or []
     if not candidates:
         raise RuntimeError("Gemini response did not contain candidates")
     parts = ((candidates[0].get("content") or {}).get("parts") or [])
@@ -77,11 +67,9 @@ def _gemini_call(*, instructions: str, input_text: str, max_output_tokens: int, 
     urls: list[str] = []
     metadata = candidates[0].get("groundingMetadata") or {}
     for chunk in metadata.get("groundingChunks") or []:
-        if not isinstance(chunk, dict):
-            continue
-        uri = ((chunk.get("web") or {}).get("uri"))
-        if isinstance(uri, str):
-            urls.append(uri)
+        if isinstance(chunk, dict):
+            uri = ((chunk.get("web") or {}).get("uri"))
+            if isinstance(uri, str): urls.append(uri)
     return _json_from_text(text), _synthetic_payload(text, urls)
 
 
@@ -92,67 +80,37 @@ def _groq_call(*, instructions: str, input_text: str, max_output_tokens: int, we
     model = os.getenv("WORLD_FRICTIONS_GROQ_MODEL", "groq/compound")
     request_text = input_text
     if web_search:
-        request_text = (
-            "Use built-in web search and visit websites as needed. Return raw JSON only. "
-            "Every source URL included in the JSON must come from your actual web research.\n\n" + input_text
-        )
+        request_text = "Use built-in web search and visit websites as needed. Return raw JSON only. Every source URL included in the JSON must come from your actual web research.\n\n" + input_text
     body: dict[str, Any] = {
         "model": model,
-        "messages": [
-            {"role": "system", "content": instructions},
-            {"role": "user", "content": request_text},
-        ],
+        "messages": [{"role": "system", "content": instructions}, {"role": "user", "content": request_text}],
         "max_completion_tokens": min(max_output_tokens, 8192),
         "response_format": {"type": "json_object"},
-        "citation_options": "enabled",
     }
     if web_search and model.startswith("groq/compound"):
         body["compound_custom"] = {"tools": {"enabled_tools": ["web_search", "visit_website"]}}
-
-    response = requests.post(
-        "https://api.groq.com/openai/v1/chat/completions",
-        timeout=600,
-        headers={
-            "Authorization": f"Bearer {key}",
-            "Content-Type": "application/json",
-            "Groq-Model-Version": "latest",
-        },
-        json=body,
-    )
+    response = requests.post("https://api.groq.com/openai/v1/chat/completions", timeout=600, headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json", "Groq-Model-Version": "latest"}, json=body)
     if not response.ok:
         raise RuntimeError(f"Groq API failed ({response.status_code}): {response.text[:1000]}")
-    payload = response.json()
-    choices = payload.get("choices") or []
+    payload = response.json(); choices = payload.get("choices") or []
     if not choices:
         raise RuntimeError("Groq response did not contain choices")
-    message = choices[0].get("message") or {}
-    text = str(message.get("content") or "").strip()
-    urls: list[str] = []
+    message = choices[0].get("message") or {}; text = str(message.get("content") or "").strip(); urls: list[str] = []
     for tool in message.get("executed_tools") or []:
-        if not isinstance(tool, dict):
-            continue
-        search_results = tool.get("search_results") or {}
-        results = search_results.get("results") if isinstance(search_results, dict) else None
-        if not isinstance(results, list):
-            continue
+        if not isinstance(tool, dict): continue
+        search_results = tool.get("search_results") or {}; results = search_results.get("results") if isinstance(search_results, dict) else None
+        if not isinstance(results, list): continue
         for item in results:
-            if isinstance(item, dict) and isinstance(item.get("url"), str):
-                urls.append(item["url"])
+            if isinstance(item, dict) and isinstance(item.get("url"), str): urls.append(item["url"])
     return _json_from_text(text), _synthetic_payload(text, urls)
 
 
 def _openai_call(*, model: str, instructions: str, input_text: str, max_output_tokens: int, web_search: bool) -> tuple[dict[str, Any], dict[str, Any]]:
-    return core._ORIGINAL_CALL_OPENAI(
-        model=model,
-        instructions=instructions,
-        input_text=input_text,
-        max_output_tokens=max_output_tokens,
-        web_search=web_search,
-    )
+    return core._ORIGINAL_CALL_OPENAI(model=model, instructions=instructions, input_text=input_text, max_output_tokens=max_output_tokens, web_search=web_search)
 
 
 def _provider_chain() -> list[str]:
-    raw = os.getenv("WORLD_FRICTIONS_PROVIDER_CHAIN", "gemini,groq,openai")
+    raw = os.getenv("WORLD_FRICTIONS_PROVIDER_CHAIN", "groq")
     return [item.strip().lower() for item in raw.split(",") if item.strip()]
 
 
@@ -160,46 +118,19 @@ def provider_call_openai(*, model: str, instructions: str, input_text: str, max_
     errors: list[str] = []
     for provider in _provider_chain():
         try:
-            if provider == "gemini":
-                return _gemini_call(
-                    instructions=instructions,
-                    input_text=input_text,
-                    max_output_tokens=max_output_tokens,
-                    web_search=web_search,
-                )
-            if provider == "groq":
-                return _groq_call(
-                    instructions=instructions,
-                    input_text=input_text,
-                    max_output_tokens=max_output_tokens,
-                    web_search=web_search,
-                )
+            if provider == "gemini": return _gemini_call(instructions=instructions,input_text=input_text,max_output_tokens=max_output_tokens,web_search=web_search)
+            if provider == "groq": return _groq_call(instructions=instructions,input_text=input_text,max_output_tokens=max_output_tokens,web_search=web_search)
             if provider == "openai":
-                if not os.getenv("OPENAI_API_KEY"):
-                    raise RuntimeError("OPENAI_API_KEY is not configured")
-                return _openai_call(
-                    model=model,
-                    instructions=instructions,
-                    input_text=input_text,
-                    max_output_tokens=max_output_tokens,
-                    web_search=web_search,
-                )
+                if not os.getenv("OPENAI_API_KEY"): raise RuntimeError("OPENAI_API_KEY is not configured")
+                return _openai_call(model=model,instructions=instructions,input_text=input_text,max_output_tokens=max_output_tokens,web_search=web_search)
             errors.append(f"{provider}: unsupported provider")
         except Exception as exc:
-            errors.append(f"{provider}: {exc}")
-            print(f"PROVIDER_FAIL: {provider}: {exc}")
-
+            errors.append(f"{provider}: {exc}"); print(f"PROVIDER_FAIL: {provider}: {exc}")
     reason = "All configured World Frictions providers failed: " + " | ".join(errors)
-    core.write_github_output(publish="false", reason=reason, score=0)
-    core.write_summary(["## World Frictions provider failure", "", reason])
-    raise RuntimeError(reason)
+    core.write_github_output(publish="false", reason=reason, score=0); core.write_summary(["## World Frictions provider failure", "", reason]); raise RuntimeError(reason)
 
 
 def main() -> int:
-    core._ORIGINAL_CALL_OPENAI = core.call_openai
-    core.call_openai = provider_call_openai
-    return core.main()
+    core._ORIGINAL_CALL_OPENAI = core.call_openai; core.call_openai = provider_call_openai; return core.main()
 
-
-if __name__ == "__main__":
-    raise SystemExit(main())
+if __name__ == "__main__": raise SystemExit(main())
