@@ -34,7 +34,7 @@ class WorldFrictionsDistributionContractTests(unittest.TestCase):
     def write_valid_bundle(self,slug='sample-friction',include_links=False):
         (self.article_dir/f'{slug}.md').write_text(ARTICLE,encoding='utf-8'); (self.en_dir/f'{slug}.md').write_text(ARTICLE,encoding='utf-8')
         social=self.social_dir/slug; social.mkdir(parents=True); canonical=validator.canonical_url(slug)
-        facebook='【テスト】'+('本文です。' * 170)
+        facebook='【テスト】'+('本文です。' * 240)
         content={'note.md':'note向け編集版','linkedin-newsletter.md':'LinkedIn Newsletter向け編集版','linkedin.md':'【テスト】LinkedIn向け投稿','facebook.md':facebook,'x.md':'【テスト】X向け投稿','reposts.md':'- 数字から再投稿\n- 反対意見から再投稿\n- 構造の問いから再投稿'}
         for name,body in content.items():
             if include_links and name!='reposts.md': body+=f'\n\n記事はこちら\n{canonical}'
