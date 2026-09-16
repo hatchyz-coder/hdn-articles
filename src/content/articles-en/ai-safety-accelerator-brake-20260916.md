@@ -1,7 +1,7 @@
 ---
 title: "AI Should Slow Down. But Nobody Wants to Be the Only One Who Does"
 socialTitle: "AI may be dangerous. That is exactly why nobody wants to ease off the accelerator"
-description: "AI leaders are openly debating safety and slower capability growth while competitive pressure keeps development moving. This article examines the structural contradiction behind the race."
+description: "AI leaders are debating safety and slower capability growth while competitive pressure keeps development moving. We examine the contradiction behind the race."
 publishedAt: 2026-09-16
 category: "World Frictions"
 tags:
@@ -10,7 +10,7 @@ tags:
   - "technology"
   - "management"
   - "risk management"
-author: "Takeshi Hadano"
+author: "Tsuyoshi Hadano"
 draft: false
 featured: true
 sourceUrl: "https://www.reuters.com/business/metas-zuckerberg-says-ai-labs-have-enough-incentive-build-safely-2026-09-16/"
