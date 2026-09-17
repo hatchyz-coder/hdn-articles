@@ -22,6 +22,7 @@ class Evidence:
     social_provider_id: str = ""
     social_status: str = ""
     social_live_evidence: bool = False
+    social_evidence_source: str = ""
     duplicate_free: bool = False
     facebook_chars: int = 0
 
@@ -35,7 +36,11 @@ def resolve_state(e: Evidence) -> State:
         return State.CANONICAL_COMMITTED
     if not e.social_provider_id:
         return State.CANONICAL_LIVE
+    if e.social_status.upper() not in {"PUBLISHED", "LIVE"}:
+        return State.SOCIAL_SCHEDULED
     if not e.social_live_evidence:
+        return State.SOCIAL_SCHEDULED
+    if e.social_evidence_source not in {"direct_network", "provider_published_retrieval"}:
         return State.SOCIAL_SCHEDULED
     if not e.duplicate_free:
         return State.SOCIAL_SCHEDULED

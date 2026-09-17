@@ -39,6 +39,24 @@ class WorldFrictionsMultiLLMTests(unittest.TestCase):
         self.assertIn("GROQ_API_KEY", text)
         self.assertNotIn("WORLD_FRICTIONS_GEMINI_MODEL", text)
 
+    def test_generation_is_split_to_avoid_oversized_compound_requests(self):
+        core = (ROOT / "scripts" / "generate_world_frictions.py").read_text(encoding="utf-8")
+        self.assertIn("def discovery_prompt", core)
+        self.assertIn("def writer_prompt", core)
+        self.assertIn("def derivative_prompt", core)
+        self.assertNotIn("max_output_tokens=28000", core)
+        self.assertIn("max_output_tokens=3500", core)
+        self.assertIn("max_output_tokens=6000", core)
+        self.assertIn("max_output_tokens=5200", core)
+
+    def test_only_research_and_review_calls_require_web_search(self):
+        core = (ROOT / "scripts" / "generate_world_frictions.py").read_text(encoding="utf-8")
+        self.assertIn("input_text=discovery_prompt", core)
+        self.assertIn("input_text=writer_prompt", core)
+        self.assertIn("input_text=derivative_prompt", core)
+        self.assertGreaterEqual(core.count("web_search=False"), 2)
+        self.assertGreaterEqual(core.count("web_search=True"), 2)
+
 
 if __name__ == "__main__":
     unittest.main()
