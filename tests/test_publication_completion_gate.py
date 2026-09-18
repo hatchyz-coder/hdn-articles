@@ -34,7 +34,7 @@ class PublicationCompletionGateTests(unittest.TestCase):
         self.assertFalse(facebook_copy_valid(1501))
 
     def test_social_live_requires_direct_evidence_and_duplicate_reconciliation(self):
-        e = Evidence(jp_exists=True, en_exists=True, canonical_live=True, social_provider_id="x", social_status="PUBLISHED", social_live_evidence=True, duplicate_free=True)
+        e = Evidence(jp_exists=True, en_exists=True, canonical_live=True, social_provider_id="x", social_status="PUBLISHED", social_live_evidence=True, social_evidence_source="direct_network", duplicate_free=True)
         self.assertEqual(resolve_state(e), State.SOCIAL_LIVE)
         self.assertTrue(may_claim_social_published(e))
 

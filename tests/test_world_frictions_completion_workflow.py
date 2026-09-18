@@ -6,9 +6,13 @@ WORKFLOW=ROOT/'.github/workflows/world-frictions-completion-gate.yml'
 CONTRACT=ROOT/'docs/world_frictions_publication_completion_gate.md'
 
 class CompletionWorkflowTests(unittest.TestCase):
-    def test_completion_workflow_runs_after_auto_publish(self):
+    def test_completion_workflow_is_dispatched_with_exact_published_slug(self):
         text=WORKFLOW.read_text(encoding='utf-8')
-        self.assertIn('World Frictions Auto Publish',text)
+        auto=(ROOT/'.github/workflows/world-frictions-auto-publish.yml').read_text(encoding='utf-8')
+        self.assertNotIn('workflow_run:',text)
+        self.assertIn('workflow_dispatch:',text)
+        self.assertIn('gh workflow run world-frictions-completion-gate.yml',auto)
+        self.assertIn('-f slug="$SLUG"',auto)
         self.assertIn('Pass 1 artifact completeness',text)
         self.assertIn('Pass 2 canonical production verification',text)
     def test_workflow_never_infers_social_live(self):

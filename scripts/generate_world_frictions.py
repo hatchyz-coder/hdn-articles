@@ -196,12 +196,12 @@ def existing_world_frictions() -> list[dict[str, str]]:
     return rows
 
 
-def automation_prompt(existing: list[dict[str, str]], threshold: int) -> str:
+def discovery_prompt(existing: list[dict[str, str]], threshold: int) -> str:
     today = datetime.now(JST).date().isoformat()
     recent = existing[-50:]
     return json.dumps(
         {
-            "task": "Autonomously scout the web, select at most one World Frictions topic, and produce the complete publication bundle.",
+            "task": "Scout the web and select at most one World Frictions topic. Return only a compact research brief for a separate writer.",
             "today_jst": today,
             "quality_threshold": threshold,
             "existing_articles_to_avoid": recent,
@@ -241,33 +241,10 @@ def automation_prompt(existing: list[dict[str, str]], threshold: int) -> str:
                 "score": "integer 0-100",
                 "slug": "lowercase ASCII words separated by hyphens; blank if publish=false",
                 "selection_reason": "short Japanese explanation",
-                "canonical": {
-                    "title": "Japanese title beginning with 【 and written for readers",
-                    "social_title": "4-80 Japanese characters",
-                    "description": "60-160 Japanese characters",
-                    "category": "世界の違和感",
-                    "tags": "3-6 short tags",
-                    "content_type": "news-analysis, opinion, case-study, practical-guide, or regulation",
-                    "summary": "short Japanese lead",
-                    "body_markdown": "roughly 2200-4500 Japanese characters, no source list at end",
-                    "sources": "array of {title,url,kind}; kind must be primary, research, reporting, or commentary",
-                },
-                "english_canonical": {
-                    "title": "natural English title",
-                    "social_title": "4-100 characters",
-                    "description": "50-180 characters",
-                    "category": "World Frictions",
-                    "tags": "3-6 English tags",
-                    "summary": "short English lead",
-                    "body_markdown": "faithful English adaptation of the Japanese argument, not a literal translation",
-                    "sources": "same factual source set, translated labels allowed",
-                },
-                "note": "Japanese note adaptation ending with the canonical URL placeholder {{CANONICAL_URL}}",
-                "linkedin_newsletter": "professional Japanese adaptation plus short natural English summary; include {{CANONICAL_URL}}",
-                "linkedin_post": "LinkedIn feed teaser, Japanese then English follows below, include {{CANONICAL_URL}}",
-                "facebook": "about 1000-1500 Japanese characters, human voice, include {{CANONICAL_URL}}",
-                "x": "short Japanese hook suitable for X, include {{CANONICAL_URL}}",
-                "reposts": "array of at least 3 distinct Japanese recut angles",
+                "thesis": "one-sentence Japanese thesis",
+                "angle": "compact structural explanation",
+                "verified_facts": "3-8 concise facts with supporting source URLs",
+                "sources": "3-6 items of {title,url,kind,note}; kind is primary, research, reporting, or commentary",
             },
             "hard_rules": [
                 "Facts, allegations, inference and opinion must be clearly distinguished.",
@@ -279,6 +256,63 @@ def automation_prompt(existing: list[dict[str, str]], threshold: int) -> str:
             ],
         },
         ensure_ascii=False,
+    )
+
+
+def writer_prompt(brief: dict[str, Any]) -> str:
+    return json.dumps(
+        {
+            "task": "Write the Japanese and English canonical World Frictions articles from this verified research brief. Do not add facts outside it.",
+            "brief": brief,
+            "output": {
+                "canonical": {
+                    "title": "Japanese title beginning with 【",
+                    "social_title": "4-80 Japanese characters",
+                    "description": "60-160 Japanese characters",
+                    "category": "世界の違和感",
+                    "tags": "3-6 short tags",
+                    "content_type": "news-analysis, opinion, case-study, practical-guide, or regulation",
+                    "summary": "short Japanese lead",
+                    "body_markdown": "2200-4500 Japanese characters; no source list",
+                    "sources": "copy the brief source set exactly",
+                },
+                "english_canonical": {
+                    "title": "natural English title",
+                    "social_title": "4-100 characters",
+                    "description": "50-180 characters",
+                    "category": "World Frictions",
+                    "tags": "3-6 English tags",
+                    "summary": "short English lead",
+                    "body_markdown": "at least 1500 characters; faithful adaptation",
+                    "sources": "same URLs and kinds as the brief",
+                },
+            },
+            "rules": ["Return raw JSON only", "No Markdown asterisk emphasis", "Distinguish fact, inference, and opinion", "Do not fabricate personal experience"],
+        }, ensure_ascii=False,
+    )
+
+
+def derivative_prompt(canonical: dict[str, Any], english: dict[str, Any], sources: list[dict[str, str]]) -> str:
+    return json.dumps(
+        {
+            "task": "Create channel-specific derivatives from the supplied final article only.",
+            "article": {
+                "title": canonical.get("title"),
+                "summary": canonical.get("summary"),
+                "body_markdown": canonical.get("body_markdown"),
+                "english_title": english.get("title"),
+                "sources": sources,
+            },
+            "output": {
+                "note": "Japanese long-form adaptation ending with {{CANONICAL_URL}}",
+                "linkedin_newsletter": "professional Japanese adaptation plus short English summary and {{CANONICAL_URL}}",
+                "linkedin_post": "Japanese then English follows below. then English; include {{CANONICAL_URL}}",
+                "facebook": "1200-1500 Japanese characters, starts with 【】, standalone, human voice, include {{CANONICAL_URL}}",
+                "x": "concise Japanese hook with {{CANONICAL_URL}}",
+                "reposts": "array of at least 3 distinct Japanese recut angles",
+            },
+            "rules": ["Return raw JSON only", "No Markdown asterisk emphasis", "Do not introduce new facts"],
+        }, ensure_ascii=False,
     )
 
 
@@ -388,7 +422,12 @@ def validate_candidate(candidate: dict[str, Any], *, threshold: int, existing: l
             for item in value:
                 validate_copy_block(item, "reposts")
         else:
-            validate_copy_block(value, key)
+            text = validate_copy_block(value, key)
+            if key == "facebook":
+                if not text.startswith("【"):
+                    raise ValueError("facebook must begin with a Japanese title in 【】")
+                if not 1200 <= len(text) <= 1500:
+                    raise ValueError(f"facebook must be 1200-1500 characters; got {len(text)}")
     return sources, matched
 
 
@@ -396,7 +435,11 @@ def review_prompt(candidate: dict[str, Any], existing: list[dict[str, str]], thr
     return json.dumps(
         {
             "task": "Act as an independent fact-checking and editorial review desk. Search the web again and decide whether this World Frictions draft is safe and strong enough for fully automatic publication without human review.",
-            "candidate": candidate,
+            "candidate": {
+                "slug": candidate.get("slug"),
+                "canonical": candidate.get("canonical"),
+                "english_canonical": candidate.get("english_canonical"),
+            },
             "existing_articles": existing[-50:],
             "minimum_overall_score": threshold,
             "reject_if": [
@@ -560,22 +603,55 @@ def main() -> int:
     base_instructions = PROMPT_PATH.read_text(encoding="utf-8")
     instructions = base_instructions + "\n\nAUTOMATION ADDENDUM\nYou are running without human editorial approval. Be more conservative, not less. If evidence or novelty is marginal, return publish=false."
 
-    candidate, writer_payload = call_openai(
+    brief, discovery_payload = call_openai(
         model=args.model,
         instructions=instructions,
-        input_text=automation_prompt(existing, args.score_threshold),
-        max_output_tokens=28000,
+        input_text=discovery_prompt(existing, args.score_threshold),
+        max_output_tokens=3500,
         web_search=True,
     )
 
-    if candidate.get("publish") is not True:
-        reason = str(candidate.get("selection_reason") or "No candidate cleared the editorial threshold.").strip()
-        write_github_output(publish="false", reason=reason, score=int(candidate.get("score", 0) or 0))
+    if brief.get("publish") is not True:
+        reason = str(brief.get("selection_reason") or "No candidate cleared the editorial threshold.").strip()
+        write_github_output(publish="false", reason=reason, score=int(brief.get("score", 0) or 0))
         write_summary(["## World Frictions", "", "No article was published.", "", f"Reason: {reason}"])
         print(f"SKIP: {reason}")
         return 0
 
-    retrieved = searched_urls(writer_payload)
+    retrieved = searched_urls(discovery_payload)
+    try:
+        brief_sources, _ = validate_sources(brief.get("sources"), retrieved)
+    except Exception as exc:
+        reason = f"Discovery output failed source gate: {exc}"
+        write_github_output(publish="false", reason=reason, score=int(brief.get("score", 0) or 0))
+        write_summary(["## World Frictions", "", "No article was published.", "", reason])
+        print(f"SKIP: {reason}")
+        return 0
+
+    written, _writer_payload = call_openai(
+        model=args.model,
+        instructions=instructions,
+        input_text=writer_prompt({**brief, "sources": brief_sources}),
+        max_output_tokens=6000,
+        web_search=False,
+    )
+    canonical = written.get("canonical")
+    english = written.get("english_canonical")
+    if not isinstance(canonical, dict) or not isinstance(english, dict):
+        raise RuntimeError("Writer response must contain canonical and english_canonical")
+    derivatives, _derivative_payload = call_openai(
+        model=args.model,
+        instructions=instructions,
+        input_text=derivative_prompt(canonical, english, brief_sources),
+        max_output_tokens=5200,
+        web_search=False,
+    )
+    candidate = {
+        **brief,
+        "canonical": {**canonical, "sources": brief_sources},
+        "english_canonical": {**english, "sources": brief_sources},
+        **derivatives,
+    }
     try:
         sources, matched = validate_candidate(candidate, threshold=args.score_threshold, existing=existing, retrieved=retrieved)
     except Exception as exc:

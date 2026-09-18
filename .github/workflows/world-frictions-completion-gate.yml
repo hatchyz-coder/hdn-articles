@@ -1,11 +1,6 @@
 name: World Frictions Completion Gate
 
 on:
-  workflow_run:
-    workflows:
-      - World Frictions Auto Publish
-    types:
-      - completed
   workflow_dispatch:
     inputs:
       slug:
@@ -18,7 +13,6 @@ permissions:
 
 jobs:
   verify-canonical-live:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,31 +21,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Resolve slug
-        id: slug
-        env:
-          MANUAL_SLUG: ${{ inputs.slug }}
-        run: |
-          python - <<'PY'
-          import os,re
-          from pathlib import Path
-          slug=os.environ.get('MANUAL_SLUG','').strip()
-          if not slug:
-              candidates=[]
-              for p in Path('src/content/articles').glob('*.md'):
-                  t=p.read_text(encoding='utf-8')
-                  if 'section: "world-frictions"' not in t and 'series: "world-frictions"' not in t: continue
-                  m=re.search(r'^publishedAt:\s*["\']?(\d{4}-\d{2}-\d{2})',t,re.M)
-                  if m: candidates.append((m.group(1),p.stem))
-              if not candidates: raise SystemExit('No World Frictions article found')
-              slug=max(candidates)[1]
-          with open(os.environ['GITHUB_OUTPUT'],'a') as f: f.write(f'slug={slug}\n')
-          PY
       - name: Pass 1 artifact completeness
-        run: python scripts/validate_world_frictions_bundle.py --slug "${{ steps.slug.outputs.slug }}" --phase final
+        run: python scripts/validate_world_frictions_bundle.py --slug "${{ inputs.slug }}" --phase final
       - name: Pass 2 canonical production verification
         env:
-          SLUG: ${{ steps.slug.outputs.slug }}
+          SLUG: ${{ inputs.slug }}
         run: |
           set -euo pipefail
           for path in "world-frictions/" "articles/${SLUG}/" "en/articles/${SLUG}/" "og/ja/${SLUG}.png" "og/en/${SLUG}.png"; do
@@ -60,7 +34,7 @@ jobs:
           done
       - name: Record strongest verified state
         env:
-          SLUG: ${{ steps.slug.outputs.slug }}
+          SLUG: ${{ inputs.slug }}
         run: |
           {
             echo '## World Frictions completion gate'

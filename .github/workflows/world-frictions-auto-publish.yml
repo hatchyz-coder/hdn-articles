@@ -342,3 +342,9 @@ jobs:
             echo "- PR: ${PR_URL}"
             echo "- Canonical: https://article.hdnjapan.com/articles/${SLUG}/"
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Dispatch canonical completion verification
+        if: steps.generate.outputs.publish == 'true'
+        env:
+          SLUG: ${{ steps.generate.outputs.slug }}
+        run: gh workflow run world-frictions-completion-gate.yml --repo "$GITHUB_REPOSITORY" --ref main -f slug="$SLUG"
