@@ -11,6 +11,7 @@ class AudienceInformationArchitectureTests(unittest.TestCase):
     def test_audience_landing_pages_exist(self):
         for path in (
             "src/pages/clinic/index.astro",
+            "src/pages/for-clinics/index.astro",
             "src/pages/lhub/index.astro",
             "src/pages/world-frictions/index.astro",
             "src/pages/research/index.astro",

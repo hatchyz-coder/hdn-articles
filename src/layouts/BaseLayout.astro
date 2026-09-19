@@ -24,6 +24,7 @@ const homeHref = lang === 'en' ? `${import.meta.env.BASE_URL}en/` : import.meta.
 const corporateHref = lang === 'en' ? 'https://hdnjapan.com/en/index.html' : 'https://hdnjapan.com/';
 const productLhubHref = lang === 'en' ? 'https://hdnjapan.com/en/lhub.html' : 'https://hdnjapan.com/lhub.html';
 const clinicHref = `${import.meta.env.BASE_URL}clinic/`;
+const serviceHref = `${import.meta.env.BASE_URL}for-clinics/`;
 const lhubArticlesHref = `${import.meta.env.BASE_URL}lhub/`;
 const frictionsHref = `${import.meta.env.BASE_URL}world-frictions/`;
 const researchHref = `${import.meta.env.BASE_URL}research/`;
@@ -150,12 +151,13 @@ const allArticlesHref = `${import.meta.env.BASE_URL}articles/`;
             <a href={frictionsHref}>世界の違和感</a>
             <a href={researchHref}>制度・一次情報</a>
             <a href={allArticlesHref}>記事を探す</a>
+            <a href={serviceHref}>医療機関向けサービス</a>
             <a href={corporateHref}>HDN Japan</a>
           </nav>
         )}
       </div>
     </header>
     <slot />
-    <footer class="footer"><div class="wrap">© HDN Inc.</div></footer>
+    <footer class="footer"><div class="wrap"><p>運営：株式会社HDN　© HDN Inc.</p><p><a href={serviceHref}>医療機関向け記事サービス</a>　<a href="https://hdnjapan.com/privacy.html">プライバシー</a>　<a href="https://hdnjapan.com/disclaimer.html">医療情報の位置づけ・免責事項</a>　<a href="https://hdnjapan.com/consultation-form.html?cta_source=articles_footer&cta_intent=content&cta_position=footer">問い合わせ</a></p></div></footer>
   </body>
 </html>
