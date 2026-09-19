@@ -1,0 +1,4 @@
+- 通知ランプの視点：撮影中のLEDが光ったら、そこにいる全員が同意したことになるのでしょうか。撮影の通知と拒否の手段の違いを問い直します。正本：https://article.hdnjapan.com/articles/smart-glasses-right-not-to-be-recorded-20260919/
+- 職場の視点：会議室にカメラ付きメガネを持ち込むとき、顧客情報や同僚の顔について誰が使用ルールを決めるのでしょうか。正本：https://article.hdnjapan.com/articles/smart-glasses-right-not-to-be-recorded-20260919/
+- 技術の価値の視点：視覚支援やハンズフリーの記録を活かしながら、記録される人の選択肢も増やせないでしょうか。正本：https://article.hdnjapan.com/articles/smart-glasses-right-not-to-be-recorded-20260919/
+- 公開後の視点：映像がネットに出たあと、撮られた人が削除を求める負担を一人で負わない設計とは何でしょうか。正本：https://article.hdnjapan.com/articles/smart-glasses-right-not-to-be-recorded-20260919/
