@@ -7,6 +7,7 @@ This file covers https://article.hdnjapan.com/. Articles explain general busines
 ## Start here
 
 - [Articles home](https://article.hdnjapan.com/): Latest published Japanese articles and category navigation.
+- [Clinic practical knowledge](https://article.hdnjapan.com/clinic/): 自費診療の始め方、オンライン診療、患者導線、LINE、予約、問診、決済、医療広告を院長・事務長向けに整理した入口。
 - [English articles home](https://article.hdnjapan.com/en/): Published English editions and English topic pages.
 - [RSS feed](https://article.hdnjapan.com/rss.xml): Recent published article feed.
 - [Sitemap](https://article.hdnjapan.com/sitemap-index.xml): Full index of published pages. If unavailable, use the site sitemap endpoint linked from robots.txt.
