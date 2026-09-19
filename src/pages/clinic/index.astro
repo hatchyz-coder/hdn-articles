@@ -20,17 +20,41 @@ const grouped = categories.map(([label, terms]) => ({
   items: articles.filter((article) => terms.some((term) => text(article).includes(term.toLowerCase()))).slice(0, 4),
 }));
 const clinicLhubCount = articles.filter(isLHubArticle).length;
+const siteUrl = Astro.site ?? new URL('https://article.hdnjapan.com');
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'CollectionPage',
+      '@id': new URL('/clinic/#collection', siteUrl).toString(),
+      name: 'クリニックの自費診療・オンライン診療 実務知識',
+      description: '自費診療の始め方、オンライン診療、LINE・予約・問診・決済、集患、医療広告を院長・事務長向けに整理するHDNの実務知識データベース。',
+      url: new URL('/clinic/', siteUrl).toString(),
+      isPartOf: { '@id': new URL('/#website', siteUrl).toString() },
+      about: ['自費診療導入', 'オンライン診療', 'クリニック経営', '患者導線', 'LINE予約', '医療広告'],
+      publisher: { '@type': 'Organization', name: '株式会社HDN', url: 'https://hdnjapan.com/' },
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'HDN Articles', item: new URL('/', siteUrl).toString() },
+        { '@type': 'ListItem', position: 2, name: 'クリニック実務知識', item: new URL('/clinic/', siteUrl).toString() },
+      ],
+    },
+  ],
+};
 ---
 <BaseLayout
-  title="クリニック経営・実務｜HDN Articles"
-  description="院長・事務長向けに、自費診療、患者導線、医療DX、医療広告、経営・業務改善の記事をまとめています。"
+  title="自費診療の始め方・オンライン診療の実務知識｜HDN Articles"
+  description="保険診療中心の院長・事務長向けに、自費診療の始め方、価格・収益、オンライン診療、LINE・予約・問診・決済、医療広告を実務目線で整理します。"
 >
+  <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
   <main>
     <section class="lane-page-intro">
       <div class="wrap">
         <p class="eyebrow">FOR CLINICS</p>
-        <h1>院長・クリニック関係者の方へ。</h1>
-        <p>自費診療、患者導線、LINE、医療広告、AI・DX、経営判断。非医療のLHub事例と混ぜず、クリニックの実務に関係する記事だけをまとめます。</p>
+        <h1>自費診療を始めたい院長の、<br />実務知識データベース。</h1>
+        <p>「何から始めるか」「在庫やスタッフ負担をどう抑えるか」「LINE・予約・問診・決済をどうつなぐか」。保険診療中心のクリニックが、自費診療を小さく始めて運用するための情報をまとめます。</p>
         <div class="lane-subnav">
           {categories.map(([label], index) => <a href={`#clinic-topic-${index + 1}`}>{label}</a>)}
         </div>
@@ -40,7 +64,7 @@ const clinicLhubCount = articles.filter(isLHubArticle).length;
     <section class="wrap topic-page-list">
       <div class="section-heading">
         <div><p class="eyebrow">CLINIC KNOWLEDGE</p><h2>クリニック向け記事</h2></div>
-        <p class="section-note">現在 {articles.length} 件。うちLHub関連 {clinicLhubCount} 件。</p>
+        <p class="section-note">現在 {articles.length} 件。うちLHub関連 {clinicLhubCount} 件。一般論と個別判断を分け、一次情報へ辿れる記事を優先します。</p>
       </div>
 
       {grouped.map((group, groupIndex) => (
@@ -67,11 +91,11 @@ const clinicLhubCount = articles.filter(isLHubArticle).length;
 
     <section class="wrap lane-context" data-contextual-service-cta="clinic-lane">
       <div>
-        <h2>自院の課題として整理したい方へ。</h2>
-        <p>記事の一般論をそのまま導入せず、現在の患者導線・収益構造・院内運用を確認して優先順位を整理します。</p>
+        <h2>何を導入するか決まっていなくても相談できます。</h2>
+        <p>記事の一般論をそのまま当てはめず、診療科、患者層、院内体制、患者導線を確認し、自院で始められる選択肢と必要な仕組みを整理します。</p>
       </div>
       <div class="cta-actions">
-        <a class="button" href="https://hdnjapan.com/consultation.html">無料相談・患者導線診断</a>
+        <a class="button" href="https://hdnjapan.com/consultation-form.html?cta_source=articles_clinic&cta_intent=self_pay&cta_position=bottom">自院で何を始められるか相談する</a>
       </div>
     </section>
   </main>
