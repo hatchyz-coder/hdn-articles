@@ -212,6 +212,16 @@ def call_openai_once(doc: dict[str, Any], source_text: str, source_processing: d
             )
         except requests.Timeout as exc:
             raise TimeoutError("OpenAI API timed out during editorial generation") from exc
+    if response.status_code == 429:
+        # Avoid retry storms while preserving the existing editorial quality gate.
+        detail = response.text[:500].lower()
+        quota_exhausted = any(marker in detail for marker in ("insufficient_quota", "billing_hard_limit", "quota_exceeded"))
+        reason = "api_quota_exhausted" if quota_exhausted else "api_rate_limited"
+        output_path = os.environ.get("GITHUB_OUTPUT")
+        if output_path:
+            with open(output_path, "a", encoding="utf-8") as output:
+                output.write(f"selected=false\nreason={reason}\n")
+        raise RuntimeError(f"OpenAI API HTTP 429 ({reason}); publication paused for this slot")
     response.raise_for_status()
     payload = response.json()
     output_text = payload.get("output_text", "")
