@@ -138,6 +138,8 @@ def should_continue(returncode: int, report: dict[str, Any]) -> tuple[bool, str]
     if reason in ROTATE_REASONS:
         return True, reason
     if returncode != 0:
+        if reason in {"api_rate_limited", "api_quota_exhausted"}:
+            return False, reason
         return True, reason or "generator_error"
     return False, reason or "completed_without_selection"
 
