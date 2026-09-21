@@ -206,7 +206,7 @@ def call_openai_once(doc: dict[str, Any], source_text: str, source_processing: d
                     {"role": "system", "content": instructions},
                     {"role": "user", "content": (
                         "Use actual current public web research and return a single JSON object. "
-                        "Do not invent citations or URLs.\\n\\n" + payload_input
+                        "Do not invent citations or URLs.\n\n" + payload_input
                     )},
                 ],
                 "max_completion_tokens": 6000,
