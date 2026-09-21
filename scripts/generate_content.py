@@ -99,11 +99,11 @@ def call_openai(
     cta: str,
     reference_context: dict[str, Any],
 ) -> dict[str, Any]:
-    api_key = os.environ.get("OPENAI_API_KEY")
+    # Fail closed: do not use OpenAI until a shared monthly budget gate is implemented.
+    api_key = os.environ.get("GROQ_API_KEY")
     if not api_key:
-        raise RuntimeError("OPENAI_API_KEY is not configured in GitHub Actions secrets")
-
-    model = os.environ.get("OPENAI_MODEL", "gpt-5-mini")
+        raise RuntimeError("GROQ_API_KEY is not configured; paid fallback disabled")
+    model = os.environ.get("HDN_GROQ_MODEL", "groq/compound")
     instructions = PROMPT_PATH.read_text(encoding="utf-8")
     user_input = {
         "source_url": source_url,
@@ -117,25 +117,28 @@ def call_openai(
             "lhub_archive": reference_context.get("lhub_archive", []),
         },
     }
-
+    body = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": instructions},
+            {"role": "user", "content": json.dumps(user_input, ensure_ascii=False)},
+        ],
+        "max_completion_tokens": 6000,
+        "response_format": {"type": "json_object"},
+    }
     response = requests.post(
-        "https://api.openai.com/v1/responses",
+        "https://api.groq.com/openai/v1/chat/completions",
         timeout=180,
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        },
-        json={
-            "model": model,
-            "instructions": instructions,
-            "input": json.dumps(user_input, ensure_ascii=False),
-            "max_output_tokens": 10000,
-            "store": False,
-        },
+        headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+        json=body,
     )
+    if response.status_code == 429:
+        raise RuntimeError("Groq API HTTP 429 (api_rate_limited); source remains eligible for retry")
     response.raise_for_status()
-    payload = response.json()
-
+    choices = response.json().get("choices") or []
+    if not choices:
+        raise RuntimeError("Groq response did not contain choices")
+    payload = {"output_text": (choices[0].get("message") or {}).get("content") or ""}
     output_text = payload.get("output_text")
     if not output_text:
         pieces: list[str] = []
