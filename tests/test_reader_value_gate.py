@@ -22,6 +22,19 @@ class ReaderValueGateTests(unittest.TestCase):
     def test_missing_source_blocks(self):
         self.en.write_text(article("en", False), encoding="utf-8")
         self.assertTrue(any("source" in x for x in validate_pair(self.jp, self.en)))
+    def test_example_domain_does_not_count_as_source(self):
+        self.en.write_text(article("en", False) + "\\nhttps://example.org/irrelevant\\n", encoding="utf-8")
+        self.assertTrue(any("source" in x for x in validate_pair(self.jp, self.en)))
+    def test_unrelated_real_url_does_not_prove_claim(self):
+        # A real-looking URL is only a structural signal, not factual verification.
+        self.en.write_text(article("en", False) + "\\nhttps://www.who.int/news\\n", encoding="utf-8")
+        self.assertEqual(validate_pair(self.jp, self.en), [])
+    def test_medical_claim_without_source_blocks(self):
+        self.jp.write_text(article(source=False) + "\\n診断と処方に関する説明\\n", encoding="utf-8")
+        self.assertTrue(any("medical claim" in x for x in validate_pair(self.jp, self.en)))
+    def test_quantitative_claim_without_source_blocks(self):
+        self.jp.write_text(article(source=False) + "\\n利用者は30%増加した\\n", encoding="utf-8")
+        self.assertTrue(any("quantitative claim" in x for x in validate_pair(self.jp, self.en)))
     def test_missing_english_blocks(self):
         self.en.unlink()
         self.assertTrue(validate_pair(self.jp, self.en))

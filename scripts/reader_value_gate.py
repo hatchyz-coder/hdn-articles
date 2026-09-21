@@ -41,7 +41,16 @@ def inspect(path: Path, lang: str) -> list[str]:
     if PRIVATE.search(text):
         errors.append(f"{path}: possible private data or credential")
     links = [u.rstrip(".,;") for u in URL.findall(body)]
-    sources = [u for u in links if urlparse(u).hostname and urlparse(u).hostname.lower() not in {"article.hdnjapan.com", "hdnjapan.com", "www.hdnjapan.com"}]
+    # URL presence is a structural signal only: it cannot establish that a source
+    # exists, is relevant to a claim, or supports the article's conclusions.
+    excluded_hosts = {"article.hdnjapan.com", "hdnjapan.com", "www.hdnjapan.com",
+                      "example.com", "example.org", "example.net", "localhost"}
+    sources = []
+    for link in links:
+        parsed = urlparse(link)
+        host = (parsed.hostname or "").lower().rstrip(".")
+        if parsed.scheme == "https" and host and host not in excluded_hosts and not host.endswith(".example") and not host.endswith(".invalid") and not host.endswith(".test"):
+            sources.append(link)
     if not sources:
         errors.append(f"{path}: no independently accessible external source URL")
     if MEDICAL.search(body) and not sources:
