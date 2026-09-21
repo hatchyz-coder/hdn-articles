@@ -133,6 +133,11 @@ jobs:
           SLUG: ${{ steps.editorial.outputs.slug }}
         run: python scripts/finalize_social_posts.py --article-path "src/content/articles/${SLUG}.md"
 
+      - name: Reader-value gate (JP/EN, fail closed)
+        if: steps.editorial.outputs.selected == 'true'
+        run: |
+          python scripts/reader_value_gate.py --jp "src/content/articles/${{ steps.editorial.outputs.slug }}.md" --en "src/content/articles-en/${{ steps.editorial.outputs.slug }}.md"
+
       - name: Lint
         if: steps.editorial.outputs.selected == 'true'
         run: |

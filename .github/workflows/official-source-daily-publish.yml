@@ -141,6 +141,11 @@ jobs:
           grep -q '^cta: ' "src/content/articles/${SLUG}.md"
           grep -q '^cta: ' "src/content/articles-en/${SLUG}.md"
 
+      - name: Reader-value gate (JP/EN, fail closed)
+        if: steps.pick.outputs.selected == 'true'
+        run: |
+          python scripts/reader_value_gate.py --jp "src/content/articles/${{ steps.pick.outputs.slug }}.md" --en "src/content/articles-en/${{ steps.pick.outputs.slug }}.md"
+
       - name: Lint
         if: steps.pick.outputs.selected == 'true'
         run: |

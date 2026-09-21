@@ -175,6 +175,11 @@ jobs:
           print("JP/EN OGP verified at 1200x630")
           PY
 
+      - name: Reader-value gate (JP/EN, fail closed)
+        if: steps.generate.outputs.publish == 'true'
+        run: |
+          python scripts/reader_value_gate.py --jp "src/content/articles/${{ steps.generate.outputs.slug }}.md" --en "src/content/articles-en/${{ steps.generate.outputs.slug }}.md"
+
       - name: Typecheck
         if: steps.generate.outputs.publish == 'true'
         run: |

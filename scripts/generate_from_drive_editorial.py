@@ -347,6 +347,18 @@ def write_outputs(slug: str, data: dict[str, Any], article: str) -> list[Path]:
     en = EN_ARTICLE_DIR / f"{slug}.md"
     if jp.exists() or en.exists():
         raise FileExistsError(f"Article slug already exists: {slug}")
+    # Reject unsuitable paired articles before any public article or social asset is written.
+    from reader_value_gate import validate_pair
+    from tempfile import TemporaryDirectory
+    with TemporaryDirectory() as temporary:
+        candidate_jp = Path(temporary) / f"{slug}.md"
+        candidate_en = Path(temporary) / "en" / f"{slug}.md"
+        candidate_en.parent.mkdir()
+        candidate_jp.write_text(article, encoding="utf-8")
+        candidate_en.write_text(_build_english(data), encoding="utf-8")
+        issues = validate_pair(candidate_jp, candidate_en)
+        if issues:
+            raise ValueError("Reader-value publication blocked: " + "; ".join(issues))
     jp.write_text(article, encoding="utf-8")
     en.write_text(_build_english(data), encoding="utf-8")
     outputs = [jp, en]

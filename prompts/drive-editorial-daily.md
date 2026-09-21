@@ -110,3 +110,7 @@ Required fields:
 - english_body_markdown
 
 When `should_generate` is false, still return all required keys with empty strings/arrays where appropriate.
+
+## Mandatory reader-value publication gate
+
+Before publication, the Japanese and English articles must each provide a concrete reader question, actionable implications, specific examples, structured explanation, and externally checkable public source URLs. Do not invent sources or claim a URL verifies a statement without checking it. Separate facts, inference and opinion; explain uncertainty and applicability, especially for medical claims. The deterministic reader-value gate is a minimum structural safeguard, not independent fact verification. If either language fails, do not publish either article; improve the draft or hold it for review.

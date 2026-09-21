@@ -138,6 +138,10 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
+      - name: Reader-value gate (JP/EN, fail closed)
+        run: |
+          python scripts/reader_value_gate.py --jp "src/content/articles/${{ steps.article.outputs.slug }}.md" --en "src/content/articles-en/${{ steps.article.outputs.slug }}.md"
+
       - name: Lint
         run: |
           if npm run | grep -q " lint"; then
