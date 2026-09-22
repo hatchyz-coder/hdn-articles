@@ -70,7 +70,8 @@ jobs:
         id: editorial
         env:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          HDN_GROQ_MODEL: ${{ vars.HDN_GROQ_MODEL || 'groq/compound' }}
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
           DRIVE_EDITORIAL_FOLDER_ID: ${{ vars.GOOGLE_DRIVE_LHUB_ARCHIVE_FOLDER_ID }}
           MIN_SCORE: ${{ inputs.min_score || '72' }}

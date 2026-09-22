@@ -24,7 +24,10 @@ ROTATE_REASONS = {
     "confidential",
     "manual_review_retry_limit",
 }
-STOP_REASONS = {"no_candidate", "dry_run"}
+STOP_REASONS = {
+    "no_candidate", "dry_run",
+    "api_rate_limited", "api_quota_exhausted", "api_unconfigured",
+}
 DEFAULT_MAX_ATTEMPTS = 4
 DEFAULT_BACKOFF_SECONDS = 8
 PRIVACY_CONTRACT_VERSION = 2

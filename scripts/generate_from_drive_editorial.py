@@ -192,38 +192,51 @@ def call_openai_once(doc: dict[str, Any], source_text: str, source_processing: d
     timer.metrics["inputCharacters"] = len(payload_input) + len(instructions)
     if mock_timeout:
         raise TimeoutError("OpenAI mock timed out")
-    api_key = os.environ.get("OPENAI_API_KEY")
-    if not api_key:
-        raise RuntimeError("OPENAI_API_KEY is not configured")
-    with timer.section("openaiSeconds", "OpenAI editorial generation with web research"):
+    # Groq-first: preserve the existing JSON contract and editorial quality gates.
+    # No unbudgeted OpenAI fallback: failures leave the source eligible for later retry.
+    groq_key = os.environ.get("GROQ_API_KEY")
+    if not groq_key:
+        base.write_output("selected", "false")
+        base.write_output("reason", "api_unconfigured")
+        raise RuntimeError("GROQ_API_KEY is not configured; no paid fallback attempted")
+    model = os.environ.get("HDN_GROQ_MODEL", "groq/compound")
+    with timer.section("openaiSeconds", "Groq editorial generation with web research"):
         try:
+            request_body = {
+                "model": model,
+                "messages": [
+                    {"role": "system", "content": instructions},
+                    {"role": "user", "content": (
+                        "Use actual current public web research and return a single JSON object. "
+                        "Do not invent citations or URLs.\n\n" + payload_input
+                    )},
+                ],
+                "max_completion_tokens": 6000,
+                "response_format": {"type": "json_object"},
+            }
+            if model.startswith("groq/compound"):
+                request_body["compound_custom"] = {
+                    "tools": {"enabled_tools": ["web_search", "visit_website"]}
+                }
             response = requests.post(
-                "https://api.openai.com/v1/responses",
+                "https://api.groq.com/openai/v1/chat/completions",
                 timeout=(10, 90),
-                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-                json={
-                    "model": os.getenv("OPENAI_MODEL", "gpt-5-mini"),
-                    "instructions": instructions,
-                    "input": payload_input,
-                    "tools": [{"type": "web_search", "search_context_size": "medium"}],
-                    "max_output_tokens": 12000,
-                    "store": False,
-                },
+                headers={"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"},
+                json=request_body,
             )
         except requests.Timeout as exc:
-            raise TimeoutError("OpenAI API timed out during editorial generation") from exc
+            raise TimeoutError("Groq API timed out during editorial generation") from exc
     if response.status_code == 429:
-        # Avoid retry storms while preserving the existing editorial quality gate.
-        detail = response.text[:500].lower()
-        quota_exhausted = any(marker in detail for marker in ("insufficient_quota", "billing_hard_limit", "quota_exceeded"))
-        reason = "api_quota_exhausted" if quota_exhausted else "api_rate_limited"
-        output_path = os.environ.get("GITHUB_OUTPUT")
-        if output_path:
-            with open(output_path, "a", encoding="utf-8") as output:
-                output.write(f"selected=false\nreason={reason}\n")
-        raise RuntimeError(f"OpenAI API HTTP 429 ({reason}); publication paused for this slot")
+        # The slot must stop without repeatedly spending the provider's limited quota.
+        # Preserve the draft and let the next scheduled slot check availability again.
+        base.write_output("selected", "false")
+        base.write_output("reason", "api_rate_limited")
+        raise RuntimeError("Groq API HTTP 429 (api_rate_limited); defer until next scheduled slot")
     response.raise_for_status()
-    payload = response.json()
+    choices = response.json().get("choices") or []
+    if not choices:
+        raise RuntimeError("Groq API returned no choices; retain article for retry")
+    payload = {"output_text": (choices[0].get("message") or {}).get("content") or ""}
     output_text = payload.get("output_text", "")
     if not output_text:
         chunks: list[str] = []
