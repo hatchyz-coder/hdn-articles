@@ -3,6 +3,7 @@ title: "The Person Who Made the Promise Forgets. The Person Who Believed It Chan
 socialTitle: "The Promise-Maker Forgets. The Believer Rearranges Their Life."
 description: "Promises cost nothing to say, but belief has an upfront price. What hiring ghosting, Qantas and psychological-contract research reveal about trust."
 publishedAt: 2026-09-22
+updatedAt: 2026-09-22
 category: "World Frictions"
 tags:
   - "Promises"
