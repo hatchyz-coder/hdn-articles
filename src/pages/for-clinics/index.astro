@@ -3,60 +3,138 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
 const siteUrl = Astro.site ?? new URL('https://article.hdnjapan.com');
 const pageUrl = new URL('/for-clinics/', siteUrl).toString();
+const consultation = 'https://hdnjapan.com/consultation-form.html?cta_source=articles_service&cta_intent=content';
+const points = [
+  { no: '01', title: '診療で伝えていることが、検索では見つからない。', body: '患者さんによく説明する内容も、Webに載っていなければ、受診先を探している人には届きません。診療室で培ってきた知識を、院外でも役立つ情報へ変えていきます。' },
+  { no: '02', title: 'ホームページを作ったまま、更新が止まっている。', body: 'お知らせ以外の更新は後回し。記事を書く時間も、外注先へ何度も指示する時間もない。短いメモや音声を起点に、発信の工程を整理します。' },
+  { no: '03', title: 'AIに任せたい。でも、医療情報を丸投げしたくない。', body: '一般論が自院の診療方針と違っていたり、根拠の薄い表現が混ざったりするのは避けたい。AIによる草案と、医療機関による確認・公開判断を分けます。' },
+];
+const values = [
+  { no: '01', title: 'まずは保険診療の「見つけてもらう理由」を増やす', body: '診療科目の一覧だけでは伝わらない、症状への向き合い方、健診後の疑問、受診前に知りたいこと。地域の患者さんが調べるテーマから記事を蓄積し、診療案内や問い合わせへの道筋を整えます。' },
+  { no: '02', title: '自費診療を始める際も、説明の土台を使える', body: '保険診療の情報発信を続けながら、必要に応じて予防、検査、オンライン診療など、自院が実際に提供する自費診療の情報へ展開。いきなり売り込むのではなく、患者さんが選択肢を理解できる流れを考えます。' },
+  { no: '03', title: '院内の「書く・整える・載せる」を減らす', body: '院長がゼロから原稿を作る必要はありません。素材から記事案を起こし、編集・公開・サイト保守までを一連の運用として支援。院内では、医学的な内容や自院の方針の確認に時間を使えます。' },
+  { no: '04', title: '記事単発で終わらず、継続して育てる', body: '記事が増えるほど、診療テーマごとの説明や関連情報を整理しやすくなります。検索・AI検索で参照され得る、出典と文脈が明確な情報を意識し、記事から診療案内へつながる構成を積み重ねます。' },
+];
+const steps = [
+  { no: '01', title: '素材を渡す', body: '院長のメモ、説明に使う音声、公開可能な院内資料を専用フォルダへ。完成原稿にする必要はありません。患者個人を特定できる情報は投入しません。' },
+  { no: '02', title: '記事案に整える', body: '素材から患者さんの疑問を整理し、見出し・本文・関連記事の構成案へ。重要な医学的説明は確認可能な一次資料や公式情報に立ち返って確認します。' },
+  { no: '03', title: '院内で確認・承認', body: '診療方針、適応・禁忌、院内での提供実態などを医師が確認。医療広告上の表現や公開範囲も担当者が確認し、修正後の版を承認します。' },
+  { no: '04', title: '公開・継続運用', body: '承認済みの記事を記事サイトへ公開。診療案内・予約・問い合わせへのリンクを整え、通常のサイト運用・保守も支援します。' },
+];
+const faqs = [
+  { q: '記事は本当に何本でも作れるのですか？', a: '契約上、記事の制作・編集・公開本数に上限はありません。ただし、毎日の公開本数や納期を保証するものではなく、素材の量、医学的確認、編集・品質審査の状況に合わせて制作順序と公開日程を調整します。記事を増やすために根拠や確認工程を省略しません。' },
+  { q: '院長が原稿を書いたり、広報担当を置いたりする必要はありますか？', a: '完成原稿を書く必要はありません。短いメモ、音声や公開可能な資料から始められます。ただし、診療内容や医学的な判断の確認、最終的な公開判断を担う院内の責任者は必要です。' },
+  { q: '既存のホームページを作り直す必要がありますか？', a: '原則として現在のホームページを残し、記事用の専用サイトやドメインを設ける形をご相談いただけます。既存サイトとのリンク、ドメイン・DNSの設定範囲は導入時に確認します。' },
+  { q: 'SEOや集患の成果は保証されますか？', a: '検索順位、AI検索での引用、予約数、患者数の増加は保証しません。患者さんが知りたい情報と自院の診療内容を結び、継続発信と予約・問い合わせ導線の改善を支援するサービスです。' },
+  { q: '英語記事やSNS向けの文章にも対応できますか？', a: '記事の多言語展開やSNS用の案内原稿にも対応します。対象言語、掲載先、院内での確認・翻訳の運用は導入時に決めます。SNSアカウントへの実投稿や個別の外部システム連携を自動的に含むものではありません。' },
+  { q: 'LHubの契約は必須ですか？', a: 'いいえ。記事サービスは単独で導入できます。予約・問診・決済などの患者導線をLINEとつなげたい場合は、独立したサービスとしてLHubをご案内します。記事サービスとのセット契約によるLHubの月額料金の値引きはありません。' },
+];
 const structuredData = {
   '@context': 'https://schema.org',
   '@graph': [
     {
       '@type': 'Service',
-      '@id': `${pageUrl}#service`,
-      name: 'HDN Articles',
-      description: '医療機関向けの記事サイト制作・運用・保守システム。記事作成・編集・公開本数に制限なし。',
+      '@id': pageUrl + '#service',
+      name: '医療機関向けAI記事制作・公開支援システム',
+      description: 'クリニックの診療方針や院内資料を患者に役立つ記事として整理。院内での確認・承認を経て公開し、記事サイトの継続運用を支援。',
       provider: { '@type': 'Organization', name: '株式会社HDN', url: 'https://hdnjapan.com/' },
       areaServed: '日本',
-      audience: { '@type': 'Audience', audienceType: '医療機関・クリニック' },
+      audience: { '@type': 'Audience', audienceType: 'クリニックの院長・事務長・医療機関の広報担当者' },
       url: pageUrl,
       offers: [
-        { '@type': 'Offer', name: '初期導入費', price: '110000', priceCurrency: 'JPY', priceSpecification: { '@type': 'UnitPriceSpecification', price: '110000', priceCurrency: 'JPY', valueAddedTaxIncluded: true } },
-        { '@type': 'Offer', name: '月額システム利用料', price: '55000', priceCurrency: 'JPY', priceSpecification: { '@type': 'UnitPriceSpecification', price: '55000', priceCurrency: 'JPY', valueAddedTaxIncluded: true, billingDuration: 'P1M' } },
+        { '@type': 'Offer', name: '初期導入費（税別）', price: '110000', priceCurrency: 'JPY', priceSpecification: { '@type': 'UnitPriceSpecification', price: '110000', priceCurrency: 'JPY', valueAddedTaxIncluded: false } },
+        { '@type': 'Offer', name: '月額システム利用料（税別）', price: '55000', priceCurrency: 'JPY', priceSpecification: { '@type': 'UnitPriceSpecification', price: '55000', priceCurrency: 'JPY', valueAddedTaxIncluded: false, billingDuration: 'P1M' } },
       ],
     },
     {
       '@type': 'BreadcrumbList',
       itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'HDN Articles', item: new URL('/', siteUrl).toString() },
-        { '@type': 'ListItem', position: 2, name: '医療機関向け記事サービス', item: pageUrl },
+        { '@type': 'ListItem', position: 1, name: 'HDN Articles（HDNのオウンドメディア）', item: new URL('/', siteUrl).toString() },
+        { '@type': 'ListItem', position: 2, name: '医療機関向けAI記事制作・公開支援システム', item: pageUrl },
       ],
     },
   ],
 };
 ---
 <BaseLayout
-  title="医療機関向け記事サイト制作・運用｜HDN Articles"
-  description="記事本数ではなく月額システム利用料で、医療機関の記事サイト制作・運用・保守を支援。初期110,000円、月額55,000円（税込）、記事作成・編集・公開本数に制限なし。"
+  title="医療機関向けAI記事制作・公開支援｜院長の知識を患者に届く情報へ｜株式会社HDN"
+  description="院長のメモ・音声・院内資料から患者に役立つ記事案を制作。医師・院内担当者の承認後に公開し、保険診療の情報発信から自費診療への展開まで継続支援。初期110,000円・月額55,000円（税別）、記事本数に契約上の上限なし。"
   canonical="/for-clinics/"
 >
   <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
-  <main>
-    <section class="lane-page-intro"><div class="wrap">
-      <p class="eyebrow">FOR MEDICAL INSTITUTIONS</p>
-      <h1>記事本数ではなく、<br />システム利用料として毎月定額で利用できます。</h1>
-      <p><strong>初期導入費110,000円（税込）／月額システム利用料55,000円（税込）</strong></p>
-      <p>記事作成・編集・公開本数に制限はありません。院長の音声やメモ、院内資料を基に、検索・AI検索から患者の疑問に応える記事サイトを制作・運用・保守します。</p>
-      <div class="cta-actions"><a class="button" href="https://hdnjapan.com/consultation-form.html?cta_source=articles_service&cta_intent=content&cta_position=hero">記事サービス導入を相談する</a><a class="text-link" href="https://hdnjapan.com/article-service.html">料金と提供範囲を見る →</a></div>
+  <main class="clinic-service">
+    <section class="service-hero"><div class="wrap service-hero-grid">
+      <div>
+        <p class="eyebrow">FOR CLINICS / 医療機関向けAI記事制作・公開支援</p>
+        <h1>院長の知識を、<br /><span>患者さんに届く言葉へ。</span></h1>
+        <p class="service-lead">診療室で何度も説明していることが、Webには一度も書かれていない。<br />その「もったいない」を、院内の執筆負担を抑えながら変えていきます。</p>
+        <p class="service-detail">メモ・音声・資料を起点に、患者さんが知りたい記事を制作。医療機関の確認・承認を経て公開し、記事サイトの運用まで支援します。保険診療の情報発信を育てながら、自費診療の案内にも活かせる土台をつくります。</p>
+        <div class="service-actions"><a class="button" href={consultation + '&cta_position=hero'}>自院での活用を無料相談する</a><a class="service-text-link" href="#how-it-works">運用の流れを見る ↓</a></div>
+        <p class="hero-assurance">完成原稿は不要　／　記事本数に契約上の上限なし　／　院内確認・承認後に公開</p>
+      </div>
+      <aside class="hero-aside" aria-label="制作の流れの概要">
+        <p class="eyebrow">FROM DAILY PRACTICE TO ARTICLES</p>
+        <div class="hero-note"><span>院長のメモ</span><p>「健診で数値を指摘された方へ。受診の目安と、相談前に準備することを伝えたい」</p></div>
+        <div class="hero-arrow" aria-hidden="true">↓</div>
+        <div class="hero-article"><span>患者さん向けの記事案</span><h2>健診結果が気になったら。受診前に知っておきたいこと</h2><p>医師確認・表現調整を経て、公開する情報に整えます。</p></div>
+        <p class="hero-aside-note">※架空のメモを用いた構成例です。実際の生成結果・医療上の判断を示すものではありません。</p>
+      </aside>
     </div></section>
 
-    <section class="wrap topic-page-list">
-      <div class="section-heading"><div><p class="eyebrow">SCOPE</p><h2>サイト開設から制作・公開・保守まで</h2></div></div>
-      <div class="article-grid topic-article-grid">
-        <article class="article-card"><h3>初期導入</h3><p>サイト初期設定、サブドメイン支援、院情報・文体設定、アカウント発行、初期品質調整、公開テストを行います。</p></article>
-        <article class="article-card"><h3>月額運用</h3><p>記事作成・編集・公開、英語版、SNS原稿、通常の保守・障害対応、バックアップを含みます。</p></article>
-        <article class="article-card"><h3>品質維持</h3><p>制作順序、公開日程、内容確認等は運用状況に応じて調整します。個別確認、全面リライト、大量生成、独自連携は追加対応です。</p></article>
-      </div>
+    <section class="service-section wrap" id="why">
+      <div class="section-intro"><p class="eyebrow">WHY THIS SERVICE</p><h2>「発信したい」が、<br />診療の忙しさに埋もれていませんか。</h2><p>患者さんに伝えたいことは、毎日の診療の中にあります。足りないのは知識ではなく、その知識を院外へ届ける工程かもしれません。</p></div>
+      <div class="pain-grid">{points.map((point) => <article class="service-card"><span class="card-number">{point.no}</span><h3>{point.title}</h3><p>{point.body}</p></article>)}</div>
+      <p class="section-punchline">カルテには残る。でも、検索結果には出てこない。<br /><strong>その知識を、患者さんとの次の接点へ。</strong></p>
     </section>
 
-    <section class="wrap lane-context" data-contextual-service-cta="articles-service">
-      <div><h2>運営・編集・医療情報の位置づけ</h2><p>運営会社は株式会社HDNです。一次情報を重視し、事実と考察を区別し、実務判断につながる編集を行います。本サイトの医療情報は一般的な情報提供であり、診断・治療や個別の医療上・法令上の判断を代替しません。</p><p>記事ごとの医療的妥当性や広告表現について最終判断が必要な場合は、医療機関または適切な専門家の確認を前提とします。</p></div>
-      <div class="cta-actions"><a class="button" href="https://hdnjapan.com/consultation-form.html?cta_source=articles_service&cta_intent=content&cta_position=bottom">導入について問い合わせる</a><a class="text-link" href="https://hdnjapan.com/disclaimer.html">免責事項 →</a></div>
+    <section class="service-section service-tint" id="value"><div class="wrap">
+      <div class="section-intro"><p class="eyebrow">WHAT CHANGES</p><h2>記事を増やすことより、<br />患者さんが迷わず理解できること。</h2><p>診療内容を知る、受診前の不安を減らす、必要な案内へ進む。その道筋を情報発信とサイト運用の両面から整えます。</p></div>
+      <div class="value-grid">{values.map((value) => <article class="service-card"><span class="card-number">{value.no}</span><h3>{value.title}</h3><p>{value.body}</p></article>)}</div>
+      <p class="service-caution">※SEO・AI検索への対応は検索結果への掲載、順位、引用や集患数を保証するものではありません。診療案内・予約への導線は医療機関の提供内容と公開方針に合わせて設計します。</p>
+    </div></section>
+
+    <section class="service-section wrap" id="example">
+      <div class="section-intro"><p class="eyebrow">FROM ONE NOTE</p><h2>院長が書くのは、<br />「患者さんによく聞かれること」だけでも。</h2><p>たとえば、こんな短いメモをきっかけに、患者さんの疑問に沿った記事構成を考えます。</p></div>
+      <div class="example-grid">
+        <div class="example-input"><p class="example-tag">入力例｜架空の院長メモ</p><h3>健診のあと、よく受ける質問</h3><ul><li>検査数値を指摘されたら、何から確認すればいい？</li><li>再検査の案内を受けたけれど、不安</li><li>受診時に持ってきてほしいものは？</li></ul><p>箇条書きでも、話した音声でも。きれいな文章にする作業から始めなくて構いません。</p></div>
+        <div class="example-output"><p class="example-tag">記事構成例｜公開前のたたき台</p><h3>健診結果で再検査と言われたら。受診前に確認したいこと</h3><ol><li>健診結果のどの項目を確認するか</li><li>受診を考える際に確認したいポイント</li><li>受診時に持参する資料や記録</li><li>自院で対応する検査・診療内容への案内</li></ol><p>読者の疑問に沿って構成を整え、根拠と自院の提供内容を確認したうえで本文・公開版へ進めます。</p></div>
+      </div>
+      <p class="service-caution">※上記は制作工程を説明するための架空例です。実際の患者、診療実績、生成結果ではありません。記事公開に必要な医学的・広告上の確認を省略するものではありません。</p>
+    </section>
+
+    <section class="service-section service-navy" id="how-it-works"><div class="wrap">
+      <div class="section-intro"><p class="eyebrow">HOW IT WORKS</p><h2>院長が担うのは、<br />知識の提供と、医療上の判断。</h2><p>文章の組み立てやサイト更新を、院長の新しい日課にしない。素材から公開までの役割を分けます。</p></div>
+      <ol class="step-grid">{steps.map((step) => <li><span class="step-number">{step.no}</span><h3>{step.title}</h3><p>{step.body}</p></li>)}</ol>
+      <p class="step-footnote">※素材形式、公開システム、担当者の役割、公開開始時期は導入時に確認します。医師・院内責任者が承認していない記事の公開を前提としません。</p>
+    </div></section>
+
+    <section class="service-section wrap" id="safety">
+      <div class="section-intro"><p class="eyebrow">MEDICAL CONTENT FIRST</p><h2>医療情報だから、<br />「自動で公開」より先に確認を置く。</h2><p>AIは原稿制作の補助です。診療の適切さや自院の医療提供内容について、AIに最終判断を委ねるサービスではありません。</p></div>
+      <div class="safety-grid"><article class="service-card"><span class="card-number">01 / 根拠</span><h3>一次資料・公式情報を確認</h3><p>重要な医学的記述は公的機関、学会等の一次資料や公式情報に立ち返り、出典が確認できない事項を断定しません。</p></article><article class="service-card"><span class="card-number">02 / 自院の実態</span><h3>一般論を、そのまま自院の説明にしない</h3><p>診療対象、検査・治療内容、予約方法、費用などは自院の実態を確認。医療広告に関わる表現も公開前に確認します。</p></article><article class="service-card"><span class="card-number">03 / 公開判断</span><h3>医師・院内担当者が最終確認</h3><p>修正が入った記事は、修正後の内容を確認してから公開。医療機関が未承認の原稿をそのまま掲載することは前提としません。</p></article></div>
+      <p class="service-caution">医学的妥当性や個別の法令適合性をAIだけで保証するものではありません。患者情報・機密資料は投入せず、医療機関と必要に応じて専門家が確認します。</p>
+    </section>
+
+    <section class="service-section service-tint" id="pricing"><div class="wrap">
+      <div class="section-intro"><p class="eyebrow">SCOPE & PRICE</p><h2>記事の本数売りではなく、<br />発信を続ける仕組みを定額で。</h2><p>記事サイトの立ち上げから記事制作・公開・通常保守まで、基本となる運用をシステム利用料としてご提供します。</p></div>
+      <div class="pricing-grid">
+        <article class="price-card"><p class="price-caption">初期導入費</p><p class="price"><strong>110,000</strong>円 <small>（税別）</small></p><h3>記事発信を始めるための初期設定</h3><ul><li>記事サイト・アカウントの初期設定</li><li>自動投稿専用ドメインの取得・設定支援</li><li>院情報・文体・取り扱うテーマの整理</li><li>初期品質調整と公開テスト</li></ul></article>
+        <article class="price-card featured-price"><p class="price-caption">月額システム利用料</p><p class="price"><strong>55,000</strong>円 <small>（税別）</small></p><h3>記事を育て、発信を継続する運用</h3><ul><li>記事の制作・編集・承認後の公開</li><li><strong>記事の制作・編集・公開本数に契約上の上限なし</strong></li><li>多言語展開・SNS向け原稿の作成支援</li><li>記事サイトの通常保守・バックアップ・運用時の問い合わせ対応</li></ul></article>
+      </div>
+      <p class="service-caution">※記事本数に契約上の上限はありませんが、公開件数・納期の保証ではありません。医療上の確認、編集品質、素材・運用状況に応じて制作順序と公開日程を調整します。個別の大規模改修、特別な外部連携、SNSへの実投稿等は基本料金への自動的な包含を意味しません。対応範囲と費用は着手前にご案内します。</p>
+      <div class="service-actions"><a class="button" href={consultation + '&cta_position=pricing'}>料金・導入方法を相談する</a><a class="service-text-link" href="https://hdnjapan.com/article-service.html">コーポレートサイトのサービス案内 →</a></div>
+    </div></section>
+
+    <section class="service-section wrap" id="faq">
+      <div class="section-intro"><p class="eyebrow">QUESTIONS</p><h2>導入前によくあるご質問。</h2></div>
+      <div class="faq-list">{faqs.map((faq) => <details><summary>{faq.q}</summary><p>{faq.a}</p></details>)}</div>
+    </section>
+
+    <section class="wrap service-bottom" data-contextual-service-cta="articles-service">
+      <div><p class="eyebrow">START WITH YOUR CLINIC</p><h2>最初に必要なのは、<br />立派な原稿ではありません。</h2><p>「患者さんに、何を伝えたいか」。まずは今あるホームページ、よく聞かれる質問、院内の発信体制を整理するところからご相談ください。記事サイトだけの導入も可能です。</p><p class="bottom-note">HDN Articlesは株式会社HDNのオウンドメディアです。本ページでご案内しているのは、医療機関ごとに導入いただく独立した記事制作・公開支援サービスです。</p></div>
+      <div class="bottom-actions"><a class="button" href={consultation + '&cta_position=bottom'}>無料で導入を相談する</a><a class="service-text-link" href="https://hdnjapan.com/">運営会社・株式会社HDNを見る →</a></div>
     </section>
   </main>
+  <style>
+    .clinic-service{--surface:#f3f7fa;--brand:#10263f;--line:#d9e5eb;color:#17212b;line-height:1.85}.clinic-service h1,.clinic-service h2,.clinic-service h3{letter-spacing:-.035em}.clinic-service p{overflow-wrap:anywhere}.service-hero{background:radial-gradient(circle at 82% 10%,#dcebf3,transparent 38%),linear-gradient(145deg,#f6fafc,#eaf2f7);padding:90px 0 86px;border-bottom:1px solid var(--line)}.service-hero-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);align-items:center;gap:68px}.service-hero h1{font-size:clamp(38px,4.7vw,66px);line-height:1.2;color:var(--brand);margin:0 0 28px}.service-hero h1 span{color:#2b688d}.service-lead{font-size:clamp(19px,2vw,23px);font-weight:800;line-height:1.7;margin:0 0 16px;color:var(--brand)}.service-detail{margin:0;color:#3a5060;font-size:16px}.service-actions{display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin-top:28px}.service-text-link{font-weight:800;color:var(--brand);text-underline-offset:5px}.hero-assurance{font-size:12px;color:#34536b;font-weight:800;margin:24px 0 0}.hero-aside{background:#fff;border:1px solid #d6e3e9;border-radius:26px;padding:30px;box-shadow:0 22px 62px #153c5817}.hero-aside .eyebrow{font-size:10px}.hero-note,.hero-article{border:1px solid var(--line);padding:20px 22px;border-radius:15px}.hero-note{background:#f8fafc}.hero-note span,.hero-article span{display:block;font-size:12px;font-weight:900;color:#2b688d}.hero-note p{margin:9px 0 0;font-weight:700}.hero-article{background:#eff6fa}.hero-article h2{font-size:23px;line-height:1.45;color:var(--brand);margin:8px 0}.hero-article p{margin:0;font-size:13px}.hero-arrow{text-align:center;color:#376b8a;font-size:24px}.hero-aside-note{font-size:11px;color:#607080;margin:14px 0 0}.service-section{padding-top:95px;padding-bottom:95px}.section-intro{max-width:830px;margin-bottom:36px}.section-intro h2{font-size:clamp(30px,3.5vw,47px);line-height:1.34;color:var(--brand);margin:0 0 18px}.section-intro>p:last-child{color:#4b5f6b;font-size:17px;max-width:800px;margin:0}.pain-grid,.safety-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.service-card{border:1px solid var(--line);border-radius:18px;padding:28px;background:#fff;min-width:0}.service-card>.card-number{font-weight:900;color:#386d8c;font-size:12px;letter-spacing:.12em}.service-card h3{font-size:21px;line-height:1.45;color:var(--brand);margin:14px 0}.service-card p{font-size:14px;color:#4c6070;margin:0}.section-punchline{margin:32px 0 0;padding:26px 30px;border-left:4px solid #2b688d;background:#f2f7fa;color:var(--brand);font-size:18px}.section-punchline strong{font-size:21px}.service-tint{background:var(--surface)}.value-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.value-grid .service-card{padding:30px}.value-grid .service-card h3{font-size:22px}.value-grid .service-card p{font-size:16px}.service-caution{font-size:12px;color:#566b79;margin:28px 0 0}.example-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.example-input,.example-output{border:1px solid var(--line);border-radius:18px;padding:30px;min-width:0}.example-input{background:#f7f6f2}.example-output{background:#eff6fa}.example-tag{font-size:12px;font-weight:900;color:#315d76;margin:0 0 14px}.example-grid h3{font-size:22px;line-height:1.45;color:var(--brand);margin:0 0 14px}.example-grid ul,.example-grid ol{padding-left:24px;margin:0 0 20px}.example-grid li{margin-bottom:7px}.example-grid p:last-child{margin:0;font-size:14px;color:#4c6070}.service-navy{background:var(--brand);color:#fff}.service-navy .eyebrow{color:#a8c9db}.service-navy .section-intro h2,.service-navy .section-intro>p:last-child{color:#fff}.step-grid{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px}.step-grid li{border:1px solid #547087;border-radius:18px;padding:24px;background:#ffffff0d;min-width:0}.step-number{font-size:25px;font-weight:900;color:#a7cfdf}.step-grid h3{font-size:19px;line-height:1.5;color:#fff;margin:12px 0}.step-grid p{font-size:13px;color:#e0e9ef;margin:0}.step-footnote{color:#d0dfe9;font-size:12px;margin:24px 0 0}.pricing-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.price-card{border:1px solid var(--line);border-radius:20px;padding:34px;background:#fff;min-width:0}.featured-price{border:2px solid #2f6b8e;box-shadow:0 12px 32px #21496512}.price-caption{margin:0;color:#2a6285;font-size:14px;font-weight:900}.price{margin:8px 0 20px;color:var(--brand);font-weight:900}.price strong{font-size:clamp(38px,4vw,56px);line-height:1.2;letter-spacing:-.045em}.price small{font-size:14px;font-weight:500}.price-card h3{font-size:20px;color:var(--brand);line-height:1.5;margin:0 0 16px}.price-card ul{margin:0;padding-left:20px;font-size:14px;color:#435868}.price-card li{margin-bottom:10px}.faq-list{max-width:900px}.faq-list details{border-bottom:1px solid var(--line);padding:4px 0}.faq-list summary{padding:19px 30px 19px 0;cursor:pointer;font-size:17px;font-weight:800;color:var(--brand)}.faq-list details p{margin:0 0 22px;color:#486071}.service-bottom{display:grid;grid-template-columns:1.5fr 1fr;gap:42px;align-items:center;margin-top:18px;margin-bottom:85px;padding:48px;border-radius:24px;background:linear-gradient(135deg,#edf5f9,#fff);border:1px solid var(--line)}.service-bottom h2{font-size:clamp(30px,3.5vw,45px);line-height:1.3;color:var(--brand);margin:0 0 18px}.service-bottom p:not(.eyebrow){margin:0 0 12px;color:#3f5668}.service-bottom .bottom-note{font-size:12px;color:#647784;margin-top:20px}.bottom-actions{display:flex;flex-direction:column;align-items:flex-start;gap:17px}.bottom-actions .button{width:100%}@media(max-width:950px){.service-hero-grid{grid-template-columns:1fr;gap:34px}.hero-aside{max-width:680px}.step-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.pain-grid,.safety-grid{grid-template-columns:1fr}.service-bottom{grid-template-columns:1fr}}@media(max-width:680px){.service-hero{padding:58px 0}.service-section{padding-top:64px;padding-bottom:64px}.service-hero h1{font-size:clamp(35px,9vw,49px)}.service-lead{font-size:18px}.hero-aside,.example-input,.example-output,.price-card{padding:23px}.value-grid,.example-grid,.pricing-grid,.step-grid{grid-template-columns:1fr}.service-bottom{padding:27px;margin-bottom:55px}.service-actions{align-items:stretch;flex-direction:column}.service-actions .button{width:100%}.service-section .section-intro h2{font-size:clamp(29px,7.5vw,38px)}}
+  </style>
 </BaseLayout>
