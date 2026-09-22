@@ -1,0 +1,24 @@
+.article-hero {
+  margin: 0 0 34px;
+}
+
+.article-hero-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1200 / 630;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+}
+
+@media (max-width: 680px) {
+  .article-hero {
+    margin-bottom: 26px;
+  }
+
+  .article-hero-image {
+    border-radius: 14px;
+  }
+}

@@ -163,6 +163,18 @@ jobs:
               echo "English page does not reference its OGP for ${slug}" >&2
               exit 1
             }
+            if grep -Eq '^heroImage:[[:space:]]*true[[:space:]]*$' "src/content/articles/${slug}.md"; then
+              grep -F 'class="article-hero-image"' "dist/articles/${slug}/index.html" >/dev/null || {
+                echo "Japanese page does not render its first-view image for ${slug}" >&2
+                exit 1
+              }
+            fi
+            if grep -Eq '^heroImage:[[:space:]]*true[[:space:]]*$' "src/content/articles-en/${slug}.md"; then
+              grep -F 'class="article-hero-image"' "dist/en/articles/${slug}/index.html" >/dev/null || {
+                echo "English page does not render its first-view image for ${slug}" >&2
+                exit 1
+              }
+            fi
           done
 
       - name: Upload Pages artifact
