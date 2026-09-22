@@ -239,3 +239,72 @@ jobs:
 
           echo "No sitemap endpoint was reachable after deployment." >&2
           exit 1
+
+      - name: Verify published for-clinics landing page
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          set -euo pipefail
+          # Check the GitHub Pages target and the visitor-facing custom domain independently.
+          for target in "${PAGE_URL%/}/for-clinics/" "https://article.hdnjapan.com/for-clinics/"; do
+            echo "Verifying live service page: $target"
+            verified=false
+            for attempt in 1 2 3 4 5 6 7 8; do
+              if curl --fail --silent --show-error --location --max-time 20 "$target" -o /tmp/for-clinics-live.html &&
+                 python3 - /tmp/for-clinics-live.html <<'PY'
+          import html
+          import sys
+          from html.parser import HTMLParser
+          from pathlib import Path
+
+          class VisibleText(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.parts = []
+                  self.hidden = 0
+
+              def handle_starttag(self, tag, attrs):
+                  if tag in {"script", "style"}:
+                      self.hidden += 1
+
+              def handle_endtag(self, tag):
+                  if tag in {"script", "style"}:
+                      self.hidden = max(0, self.hidden - 1)
+
+              def handle_data(self, data):
+                  if not self.hidden:
+                      self.parts.append(data)
+
+          raw = Path(sys.argv[1]).read_text(encoding="utf-8")
+          parser = VisibleText()
+          parser.feed(raw)
+          text = html.unescape(" ".join(parser.parts))
+          required = (
+              "院長の知識を、",
+              "患者さんに届く言葉へ。",
+              "110,000",
+              "55,000",
+              "（税別）",
+              "院内で確認・承認",
+              "検索順位、AI検索での引用、予約数、患者数の増加は保証しません",
+          )
+          missing = [term for term in required if term not in text]
+          if missing:
+              raise SystemExit("Production page is stale or incomplete: " + repr(missing))
+          if "記事本数ではなく、" in text or "110,000円（税込）" in text:
+              raise SystemExit("Legacy for-clinics content is still present")
+          if "consultation-form.html?cta_source=articles_service" not in raw:
+              raise SystemExit("Service consultation link is missing")
+          print("Production content verified: new headline, tax-exclusive prices, approval, disclaimers and CTA.")
+          PY
+              then
+                verified=true
+                break
+              fi
+              if [ "$attempt" -lt 8 ]; then sleep 10; fi
+            done
+            if [ "$verified" != true ]; then
+              echo "Published for-clinics page did not match approved content: $target" >&2
+              exit 1
+            fi
+          done
