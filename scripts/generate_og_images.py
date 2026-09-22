@@ -23,12 +23,10 @@ BOLD_FONT_CANDIDATES = [
     Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc"),
     Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"),
     Path("/usr/share/fonts/truetype/noto/NotoSansCJK-Bold.ttc"),
-    Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
 ]
 REGULAR_FONT_CANDIDATES = [
     Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"),
     Path("/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc"),
-    Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
 ]
 
 
@@ -36,7 +34,10 @@ def find_font(candidates: list[Path]) -> Path:
     for path in candidates:
         if path.exists():
             return path
-    raise SystemExit("No suitable font found. Install fonts-noto-cjk before generating OGP images.")
+    raise SystemExit(
+        "Noto Sans CJK is required for OGP images. "
+        "Install fonts-noto-cjk instead of falling back to a font that renders Japanese as boxes."
+    )
 
 
 BOLD_FONT = find_font(BOLD_FONT_CANDIDATES)
