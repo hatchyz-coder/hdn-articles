@@ -12,6 +12,7 @@ tags:
 author: "羽田野 剛士"
 draft: false
 featured: true
+heroImage: true
 cta: editorial
 audiences:
   - "general"

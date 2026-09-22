@@ -1,7 +1,7 @@
 ---
 title: "Where Did the People Who Said 'Absolutely, Let's Do It' Go?"
 socialTitle: "When Enthusiasm Never Turns Into Action"
-description: "An unanswered meeting request, a contract challenged a month later, unclear hiring expectations, and a last-minute cancellation: what everyday promises cost others, and how to protect trust without relying on assumptions."
+description: "An unanswered meeting request, a challenged contract, unclear hiring expectations, and a last-minute cancellation: what everyday promises cost others and how to protect trust."
 publishedAt: 2026-09-22
 category: "World Frictions"
 tags:
@@ -11,6 +11,7 @@ tags:
   - "Communication"
 author: "Tsuyoshi Hadano"
 draft: false
+heroImage: true
 cta: editorial
 audiences:
   - "general"

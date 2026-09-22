@@ -129,6 +129,19 @@ const ctaConfig = {
     <nav class="breadcrumbs" aria-label="Breadcrumb">
       <a href={`${import.meta.env.BASE_URL}en/`}>HDN Articles</a><span>›</span><span>English</span>
     </nav>
+    {article.data.heroImage && (
+      <figure class="article-hero">
+        <img
+          class="article-hero-image"
+          src={ogImage.pathname}
+          alt={`Featured image for ${article.data.title}`}
+          width="1200"
+          height="630"
+          loading="eager"
+          fetchpriority="high"
+        />
+      </figure>
+    )}
     <header class="article-header">
       <p class="meta">{article.data.category} | {article.data.publishedAt.toLocaleDateString('en-US')} | Tsuyoshi Hadano</p>
       <h1>{article.data.title}</h1>
