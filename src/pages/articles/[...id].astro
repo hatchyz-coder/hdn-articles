@@ -17,6 +17,9 @@ const { Content } = await render(article);
 const articleUrl = new URL(`${import.meta.env.BASE_URL}articles/${article.id}/`, Astro.site);
 const englishUrl = hasEnglish ? new URL(`${import.meta.env.BASE_URL}en/articles/${article.id}/`, Astro.site) : undefined;
 const ogImage = new URL(`${import.meta.env.BASE_URL}og/ja/${article.id}.png`, Astro.site);
+if (article.data.updatedAt) {
+  ogImage.searchParams.set('v', article.data.updatedAt.toISOString().slice(0, 10));
+}
 const tagSet = new Set(article.data.tags);
 const relatedArticles = articles
   .filter((candidate) => candidate.id !== article.id)
@@ -134,7 +137,7 @@ const ctaConfig = {
       <figure class="article-hero">
         <img
           class="article-hero-image"
-          src={ogImage.pathname}
+          src={`${ogImage.pathname}${ogImage.search}`}
           alt={`${article.data.title}のアイキャッチ画像`}
           width="1200"
           height="630"
