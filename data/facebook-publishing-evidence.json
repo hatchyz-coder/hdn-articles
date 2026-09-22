@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "brand": {
+    "metricool_brand_id": "6937267",
+    "label": "HDN",
+    "owner": "dispatch_hatchy@yahoo.co.jp",
+    "timezone": "Asia/Tokyo",
+    "facebook_network_id": "1310362148819197"
+  },
+  "records": [
+    {
+      "public_url": "https://article.hdnjapan.com/articles/ai-safety-accelerator-brake-20260916/",
+      "duplicate_key": "d107169e7a0cea110ad13d20a271d70efc237404553f4dc0b62f878f728ea3a5",
+      "metricool_post_id": "380411274",
+      "metricool_uuid": "7693183755742758884",
+      "status": "scheduled",
+      "scheduled_at": "2026-09-25T19:30:00+09:00",
+      "facebook_post_url": null,
+      "evidence_source": "metricool_scheduled_post_retrieval"
+    },
+    {
+      "public_url": "https://article.hdnjapan.com/articles/smart-glasses-right-not-to-be-recorded-20260919/",
+      "metricool_post_id": "378555125",
+      "metricool_uuid": "2270923948774343283",
+      "status": "published",
+      "scheduled_at": "2026-09-19T20:59:00+09:00",
+      "facebook_post_url": "https://facebook.com/122110552695454685/posts/122113025577454685",
+      "evidence_source": "metricool_provider_published_retrieval"
+    }
+  ]
+}
