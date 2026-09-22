@@ -43,6 +43,29 @@ class DriveEditorialResilientRunnerTests(unittest.TestCase):
         self.assertTrue(retry)
         self.assertEqual(reason, "generator_error")
 
+    def test_groq_429_stops_without_retry_even_with_stale_processing_report(self):
+        report = resilient.apply_generator_outputs(
+            {"selected": False, "reason": "processing_started"},
+            {"selected": "false", "reason": "api_rate_limited"},
+        )
+        retry, reason = resilient.should_continue(1, report)
+        self.assertFalse(retry)
+        self.assertEqual(reason, "api_rate_limited")
+
+    def test_missing_groq_configuration_stops_without_retry(self):
+        retry, reason = resilient.should_continue(
+            1, {"selected": False, "reason": "api_unconfigured"},
+        )
+        self.assertFalse(retry)
+        self.assertEqual(reason, "api_unconfigured")
+
+    def test_growth_generator_receives_groq_key_and_model(self):
+        workflow = (ROOT / ".github/workflows/hdn-growth-pipeline.yml").read_text(encoding="utf-8")
+        section = workflow.split("      - name: Generate article and channel drafts", 1)[1]
+        section = section.split("      - name: Build and validate site", 1)[0]
+        self.assertIn("GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}", section)
+        self.assertIn("HDN_GROQ_MODEL: ${{ vars.HDN_GROQ_MODEL || 'groq/compound' }}", section)
+
     def test_parse_github_outputs_uses_last_value(self):
         outputs = resilient.parse_github_outputs("selected=false\nreason=api_timeout\nreason=generated\n")
         self.assertEqual(outputs["selected"], "false")

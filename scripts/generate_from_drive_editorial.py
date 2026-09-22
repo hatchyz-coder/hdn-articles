@@ -196,6 +196,8 @@ def call_openai_once(doc: dict[str, Any], source_text: str, source_processing: d
     # No unbudgeted OpenAI fallback: failures leave the source eligible for later retry.
     groq_key = os.environ.get("GROQ_API_KEY")
     if not groq_key:
+        base.write_output("selected", "false")
+        base.write_output("reason", "api_unconfigured")
         raise RuntimeError("GROQ_API_KEY is not configured; no paid fallback attempted")
     model = os.environ.get("HDN_GROQ_MODEL", "groq/compound")
     with timer.section("openaiSeconds", "Groq editorial generation with web research"):
@@ -225,7 +227,11 @@ def call_openai_once(doc: dict[str, Any], source_text: str, source_processing: d
         except requests.Timeout as exc:
             raise TimeoutError("Groq API timed out during editorial generation") from exc
     if response.status_code == 429:
-        raise RuntimeError("Groq API HTTP 429 (api_rate_limited); retain article for retry")
+        # The slot must stop without repeatedly spending the provider's limited quota.
+        # Preserve the draft and let the next scheduled slot check availability again.
+        base.write_output("selected", "false")
+        base.write_output("reason", "api_rate_limited")
+        raise RuntimeError("Groq API HTTP 429 (api_rate_limited); defer until next scheduled slot")
     response.raise_for_status()
     choices = response.json().get("choices") or []
     if not choices:

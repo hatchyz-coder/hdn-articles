@@ -134,6 +134,8 @@ jobs:
       - name: Generate article and channel drafts
         if: steps.pick.outputs.selected == 'true'
         env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          HDN_GROQ_MODEL: ${{ vars.HDN_GROQ_MODEL || 'groq/compound' }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
