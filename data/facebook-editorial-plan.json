@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "timezone": "Asia/Tokyo",
+  "cadence": "Every three days at 19:30 JST",
+  "posts": [
+    {
+      "article_id": "ai-safety-accelerator-brake-20260916",
+      "scheduled_at": "2026-09-25T19:30:00+09:00"
+    },
+    {
+      "article_id": "online-care-patient-journey-2026",
+      "scheduled_at": "2026-09-28T19:30:00+09:00"
+    },
+    {
+      "article_id": "promises-trust-and-expectations-20260922",
+      "scheduled_at": "2026-10-01T19:30:00+09:00"
+    },
+    {
+      "article_id": "health-food-advertising-story-context",
+      "scheduled_at": "2026-10-04T19:30:00+09:00"
+    },
+    {
+      "article_id": "clinic-video-strategy",
+      "scheduled_at": "2026-10-07T19:30:00+09:00"
+    },
+    {
+      "article_id": "productivity-theater-1on1-daily-report",
+      "scheduled_at": "2026-10-10T19:30:00+09:00"
+    },
+    {
+      "article_id": "electronic-prescription-clinic-operations-2026",
+      "scheduled_at": "2026-10-13T19:30:00+09:00"
+    },
+    {
+      "article_id": "medical-fee-revision-clinic-facility-standards-2026",
+      "scheduled_at": "2026-10-16T19:30:00+09:00"
+    }
+  ]
+}

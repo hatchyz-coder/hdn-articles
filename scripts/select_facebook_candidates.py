@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ARTICLE_DIR = ROOT / "src/content/articles"
 SOCIAL_DIR = ROOT / "social"
 CANONICAL_ROOT = "https://article.hdnjapan.com/articles"
+DEFAULT_PLAN = ROOT / "data/facebook-editorial-plan.json"
 
 
 def field(text: str, name: str) -> str:
@@ -65,13 +66,23 @@ def evaluate(path: Path, evidence: dict, desired_at: str | None) -> Record:
     copy = fb_path.read_text(encoding="utf-8").strip() if fb_path.exists() else ""
     body = article.split("---", 2)[-1]
     sources = {u.rstrip("/).,") for u in re.findall(r"https?://[^\s>]+", body)}
+    if field(article, "sourceUrl"):
+        sources.add(field(article, "sourceUrl"))
+    section_count = len(re.findall(r"(?m)^#{2,3}\s+", body))
+    practical_steps = len(re.findall(r"(?m)^###\s+(?:\d+[.．]|チェック|確認)", body))
+    concrete_mentions = len(re.findall(r"\d|事例|調査|報告|命じ|公表", body))
+    utility_mentions = len(re.findall(r"設計|確認|判断|必要|仕組み|選択|運用|導線|対応", body))
+    perspective_signal = re.search(
+        r"HDNの視点|私は|僕は|私自身|違和感|と思います|重要なのは|DXは|成功する",
+        body,
+    )
     breakdown = {
         "facebook_fit": 20 if 1000 <= len(copy) <= 1800 and copy.startswith("【") else 0,
         "evidence": min(20, len(sources) * 5),
-        "concrete_examples": 15 if len(re.findall(r"\d|事例|調査|報告|命じ|公表", body)) >= 8 else 5,
-        "reader_utility": 15 if len(re.findall(r"設計|確認|判断|必要|仕組み|選択", body)) >= 8 else 5,
-        "hatch_perspective": 15 if re.search(r"私は|僕は|私自身|違和感|と思います", body) else 0,
-        "article_depth": 15 if len(body) >= 2500 and body.count("\n## ") >= 4 else 5,
+        "concrete_examples": 15 if concrete_mentions >= 8 or practical_steps >= 4 else 5,
+        "reader_utility": 15 if utility_mentions >= 8 else 5,
+        "hatch_perspective": 15 if perspective_signal else 0,
+        "article_depth": 15 if len(body) >= 2400 and section_count >= 4 else 5,
     }
     score = sum(breakdown.values())
     key = duplicate_key(url, copy) if copy else hashlib.sha256(f"facebook\n{clean_url(url)}".encode()).hexdigest()
@@ -111,7 +122,28 @@ def evaluate(path: Path, evidence: dict, desired_at: str | None) -> Record:
     )
 
 
-def build_ledger(evidence_path: Path, desired_at: str | None) -> dict:
+def load_plan(plan_path: Path) -> dict[str, str]:
+    if not plan_path.exists():
+        return {}
+    document = json.loads(plan_path.read_text(encoding="utf-8"))
+    items = document.get("posts", [])
+    plan = {item["article_id"]: item["scheduled_at"] for item in items}
+    if len(plan) != len(items):
+        raise ValueError("facebook editorial plan contains duplicate article_id values")
+    moments = []
+    for article_id, value in plan.items():
+        moment = datetime.fromisoformat(value)
+        if moment.tzinfo is None:
+            raise ValueError(f"scheduled_at must include timezone: {article_id}")
+        moments.append((moment, article_id))
+    moments.sort()
+    for (previous, _), (current, article_id) in zip(moments, moments[1:]):
+        if (current - previous).total_seconds() < 60 * 60 * 48:
+            raise ValueError(f"Facebook posts must be spaced by at least 48 hours: {article_id}")
+    return plan
+
+
+def build_ledger(evidence_path: Path, desired_at: str | None, plan_path: Path = DEFAULT_PLAN) -> dict:
     evidence_doc = json.loads(evidence_path.read_text(encoding="utf-8")) if evidence_path.exists() else {"records": []}
     evidence = {}
     for item in evidence_doc.get("records", []):
@@ -119,12 +151,18 @@ def build_ledger(evidence_path: Path, desired_at: str | None) -> dict:
             evidence[item["duplicate_key"]] = item
         if item.get("public_url"):
             evidence[clean_url(item["public_url"])] = item
-    records = [evaluate(p, evidence, desired_at) for p in sorted(ARTICLE_DIR.glob("*.md"))]
+    plan = load_plan(plan_path)
+    records = [evaluate(p, evidence, plan.get(p.stem, desired_at)) for p in sorted(ARTICLE_DIR.glob("*.md"))]
     published = [r for r in records if r.canonical_status == "published"]
     return {
         "schema_version": 1,
         "generated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
-        "policy": {"minimum_reader_value_score": 80, "filler_forbidden": True, "all_categories_scanned": True},
+        "policy": {
+            "minimum_reader_value_score": 80,
+            "minimum_schedule_gap_hours": 48,
+            "filler_forbidden": True,
+            "all_categories_scanned": True,
+        },
         "summary": {
             "published_articles": len(published),
             "selected": sum(r.decision == "candidate_selected" for r in records),
@@ -139,13 +177,14 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--evidence", type=Path, default=ROOT / "data/facebook-publishing-evidence.json")
     parser.add_argument("--output", type=Path, default=ROOT / "data/facebook-post-ledger.json")
+    parser.add_argument("--plan", type=Path, default=DEFAULT_PLAN)
     parser.add_argument("--desired-at", help="ISO 8601 timestamp including timezone")
     args = parser.parse_args()
     if args.desired_at:
         parsed = datetime.fromisoformat(args.desired_at)
         if parsed.tzinfo is None:
             raise SystemExit("--desired-at must include a timezone")
-    ledger = build_ledger(args.evidence, args.desired_at)
+    ledger = build_ledger(args.evidence, args.desired_at, args.plan)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(ledger, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(ledger["summary"], ensure_ascii=False))

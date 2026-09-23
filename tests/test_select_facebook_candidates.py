@@ -64,6 +64,35 @@ class FacebookCandidateTests(unittest.TestCase):
         record.post_status = "reconciliation_mismatch"
         self.assertNotEqual(record.post_status, "published")
 
+    def test_editorial_plan_rejects_too_close_slots(self):
+        with tempfile.TemporaryDirectory() as directory:
+            plan = Path(directory) / "plan.json"
+            plan.write_text(json.dumps({"posts": [
+                {"article_id": "one", "scheduled_at": "2026-10-01T19:30:00+09:00"},
+                {"article_id": "two", "scheduled_at": "2026-10-02T19:30:00+09:00"},
+            ]}), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "at least 48 hours"):
+                selector.load_plan(plan)
+
+    def test_editorial_plan_accepts_three_day_cadence(self):
+        plan = selector.load_plan(ROOT / "data/facebook-editorial-plan.json")
+        self.assertEqual(len(plan), 8)
+
+    def test_every_planned_article_passes_reader_value_gate(self):
+        plan = selector.load_plan(ROOT / "data/facebook-editorial-plan.json")
+        records = {
+            article_id: selector.evaluate(
+                ROOT / "src/content/articles" / f"{article_id}.md", {}, scheduled_at
+            )
+            for article_id, scheduled_at in plan.items()
+        }
+        rejected = {
+            article_id: record.decision_reason
+            for article_id, record in records.items()
+            if record.decision != "candidate_selected"
+        }
+        self.assertEqual(rejected, {})
+
 
 if __name__ == "__main__":
     unittest.main()
