@@ -19,6 +19,76 @@
       "evidence_source": "metricool_scheduled_post_retrieval"
     },
     {
+      "public_url": "https://article.hdnjapan.com/articles/online-care-patient-journey-2026/",
+      "duplicate_key": "4b17ada35183febbff228507d910045563df6ddbc1fc9c499a312af070a0401a",
+      "metricool_post_id": "380500842",
+      "metricool_uuid": "5148555578459243057",
+      "status": "scheduled",
+      "scheduled_at": "2026-09-28T19:30:00+09:00",
+      "facebook_post_url": null,
+      "evidence_source": "metricool_scheduled_post_retrieval"
+    },
+    {
+      "public_url": "https://article.hdnjapan.com/articles/promises-trust-and-expectations-20260922/",
+      "duplicate_key": "32951ddf01c6fec2ed3c3f319b63b3c6b17f4342389c4072c78f1aad6f411b8d",
+      "metricool_post_id": "380500875",
+      "metricool_uuid": "-4402072586258005747",
+      "status": "scheduled",
+      "scheduled_at": "2026-10-01T19:30:00+09:00",
+      "facebook_post_url": null,
+      "evidence_source": "metricool_scheduled_post_retrieval"
+    },
+    {
+      "public_url": "https://article.hdnjapan.com/articles/health-food-advertising-story-context/",
+      "duplicate_key": "0515421742745b6995baf8002a4defad11bf618ead6c73051ea77ab6f233c1ca",
+      "metricool_post_id": "380500902",
+      "metricool_uuid": "192731111539166298",
+      "status": "scheduled",
+      "scheduled_at": "2026-10-04T19:30:00+09:00",
+      "facebook_post_url": null,
+      "evidence_source": "metricool_scheduled_post_retrieval"
+    },
+    {
+      "public_url": "https://article.hdnjapan.com/articles/clinic-video-strategy/",
+      "duplicate_key": "46ef996d41f7c6425d2467e3184305c3bfe1c5f16e0c729103fae4b49f753ac5",
+      "metricool_post_id": "380500948",
+      "metricool_uuid": "2585319997784999600",
+      "status": "scheduled",
+      "scheduled_at": "2026-10-07T19:30:00+09:00",
+      "facebook_post_url": null,
+      "evidence_source": "metricool_scheduled_post_retrieval"
+    },
+    {
+      "public_url": "https://article.hdnjapan.com/articles/productivity-theater-1on1-daily-report/",
+      "duplicate_key": "5fd0d7036402343b12896bb7a4ce9ea2a6a463dfad23b24339e9f5fd13c8da26",
+      "metricool_post_id": "380500989",
+      "metricool_uuid": "1663883359627792260",
+      "status": "scheduled",
+      "scheduled_at": "2026-10-10T19:30:00+09:00",
+      "facebook_post_url": null,
+      "evidence_source": "metricool_scheduled_post_retrieval"
+    },
+    {
+      "public_url": "https://article.hdnjapan.com/articles/electronic-prescription-clinic-operations-2026/",
+      "duplicate_key": "54fe6420ce467983b34f2191a487d191ae8d37f3aff0f27a8b6814a2be7518c4",
+      "metricool_post_id": "380501011",
+      "metricool_uuid": "661471427995847573",
+      "status": "scheduled",
+      "scheduled_at": "2026-10-13T19:30:00+09:00",
+      "facebook_post_url": null,
+      "evidence_source": "metricool_scheduled_post_retrieval"
+    },
+    {
+      "public_url": "https://article.hdnjapan.com/articles/medical-fee-revision-clinic-facility-standards-2026/",
+      "duplicate_key": "9ef7921d4a1301b01d6fca6ce356c7c4e648b8b699f8e4d25437bfcfb4c77908",
+      "metricool_post_id": "380501057",
+      "metricool_uuid": "-6465850949129778999",
+      "status": "scheduled",
+      "scheduled_at": "2026-10-16T19:30:00+09:00",
+      "facebook_post_url": null,
+      "evidence_source": "metricool_scheduled_post_retrieval"
+    },
+    {
       "public_url": "https://article.hdnjapan.com/articles/smart-glasses-right-not-to-be-recorded-20260919/",
       "metricool_post_id": "378555125",
       "metricool_uuid": "2270923948774343283",
