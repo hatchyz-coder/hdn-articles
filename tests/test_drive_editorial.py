@@ -25,10 +25,11 @@ class DriveEditorialTests(unittest.TestCase):
         self.assertNotIn("compound_custom", body)
         self.assertNotIn("tools", body)
 
-    def test_gpt_oss_fallback_keeps_json_and_browser_research(self):
+    def test_gpt_oss_fallback_uses_documented_browser_search_shape(self):
         body = editorial._groq_request_body("openai/gpt-oss-120b", "instructions", "payload")
-        self.assertEqual(body["response_format"], {"type": "json_object"})
         self.assertEqual(body["tools"], [{"type": "browser_search"}])
+        self.assertNotIn("response_format", body)
+        self.assertIn("return a single JSON object", body["messages"][1]["content"])
 
     def test_provider_rejection_falls_back_once(self):
         class FakeResponse:
