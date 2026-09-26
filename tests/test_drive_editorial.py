@@ -19,6 +19,12 @@ import generate_from_drive_editorial as editorial
 
 
 class DriveEditorialTests(unittest.TestCase):
+    def test_existing_generated_slug_is_recorded_instead_of_failing_daily_slot(self):
+        generator = (SCRIPTS / "generate_from_drive_knowledge.py").read_text(encoding="utf-8")
+        self.assertIn("except FileExistsError:", generator)
+        self.assertIn('"already_published"', generator)
+        self.assertIn('"duplicate_slug"', generator)
+
     def test_generated_pair_has_matching_required_lhub_taxonomy(self):
         data = {
             "title": "古民家リノベーションでLHubを活用する",
