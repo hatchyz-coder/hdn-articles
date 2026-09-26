@@ -356,9 +356,37 @@ def _fit_description(value: Any, minimum: int, maximum: int, label: str) -> str:
     return clipped + "…"
 
 
+def _article_taxonomy(data: dict[str, Any]) -> tuple[list[str], str]:
+    """Classify the fixed LHub lane into schema-safe audience and industry values."""
+    text = " ".join(
+        str(value)
+        for value in (
+            data.get("title", ""),
+            data.get("english_title", ""),
+            data.get("category", ""),
+            " ".join(str(tag) for tag in data.get("tags", [])),
+        )
+    ).lower()
+    classifiers = (
+        ("dental", ("歯科", "歯医者", "dental")),
+        ("medical", ("クリニック", "診療", "患者", "医療", "clinic", "medical", "patient")),
+        ("real-estate", ("不動産", "賃貸", "物件", "古民家", "real estate", "rental", "property")),
+        ("retail", ("小売", "店舗", "物販", "ec", "通販", "retail", "commerce", "shop")),
+        ("creator", ("クリエイター", "声優", "ファンクラブ", "creator", "artist", "fan club")),
+        ("fortune", ("占い", "鑑定", "fortune", "astrology")),
+    )
+    industry = next(
+        (name for name, keywords in classifiers if any(keyword in text for keyword in keywords)),
+        "other",
+    )
+    audiences = ["clinic", "lhub"] if industry in {"medical", "dental"} else ["lhub"]
+    return audiences, industry
+
+
 def build_article(data: dict[str, Any], doc: dict[str, Any]) -> str:
     description = _fit_description(data["description"], 60, 160, "description")
     tags = [str(tag).strip() for tag in data.get("tags", []) if str(tag).strip()]
+    audiences, industry = _article_taxonomy(data)
     today = date.today().isoformat()
     lines = [
         "---",
@@ -373,6 +401,12 @@ def build_article(data: dict[str, Any], doc: dict[str, Any]) -> str:
         "draft: false",
         "featured: false",
         f"cta: {_cta(data)}",
+        "audiences:",
+        *[f'  - "{audience}"' for audience in audiences],
+        'section: "lhub-usecase"',
+        f'industry: "{industry}"',
+        'series: "lhub-use-cases"',
+        'contentType: "practical-guide"',
         "---",
         "",
         str(data.get("summary", "")).strip(),
@@ -397,6 +431,7 @@ def _build_english(data: dict[str, Any]) -> str:
         data.get("english_description", ""), 50, 180, "English description"
     )
     tags = [str(tag).strip() for tag in data.get("english_tags", data.get("tags", [])) if str(tag).strip()]
+    audiences, industry = _article_taxonomy(data)
     today = date.today().isoformat()
     lines = [
         "---",
@@ -410,6 +445,12 @@ def _build_english(data: dict[str, Any]) -> str:
         'author: "Tsuyoshi Hadano"',
         "draft: false",
         f"cta: {_cta(data)}",
+        "audiences:",
+        *[f'  - "{audience}"' for audience in audiences],
+        'section: "lhub-usecase"',
+        f'industry: "{industry}"',
+        'series: "lhub-use-cases"',
+        'contentType: "practical-guide"',
         "---",
         "",
         str(data.get("english_summary", "")).strip(),
