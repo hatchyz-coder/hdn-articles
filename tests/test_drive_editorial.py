@@ -1,6 +1,7 @@
 import sys
 import types
 import unittest
+from unittest import mock
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -18,6 +19,57 @@ import generate_from_drive_editorial as editorial
 
 
 class DriveEditorialTests(unittest.TestCase):
+    def test_compound_request_uses_documented_minimal_shape(self):
+        body = editorial._groq_request_body("groq/compound", "instructions", "payload")
+        self.assertNotIn("response_format", body)
+        self.assertNotIn("compound_custom", body)
+        self.assertNotIn("tools", body)
+
+    def test_gpt_oss_fallback_keeps_json_and_browser_research(self):
+        body = editorial._groq_request_body("openai/gpt-oss-120b", "instructions", "payload")
+        self.assertEqual(body["response_format"], {"type": "json_object"})
+        self.assertEqual(body["tools"], [{"type": "browser_search"}])
+
+    def test_provider_rejection_falls_back_once(self):
+        class FakeResponse:
+            def __init__(self, status_code, payload):
+                self.status_code = status_code
+                self._payload = payload
+
+            def json(self):
+                return self._payload
+
+            def raise_for_status(self):
+                if self.status_code >= 400:
+                    raise RuntimeError(f"HTTP {self.status_code}")
+
+        responses = [
+            FakeResponse(404, {"error": {"code": "model_not_available"}}),
+            FakeResponse(200, {"choices": [{"message": {"content": '{"ok": true}'}}]}),
+        ]
+        posted_models = []
+
+        def fake_post(_url, **kwargs):
+            posted_models.append(kwargs["json"]["model"])
+            return responses.pop(0)
+
+        timer = editorial.base.RunTimer()
+        with mock.patch.dict(
+            editorial.os.environ,
+            {
+                "GROQ_API_KEY": "test-key",
+                "HDN_GROQ_MODEL": "groq/compound",
+                "HDN_GROQ_FALLBACK_MODEL": "openai/gpt-oss-120b",
+            },
+            clear=False,
+        ), mock.patch.object(editorial.requests, "post", side_effect=fake_post, create=True), mock.patch.object(
+            editorial.requests, "Timeout", TimeoutError, create=True
+        ):
+            result = editorial.call_openai_once({}, "seed", {}, timer, False)
+
+        self.assertEqual(result, {"ok": True})
+        self.assertEqual(posted_models, ["groq/compound", "openai/gpt-oss-120b"])
+
     def test_healthcare_seed_scores_above_off_brand_seed_for_diagnostics_only(self):
         self.assertGreater(editorial.relevance_score("クリニックのLINE患者導線改善"), 0)
         self.assertLess(editorial.relevance_score("NFTと仮想通貨の集客方法"), 0)

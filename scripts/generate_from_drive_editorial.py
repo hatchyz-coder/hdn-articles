@@ -24,6 +24,9 @@ ROOT = Path(__file__).resolve().parents[1]
 PROMPT_PATH = ROOT / "prompts" / "drive-editorial-daily.md"
 EN_ARTICLE_DIR = ROOT / "src" / "content" / "articles-en"
 MAX_SCAN = 500
+DEFAULT_GROQ_MODEL = "groq/compound"
+DEFAULT_GROQ_FALLBACK_MODEL = "openai/gpt-oss-120b"
+PROVIDER_REJECTION_STATUSES = {400, 404, 422}
 
 # Fingerprint of the approved Drive editorial folder. The raw private folder ID is never
 # committed to this public repository, while a misconfigured Actions variable fails closed.
@@ -175,6 +178,53 @@ def select_target_doc(drive: Any, state: dict[str, Any], folder_id: str, args: A
         return (candidates[0], "daily_backlog_queue") if candidates else (None, "daily_backlog_queue")
 
 
+def _groq_models() -> list[str]:
+    """Return a de-duplicated primary/fallback model chain.
+
+    Repository variables may retain a provider model that later becomes unavailable.
+    Keeping the fallback in code prevents one stale variable from stopping publication.
+    """
+    configured = [
+        os.environ.get("HDN_GROQ_MODEL", DEFAULT_GROQ_MODEL).strip(),
+        os.environ.get("HDN_GROQ_FALLBACK_MODEL", DEFAULT_GROQ_FALLBACK_MODEL).strip(),
+    ]
+    return list(dict.fromkeys(model for model in configured if model))
+
+
+def _groq_request_body(model: str, instructions: str, payload_input: str) -> dict[str, Any]:
+    body: dict[str, Any] = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": instructions},
+            {"role": "user", "content": (
+                "Use actual current public web research and return a single JSON object. "
+                "Do not invent citations or URLs.\n\n" + payload_input
+            )},
+        ],
+        "max_completion_tokens": 6000,
+    }
+    if model.startswith("groq/compound"):
+        # Compound performs its own tool orchestration. Keep the provider's documented
+        # minimal request shape; response_format/compound_custom combinations have been
+        # rejected by the provider even while the model itself remains listed.
+        return body
+
+    body["response_format"] = {"type": "json_object"}
+    if model.startswith("openai/gpt-oss-"):
+        body["tools"] = [{"type": "browser_search"}]
+    return body
+
+
+def _provider_error_code(response: Any) -> str:
+    """Extract a non-sensitive provider error code for diagnostics."""
+    try:
+        error = response.json().get("error") or {}
+    except (TypeError, ValueError, AttributeError):
+        return "unknown"
+    code = str(error.get("code") or error.get("type") or "unknown")
+    return re.sub(r"[^a-zA-Z0-9_.-]", "_", code)[:80] or "unknown"
+
+
 def call_openai_once(doc: dict[str, Any], source_text: str, source_processing: dict[str, Any], timer: Any, mock_timeout: bool) -> dict[str, Any]:
     instructions = PROMPT_PATH.read_text(encoding="utf-8")
     user_input = {
@@ -199,39 +249,50 @@ def call_openai_once(doc: dict[str, Any], source_text: str, source_processing: d
         base.write_output("selected", "false")
         base.write_output("reason", "api_unconfigured")
         raise RuntimeError("GROQ_API_KEY is not configured; no paid fallback attempted")
-    model = os.environ.get("HDN_GROQ_MODEL", "groq/compound")
     with timer.section("openaiSeconds", "Groq editorial generation with web research"):
-        try:
-            request_body = {
-                "model": model,
-                "messages": [
-                    {"role": "system", "content": instructions},
-                    {"role": "user", "content": (
-                        "Use actual current public web research and return a single JSON object. "
-                        "Do not invent citations or URLs.\n\n" + payload_input
-                    )},
-                ],
-                "max_completion_tokens": 6000,
-                "response_format": {"type": "json_object"},
-            }
-            if model.startswith("groq/compound"):
-                request_body["compound_custom"] = {
-                    "tools": {"enabled_tools": ["web_search", "visit_website"]}
-                }
-            response = requests.post(
-                "https://api.groq.com/openai/v1/chat/completions",
-                timeout=(10, 90),
-                headers={"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"},
-                json=request_body,
-            )
-        except requests.Timeout as exc:
-            raise TimeoutError("Groq API timed out during editorial generation") from exc
-    if response.status_code == 429:
-        # The slot must stop without repeatedly spending the provider's limited quota.
-        # Preserve the draft and let the next scheduled slot check availability again.
+        models = _groq_models()
+        response = None
+        for index, model in enumerate(models):
+            try:
+                response = requests.post(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    timeout=(10, 90),
+                    headers={"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"},
+                    json=_groq_request_body(model, instructions, payload_input),
+                )
+            except requests.Timeout as exc:
+                raise TimeoutError("Groq API timed out during editorial generation") from exc
+
+            if response.status_code == 429:
+                # The slot must stop without repeatedly spending the provider's limited quota.
+                # Preserve the draft and let the next scheduled slot check availability again.
+                base.write_output("selected", "false")
+                base.write_output("reason", "api_rate_limited")
+                raise RuntimeError("Groq API HTTP 429 (api_rate_limited); defer until next scheduled slot")
+
+            has_fallback = index + 1 < len(models)
+            if response.status_code in PROVIDER_REJECTION_STATUSES and has_fallback:
+                print(
+                    "Groq provider rejected editorial model "
+                    f"model={model} status={response.status_code} code={_provider_error_code(response)}; "
+                    f"falling back to {models[index + 1]}",
+                    file=sys.stderr,
+                    flush=True,
+                )
+                continue
+            break
+
+    if response is None:
         base.write_output("selected", "false")
-        base.write_output("reason", "api_rate_limited")
-        raise RuntimeError("Groq API HTTP 429 (api_rate_limited); defer until next scheduled slot")
+        base.write_output("reason", "api_model_unavailable")
+        raise RuntimeError("No Groq editorial model is configured")
+    if response.status_code in PROVIDER_REJECTION_STATUSES:
+        base.write_output("selected", "false")
+        base.write_output("reason", "api_model_unavailable")
+        raise RuntimeError(
+            "Groq editorial models rejected the request "
+            f"(status={response.status_code}, code={_provider_error_code(response)})"
+        )
     response.raise_for_status()
     choices = response.json().get("choices") or []
     if not choices:

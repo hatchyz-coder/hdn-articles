@@ -59,6 +59,22 @@ class DriveEditorialResilientRunnerTests(unittest.TestCase):
         self.assertFalse(retry)
         self.assertEqual(reason, "api_unconfigured")
 
+    def test_provider_model_rejection_stops_without_retry_storm(self):
+        retry, reason = resilient.should_continue(
+            1, {"selected": False, "reason": "api_model_unavailable"},
+        )
+        self.assertFalse(retry)
+        self.assertEqual(reason, "api_model_unavailable")
+
+    def test_daily_workflow_configures_free_research_fallback(self):
+        workflow = (ROOT / ".github/workflows/daily-drive-editorial-publish.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn(
+            "HDN_GROQ_FALLBACK_MODEL: ${{ vars.HDN_GROQ_FALLBACK_MODEL || 'openai/gpt-oss-120b' }}",
+            workflow,
+        )
+
     def test_growth_generator_receives_groq_key_and_model(self):
         workflow = (ROOT / ".github/workflows/hdn-growth-pipeline.yml").read_text(encoding="utf-8")
         section = workflow.split("      - name: Generate article and channel drafts", 1)[1]
