@@ -209,9 +209,13 @@ def _groq_request_body(model: str, instructions: str, payload_input: str) -> dic
         # rejected by the provider even while the model itself remains listed.
         return body
 
-    body["response_format"] = {"type": "json_object"}
     if model.startswith("openai/gpt-oss-"):
+        # Groq's documented built-in browser-search example does not combine the
+        # tool with response_format. The provider rejects that combination with
+        # invalid_request_error, so keep the JSON-only requirement in the prompt.
         body["tools"] = [{"type": "browser_search"}]
+        return body
+    body["response_format"] = {"type": "json_object"}
     return body
 
 
