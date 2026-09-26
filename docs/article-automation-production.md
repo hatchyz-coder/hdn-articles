@@ -30,6 +30,10 @@ Every generated Japanese/English pair receives the same schema-safe LHub taxonom
 Industry and audience are classified deterministically from the generated title, category,
 and tags; medical and dental use cases include both `clinic` and `lhub` audiences.
 
+If a no-cost manual recovery has already published the generated slug, the next automated
+run records that Drive source as `already_published` and stops cleanly. This prevents the
+same source from blocking every later daily slot with a duplicate-file error.
+
 ## Main automated flow
 
 `HDN Growth Pipeline` runs on weekdays at `22:15 UTC` (`07:15 JST` the following day).

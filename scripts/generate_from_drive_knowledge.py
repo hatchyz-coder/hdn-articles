@@ -725,7 +725,19 @@ def main() -> int:
         return finish(args, state, {**report, "score": score}, timer, False, "low_score")
 
     slug = normalize_slug(str(data.get("suggested_slug", "")), doc["id"])
-    outputs = write_outputs(slug, data, build_article(data, doc))
+    try:
+        outputs = write_outputs(slug, data, build_article(data, doc))
+    except FileExistsError:
+        # A manually recovered publication may already occupy the generated slug.
+        # Record the source as complete instead of failing every later daily slot.
+        mark_finished(
+            state,
+            doc,
+            "already_published",
+            {"reason": "duplicate_slug", "slug": slug, "score": score},
+            permanent=True,
+        )
+        return finish(args, state, {**report, "score": score, "slug": slug}, timer, False, "duplicate_slug")
     research_review = {
         "additionalVerificationTopics": data.get("additional_verification_topics", []),
         "officialSourceCandidates": data.get("official_source_candidates", []),
