@@ -396,14 +396,20 @@
     },
     "fafbd1fbb243877f9bff916981bb57e51735a22f1048c728887886e0116c6970": {
       "modifiedTime": "2026-07-23T03:43:35.767Z",
-      "status": "api_timeout",
-      "startedAt": "2026-08-25T00:42:50.873706+00:00",
+      "status": "generated",
+      "startedAt": "2026-09-26T23:14:32.884731+00:00",
       "retry_count": 0,
-      "finishedAt": "2026-08-25T00:44:02.068613+00:00",
+      "finishedAt": "2026-09-26T23:15:25.659889+00:00",
       "reason": "AI confidentiality flags",
-      "score": 88,
+      "score": 85,
       "privacyContractVersion": 2,
-      "requeueReason": "privacy_contract_corrected"
+      "requeueReason": "privacy_contract_corrected",
+      "slug": "kominka-inn-share-space-dx-benefits",
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3805,
+        "inputCharacters": 3805
+      }
     },
     "e4832157142d9da7e9dbb34887a90bad2ff02f777c9d33b810911e1802445653": {
       "modifiedTime": "2026-07-23T03:43:19.175Z",
@@ -655,5 +661,5 @@
       "score": 88
     }
   },
-  "updatedAt": "2026-09-05T05:04:55.655481+00:00"
+  "updatedAt": "2026-09-26T23:15:25.659897+00:00"
 }
