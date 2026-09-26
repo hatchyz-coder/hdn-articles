@@ -22,6 +22,10 @@ resilient runner treats that reason as a hard stop instead of repeating the same
 failure four times. Logs include only the model, HTTP status, and sanitized provider error
 code; private Drive seed content is never included in the diagnostic line.
 
+Generated meta descriptions that exceed the schema maximum are normalized and clipped
+deterministically after generation. A formatting-only overflow must not spend a second
+provider call. Descriptions below the minimum remain a quality failure.
+
 ## Main automated flow
 
 `HDN Growth Pipeline` runs on weekdays at `22:15 UTC` (`07:15 JST` the following day).

@@ -19,6 +19,17 @@ import generate_from_drive_editorial as editorial
 
 
 class DriveEditorialTests(unittest.TestCase):
+    def test_long_english_description_is_fitted_without_regeneration(self):
+        value = "A practical guide to improving LINE operations for clinics and small businesses. " * 4
+        fitted = editorial._fit_description(value, 50, 180, "English description")
+        self.assertGreaterEqual(len(fitted), 50)
+        self.assertLessEqual(len(fitted), 180)
+        self.assertTrue(fitted.endswith("…"))
+
+    def test_short_description_still_fails_quality_gate(self):
+        with self.assertRaisesRegex(ValueError, "description must be 60-160"):
+            editorial._fit_description("短すぎます", 60, 160, "description")
+
     def test_compound_request_uses_documented_minimal_shape(self):
         body = editorial._groq_request_body("groq/compound", "instructions", "payload")
         self.assertNotIn("response_format", body)

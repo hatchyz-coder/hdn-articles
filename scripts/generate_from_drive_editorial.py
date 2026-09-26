@@ -339,10 +339,25 @@ def _cta(data: dict[str, Any]) -> str:
     return value if value in {"consultation", "lhub", "self-pay", "sns"} else "consultation"
 
 
+def _fit_description(value: Any, minimum: int, maximum: int, label: str) -> str:
+    """Normalize a generated meta description without spending another model call."""
+    description = re.sub(r"\s+", " ", str(value)).strip()
+    if len(description) < minimum:
+        raise ValueError(f"{label} must be {minimum}-{maximum} characters; got {len(description)}")
+    if len(description) <= maximum:
+        return description
+
+    clipped = description[: maximum - 1].rstrip()
+    # Avoid leaving a visibly partial English word when a nearby word boundary exists.
+    if " " in clipped:
+        at_boundary = clipped.rsplit(" ", 1)[0].rstrip(" ,;:-")
+        if len(at_boundary) >= minimum:
+            clipped = at_boundary
+    return clipped + "…"
+
+
 def build_article(data: dict[str, Any], doc: dict[str, Any]) -> str:
-    description = str(data["description"]).strip()
-    if not 60 <= len(description) <= 160:
-        raise ValueError(f"description must be 60-160 characters; got {len(description)}")
+    description = _fit_description(data["description"], 60, 160, "description")
     tags = [str(tag).strip() for tag in data.get("tags", []) if str(tag).strip()]
     today = date.today().isoformat()
     lines = [
@@ -378,9 +393,9 @@ def build_article(data: dict[str, Any], doc: dict[str, Any]) -> str:
 
 
 def _build_english(data: dict[str, Any]) -> str:
-    description = str(data.get("english_description", "")).strip()
-    if not 50 <= len(description) <= 180:
-        raise ValueError(f"English description must be 50-180 characters; got {len(description)}")
+    description = _fit_description(
+        data.get("english_description", ""), 50, 180, "English description"
+    )
     tags = [str(tag).strip() for tag in data.get("english_tags", data.get("tags", [])) if str(tag).strip()]
     today = date.today().isoformat()
     lines = [
