@@ -19,6 +19,35 @@ import generate_from_drive_editorial as editorial
 
 
 class DriveEditorialTests(unittest.TestCase):
+    def test_generated_pair_has_matching_required_lhub_taxonomy(self):
+        data = {
+            "title": "古民家リノベーションでLHubを活用する",
+            "english_title": "Using LHub for Traditional Home Renovation",
+            "description": "古民家リノベーション事業でLINEとLHubを活用し、見学予約から相談、顧客フォローまでを一貫して運用するための実務ポイントを整理します。",
+            "english_description": "A practical guide to using LINE and LHub for traditional-home renovation inquiries, tour bookings, consultations, and follow-up.",
+            "category": "マーケティング",
+            "tags": ["LHub", "古民家", "不動産"],
+            "summary": "概要です。",
+            "body_markdown": "## 本文\n\n内容です。",
+            "english_summary": "Summary.",
+            "english_body_markdown": "## Body\n\nContent.",
+        }
+        jp = editorial.build_article(data, {})
+        en = editorial._build_english(data)
+        for article in (jp, en):
+            self.assertIn('audiences:\n  - "lhub"', article)
+            self.assertIn('section: "lhub-usecase"', article)
+            self.assertIn('industry: "real-estate"', article)
+            self.assertIn('series: "lhub-use-cases"', article)
+            self.assertIn('contentType: "practical-guide"', article)
+
+    def test_medical_lhub_taxonomy_adds_clinic_audience(self):
+        audiences, industry = editorial._article_taxonomy(
+            {"title": "クリニックの患者予約をLHubで改善", "tags": ["医療"]}
+        )
+        self.assertEqual(audiences, ["clinic", "lhub"])
+        self.assertEqual(industry, "medical")
+
     def test_long_english_description_is_fitted_without_regeneration(self):
         value = "A practical guide to improving LINE operations for clinics and small businesses. " * 4
         fitted = editorial._fit_description(value, 50, 180, "English description")
