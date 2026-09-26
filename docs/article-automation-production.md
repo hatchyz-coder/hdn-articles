@@ -7,6 +7,19 @@
 - Content source of truth: `src/content/articles/`
 - Generated articles remain `draft: true` until editorial approval.
 
+## 2026-09-26: Daily Drive provider failover
+
+The Daily Drive editorial workflow must not depend on a single provider request shape.
+`groq/compound` uses Groq's documented minimal chat-completions request and performs its
+own web-tool orchestration. If Groq rejects that request with HTTP 400, 404, or 422, the
+same publication slot falls back once to `openai/gpt-oss-120b` with `browser_search` and
+JSON mode. HTTP 429 still stops immediately so the workflow does not amplify rate limits.
+
+If both models reject the request, the generator emits `api_model_unavailable`. The
+resilient runner treats that reason as a hard stop instead of repeating the same provider
+failure four times. Logs include only the model, HTTP status, and sanitized provider error
+code; private Drive seed content is never included in the diagnostic line.
+
 ## Main automated flow
 
 `HDN Growth Pipeline` runs on weekdays at `22:15 UTC` (`07:15 JST` the following day).
