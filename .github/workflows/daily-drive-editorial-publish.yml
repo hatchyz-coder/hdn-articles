@@ -238,7 +238,6 @@ jobs:
           cat > /tmp/pr-body.md <<EOF
           ## Daily Drive editorial publication
 
-          - Editorial seed: private Google Drive draft (identifier intentionally not exposed)
           - Publication mode: ${PUBLICATION_MODE}
           - Editorial score: ${SCORE}
           - Fallback trigger: ${FALLBACK_TRIGGER:-none}
@@ -248,10 +247,10 @@ jobs:
 
           ## Automated publication gates
 
-          - [x] Private Drive seed is not cited or exposed publicly
-          - [x] Current public web sources are used for time-sensitive facts
-          - [x] Existing article titles are checked for duplicate intent
-          - [x] AI-pattern editorial review is part of the generation prompt
+          - [x] At most one LHub article is allowed for the JST calendar day
+          - [x] Japanese and English Publication Fact Gates passed
+          - [x] Generated mode uses current public research; reserve mode uses pre-validated official LHub documentation
+          - [x] Reserve reuse is blocked by state and existing-slug checks
           - [x] Lint / typecheck / tests / build / migration check completed before merge
           EOF
 
@@ -332,5 +331,5 @@ jobs:
             echo "Publication mode: ${PUBLICATION_MODE}"
             echo "Editorial score: ${SCORE}"
             if [ -n "${FALLBACK_TRIGGER}" ]; then echo "Fallback trigger: ${FALLBACK_TRIGGER}"; fi
-            echo "The private Drive seed identifier was not written into the public article or PR."
+            echo "Daily Guarantee prevented duplicate-day publication and recorded the publication mode."
           } >> "$GITHUB_STEP_SUMMARY"
