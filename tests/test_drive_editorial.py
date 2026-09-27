@@ -190,6 +190,17 @@ class DriveEditorialTests(unittest.TestCase):
         self.assertIn("EMPTY `confidentiality_flags` array", prompt)
         self.assertIn("residual privacy/confidentiality blockers", prompt)
 
+
+    def test_prompt_requires_daily_lhub_reader_value_contract(self):
+        prompt = editorial.PROMPT_PATH.read_text(encoding="utf-8")
+        self.assertIn("exactly one useful LHub article every calendar day", prompt)
+        self.assertIn("A quality shortfall is not a reason to skip the day", prompt)
+        self.assertIn("do not accept a zero-publication day", prompt)
+        self.assertIn("2,000–3,000 Japanese characters", prompt)
+        self.assertIn("emotionally recognizable", prompt)
+        self.assertIn("make LHub feel concretely useful", prompt)
+        self.assertIn("rotate to the next eligible seed", prompt)
+
     def test_deterministic_seed_prefilter_still_blocks_direct_private_data(self):
         flags = editorial.base.confidentiality_flags("seed", "連絡先 test.person@example.com")
         self.assertIn("email_address", flags)

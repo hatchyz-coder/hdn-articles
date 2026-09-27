@@ -17,12 +17,15 @@ import time
 from pathlib import Path
 from typing import Any
 
+from publication_fact_gate import repair_file_pair
+
 TRANSIENT_REASONS = {"api_timeout"}
 ROTATE_REASONS = {
     "low_score",
     "duplicate_source",
     "confidential",
     "manual_review_retry_limit",
+    "fact_gate_failed",
 }
 STOP_REASONS = {
     "no_candidate", "dry_run",
@@ -148,6 +151,105 @@ def should_continue(returncode: int, report: dict[str, Any]) -> tuple[bool, str]
     return False, reason or "completed_without_selection"
 
 
+
+def _override_outputs(output_text: str, selected: bool, reason: str) -> str:
+    kept = []
+    for line in output_text.splitlines():
+        key = line.split("=", 1)[0].strip() if "=" in line else ""
+        if key not in {"selected", "reason"}:
+            kept.append(line)
+    kept.extend([f"selected={'true' if selected else 'false'}", f"reason={reason}"])
+    return "\n".join(kept) + "\n"
+
+
+def _mark_fact_gate_failed(state_path: Path, slug: str, reason: str) -> None:
+    try:
+        state = json.loads(state_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return
+    changed = False
+    for record in state.get("documents", {}).values():
+        if not isinstance(record, dict):
+            continue
+        if record.get("status") == "generated" and record.get("slug") == slug:
+            record["status"] = "fact_gate_failed"
+            record["reason"] = reason
+            record["manualReview"] = True
+            changed = True
+    if changed:
+        state["updatedAt"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def _cleanup_failed_candidate(slug: str) -> None:
+    for path in (
+        Path("src/content/articles") / f"{slug}.md",
+        Path("src/content/articles-en") / f"{slug}.md",
+    ):
+        try:
+            path.unlink()
+        except FileNotFoundError:
+            pass
+    social_dir = Path("social") / slug
+    if social_dir.exists():
+        for child in social_dir.iterdir():
+            if child.is_file():
+                child.unlink()
+        try:
+            social_dir.rmdir()
+        except OSError:
+            pass
+
+
+def apply_publication_fact_gate(
+    report: dict[str, Any],
+    output_text: str,
+    generator_args: list[str],
+) -> tuple[dict[str, Any], str]:
+    """Repair selected JP/EN deterministically; rotate when safe repair is impossible."""
+    if report.get("selected") is not True:
+        return report, output_text
+
+    slug = str(report.get("slug") or "").strip()
+    if not slug:
+        failed = {**report, "selected": False, "reason": "fact_gate_failed"}
+        return failed, _override_outputs(output_text, False, "fact_gate_failed")
+
+    jp = Path("src/content/articles") / f"{slug}.md"
+    en = Path("src/content/articles-en") / f"{slug}.md"
+    if not jp.exists() or not en.exists():
+        failed = {**report, "selected": False, "reason": "fact_gate_failed"}
+        return failed, _override_outputs(output_text, False, "fact_gate_failed")
+
+    result = repair_file_pair(jp, en)
+    if result["accepted"]:
+        repaired_lines = (
+            len(result["japanese"]["removed_lines"])
+            + len(result["english"]["removed_lines"])
+        )
+        if repaired_lines:
+            print(
+                f"Publication Fact Gate repaired {repaired_lines} unsafe line(s) for slug={slug}",
+                flush=True,
+            )
+        return report, output_text
+
+    reason = str(
+        result["japanese"]["gate"].get("reason")
+        if not result["japanese"]["accepted"]
+        else result["english"]["gate"].get("reason")
+    ) or "fact_gate_failed"
+    state_value = generator_arg_value(generator_args, "--state-path")
+    if state_value:
+        _mark_fact_gate_failed(Path(state_value), slug, reason)
+    _cleanup_failed_candidate(slug)
+    failed = {**report, "selected": False, "reason": "fact_gate_failed", "factGateReason": reason}
+    print(
+        f"Publication Fact Gate could not safely repair slug={slug}; rotating to next candidate reason={reason}",
+        flush=True,
+    )
+    return failed, _override_outputs(output_text, False, "fact_gate_failed")
+
 def run_once(generator_args: list[str], report_path: Path) -> tuple[int, dict[str, Any], str]:
     try:
         report_path.unlink()
@@ -171,6 +273,7 @@ def run_once(generator_args: list[str], report_path: Path) -> tuple[int, dict[st
 
     outputs = parse_github_outputs(output_text)
     report = apply_generator_outputs(read_report(report_path), outputs)
+    report, output_text = apply_publication_fact_gate(report, output_text, generator_args)
     return completed.returncode, report, output_text
 
 
