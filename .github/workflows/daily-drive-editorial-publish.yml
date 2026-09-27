@@ -89,7 +89,9 @@ jobs:
             --max-drive-files 500
           )
           if [ -n "$DOCUMENT_ID" ]; then args+=(--document-id "$DOCUMENT_ID"); fi
-          python scripts/run_drive_editorial_resilient.py \
+          python scripts/lhub_daily_guarantee.py \
+            --reserve-dir fallback/lhub \
+            --state-path data/editorial-drive/processed-docs.json \
             --max-attempts 4 \
             --backoff-seconds 8 \
             --report-path /tmp/editorial-drive-run.json \
@@ -221,6 +223,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           SLUG: ${{ steps.editorial.outputs.slug }}
           SCORE: ${{ steps.editorial.outputs.score }}
+          PUBLICATION_MODE: ${{ steps.editorial.outputs.mode || 'generated' }}
+          FALLBACK_TRIGGER: ${{ steps.editorial.outputs.fallback_trigger || '' }}
         run: |
           set -euo pipefail
           branch="content/daily-drive-${SLUG}-${GITHUB_RUN_ID}"
@@ -235,8 +239,10 @@ jobs:
           ## Daily Drive editorial publication
 
           - Editorial seed: private Google Drive draft (identifier intentionally not exposed)
-          - Editorial score: ${SCORE}/100
-          - Current web/news research: required during generation
+          - Publication mode: ${PUBLICATION_MODE}
+          - Editorial score: ${SCORE}
+          - Fallback trigger: ${FALLBACK_TRIGGER:-none}
+          - Source verification: generated articles require current web research; reserve articles are pre-validated against official LHub documentation
           - Japanese and English: publication-ready pair
           - Social copy: X / LinkedIn / Facebook finalized with production URL
 
@@ -315,12 +321,16 @@ jobs:
         env:
           SLUG: ${{ steps.editorial.outputs.slug }}
           SCORE: ${{ steps.editorial.outputs.score }}
+          PUBLICATION_MODE: ${{ steps.editorial.outputs.mode || 'generated' }}
+          FALLBACK_TRIGGER: ${{ steps.editorial.outputs.fallback_trigger || '' }}
         run: |
           {
             echo "## Drive editorial publication slot"
             echo ""
             echo "Published: https://article.hdnjapan.com/articles/${SLUG}/"
             echo "English: https://article.hdnjapan.com/en/articles/${SLUG}/"
-            echo "Editorial score: ${SCORE}/100"
+            echo "Publication mode: ${PUBLICATION_MODE}"
+            echo "Editorial score: ${SCORE}"
+            if [ -n "${FALLBACK_TRIGGER}" ]; then echo "Fallback trigger: ${FALLBACK_TRIGGER}"; fi
             echo "The private Drive seed identifier was not written into the public article or PR."
           } >> "$GITHUB_STEP_SUMMARY"
