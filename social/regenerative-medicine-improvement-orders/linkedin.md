@@ -1,9 +1,17 @@
-【厚労省が再生医療で改善命令等を公表】
+【再生医療の安全管理は「責任の線」が切れていないか / Regenerative Medicine Safety Depends on Clear Decision Ownership】
 
-2026年7月31日、厚生労働省は再生医療等安全性確保法に基づく改善命令等を公表しました。
+再生医療の行政処分を見ると、書類の有無だけでなく「実際に誰が患者選定や治療判断をしていたのか」という責任構造が重要だと分かります。外部委託があっても、医学的判断と院内の説明責任まで外側へ流れていないかを確認する必要があります。
 
-公表資料で重要なのは、形式的な書類管理だけでなく、医療機関の主体性、患者適格性の判断、疾病等報告、製造委託先への指示・確認といった実運用が問題として示されている点です。
+記事では2026年7月31日の厚生労働省公表資料を基に、適格性判断、疾病等報告、委託先管理などを整理しました。組織としては、責任者名だけでなく、代替者、判断根拠、記録場所、緊急時の報告経路までたどれることが重要です。
 
-再生医療等を提供する医療機関では、提供計画と実際の診療フロー、外部事業者との役割分担、異常事象発生時の報告体制を改めて確認しておく価値があります。
+記事はこちら
+https://article.hdnjapan.com/articles/regenerative-medicine-improvement-orders/
 
-※本投稿は厚労省公表資料をもとにした実務上の整理であり、個別の法的判断は関係法令・所管当局・専門家等の確認が必要です。
+English follows below.
+
+Recent enforcement in regenerative medicine highlights a broader governance issue: paperwork is not enough if actual clinical decision ownership is unclear. Outsourcing administrative or manufacturing work does not remove the provider's responsibility for clinical judgment and traceability. The article reviews Japan's official enforcement release and translates it into operational checks around eligibility, adverse-event reporting and vendor oversight.
+
+Read the full article:
+https://article.hdnjapan.com/articles/regenerative-medicine-improvement-orders/
+
+#再生医療 #患者安全 #HealthcareGovernance #PatientSafety

@@ -1,4 +1,17 @@
-小規模エステ運営における“運用コスト”を下げて顧客接点を磨くには、予約の一本化と再来導線の設計が不可欠です。LINEを窓口に予約・決済・顧客管理を統合するLHubの導入メリット、実務上の注意点、ROIを考える際のチェックポイントをまとめました。導入を評価する運営責任者向けに、確認すべき5項目を提示しています。
+【予約を増やす前に、予約対応の手作業を減らす / Before Growing Bookings, Reduce Booking Admin】
+
+予約チャネルが増えるほど顧客に便利に見えますが、DM、電話、LINE、予約サイトが分散すると、スタッフ側では転記・確認・変更対応が増えます。予約数が伸びても、管理工数が同じ速度で増えるなら持続しません。
+
+記事ではリマインド研究も参照しながら、予約、事前決済、変更導線、フォローを一つの流れとして設計する考え方を整理しました。サロン経営では予約件数だけでなく、1件あたりの確認作業や返信待ちを減らせたかも重要な運用KPIです。
 
 記事はこちら
 https://article.hdnjapan.com/articles/lhub-line-salon-reservation/
+
+English follows below.
+
+More booking channels can look customer-friendly while quietly increasing manual reconciliation for staff. DMs, calls, LINE messages and booking platforms often create duplicated updates and missed changes. The article connects reminder research with a more integrated booking flow. For small salons, operational leverage comes not only from more bookings, but from less admin work per booking.
+
+Read the full article:
+https://article.hdnjapan.com/articles/lhub-line-salon-reservation/
+
+#サロン経営 #予約DX #ServiceOperations #LINE

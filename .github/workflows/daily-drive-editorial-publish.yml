@@ -151,18 +151,18 @@ jobs:
             echo "reason=ok" >> "$GITHUB_OUTPUT"
           else
             reason=$(python - <<'PY'
-import json
-from pathlib import Path
-for path in (Path("/tmp/fact-gate-jp.json"), Path("/tmp/fact-gate-en.json")):
-    if path.exists():
-        data = json.loads(path.read_text(encoding="utf-8"))
-        if not data.get("publication_fact_gate", False):
-            print(data.get("reason", "publication_fact_gate_failed"))
-            break
-else:
-    print("publication_fact_gate_failed")
-PY
-)
+          import json
+          from pathlib import Path
+          for path in (Path("/tmp/fact-gate-jp.json"), Path("/tmp/fact-gate-en.json")):
+              if path.exists():
+                  data = json.loads(path.read_text(encoding="utf-8"))
+                  if not data.get("publication_fact_gate", False):
+                      print(data.get("reason", "publication_fact_gate_failed"))
+                      break
+          else:
+              print("publication_fact_gate_failed")
+          PY
+            )
             echo "passed=false" >> "$GITHUB_OUTPUT"
             echo "reason=$reason" >> "$GITHUB_OUTPUT"
           fi

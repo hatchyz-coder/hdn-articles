@@ -39,6 +39,29 @@ def clean_x_body(text: str) -> str:
     return text
 
 
+def validate_social_copy(channel: str, text: str, article_url: str) -> None:
+    text = text.strip()
+    if article_url not in text:
+        raise ValueError(f"{channel}: canonical article URL missing")
+    if channel == "facebook":
+        if not text.startswith("【"):
+            raise ValueError("facebook: title must start with 【")
+        if not 1200 <= len(text) <= 1500:
+            raise ValueError(f"facebook: must be 1200-1500 characters, got {len(text)}")
+    elif channel == "linkedin":
+        if not text.startswith("【") or " / " not in text.splitlines()[0]:
+            raise ValueError("linkedin: first line must be 【日本語 / English】")
+        if "English follows below." not in text:
+            raise ValueError("linkedin: English follows below. missing")
+        if len(text) > 3000:
+            raise ValueError("linkedin: exceeds 3000 characters")
+    elif channel == "x":
+        if not text.startswith("【"):
+            raise ValueError("x: title must start with 【")
+    else:
+        raise ValueError(f"unknown channel: {channel}")
+
+
 def finalize_post(path: Path, body: str, article_url: str, label: str) -> Path:
     if not body:
         raise ValueError(f"Social draft became empty after cleanup: {path}")
@@ -78,6 +101,13 @@ def finalize_social_posts(slug: str) -> list[Path]:
             "記事はこちら",
         ),
     ]
+    for channel, path in paths.items():
+        validate_social_copy(channel, path.read_text(encoding="utf-8"), article_url)
+    facebook_text = paths["facebook"].read_text(encoding="utf-8").strip()
+    if paths["linkedin"].read_text(encoding="utf-8").strip() == facebook_text:
+        raise ValueError("linkedin: must not duplicate Facebook copy")
+    if paths["x"].read_text(encoding="utf-8").strip() == facebook_text:
+        raise ValueError("x: must not duplicate Facebook copy")
     return finalized
 
 

@@ -1,23 +1,17 @@
-【無難な動画では、患者は動かない】
+【クリニック動画は再生数より「不安を一つ減らせたか」 / Clinic Video Should Reduce Friction, Not Just Chase Views】
 
-医療機関のSNS・YouTube戦略では、動画制作そのものより先に「患者が受診前に何を不安に感じているか」を整理する必要があります。
+院長あいさつや設備紹介だけでは、受診を迷う人の本当の不安に届かないことがあります。患者さんが知りたいのは、先生の雰囲気、初診の流れ、費用、プライバシー、予約後に何が起きるかといった具体的な情報です。
 
-私はクリニック動画を大きく3種類に分けています。
+記事では動画を「安心材料」「診療理解」「認知獲得」に分け、医療広告やプライバシーにも配慮しながら導線へつなぐ考え方を整理しました。経営上は再生数だけでなく、プロフィール閲覧、LINE登録、問診・予約到達、不安由来の問い合わせ減少まで見るべきだと考えています。
 
-1. 安心材料：アクセス、院内、受付、医師、診療フロー、プライバシー等
-2. 診療理解：対象者、診察内容、治療選択肢、注意点等
-3. 認知獲得：患者が言いづらい悩みや、よくある誤解に専門家として答えるテーマ
+記事はこちら
+https://article.hdnjapan.com/articles/clinic-video-strategy/
 
-認知獲得では、炎上や過度な煽りを狙う必要はありません。必要なのは、無難に埋もれない問いを、医療機関として適切な範囲で提示することです。
+English follows below.
 
-また、再生数だけで評価せず、インプレッション、CTR、平均視聴時間等を確認し、その先のLINE登録、問診、予約、診療まで導線として見ることが重要です。
+A polished clinic video is not valuable simply because it looks professional or generates views. Patients often need practical reassurance: who they will meet, what the first visit involves, what it costs and how privacy is handled. The article separates video into reassurance, clinical understanding and awareness roles, while keeping advertising and privacy constraints in view. The business metric should be reduced friction across the patient journey, not views alone.
 
-SNSを「投稿業務」として切り離さず、患者接点全体の設計として考える。この考え方を記事に整理しました。
+Read the full article:
+https://article.hdnjapan.com/articles/clinic-video-strategy/
 
-Article:
-https://article.hdnjapan.com/
-
-HDN Medical SNS / YouTube Strategy:
-https://hdnjapan.com/medical-sns.html
-
-#HealthcareMarketing #MedicalSNS #YouTubeStrategy #ClinicManagement #PatientJourney #LHub
+#クリニック経営 #医療マーケティング #HealthcareMarketing #PatientExperience
