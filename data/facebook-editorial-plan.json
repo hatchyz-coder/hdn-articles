@@ -1,12 +1,8 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "timezone": "Asia/Tokyo",
-  "cadence": "Every three days at 19:30 JST",
+  "cadence": "Target 4 Facebook posts/week at 19:30 JST; no same-day duplicate; quality gate overrides quota",
   "posts": [
-    {
-      "article_id": "ai-safety-accelerator-brake-20260916",
-      "scheduled_at": "2026-09-25T19:30:00+09:00"
-    },
     {
       "article_id": "online-care-patient-journey-2026",
       "scheduled_at": "2026-09-28T19:30:00+09:00"
@@ -17,23 +13,67 @@
     },
     {
       "article_id": "health-food-advertising-story-context",
-      "scheduled_at": "2026-10-04T19:30:00+09:00"
+      "scheduled_at": "2026-10-02T19:30:00+09:00"
     },
     {
       "article_id": "clinic-video-strategy",
-      "scheduled_at": "2026-10-07T19:30:00+09:00"
+      "scheduled_at": "2026-10-04T19:30:00+09:00"
     },
     {
       "article_id": "productivity-theater-1on1-daily-report",
-      "scheduled_at": "2026-10-10T19:30:00+09:00"
+      "scheduled_at": "2026-10-05T19:30:00+09:00"
     },
     {
       "article_id": "electronic-prescription-clinic-operations-2026",
-      "scheduled_at": "2026-10-13T19:30:00+09:00"
+      "scheduled_at": "2026-10-07T19:30:00+09:00"
     },
     {
       "article_id": "medical-fee-revision-clinic-facility-standards-2026",
+      "scheduled_at": "2026-10-09T19:30:00+09:00"
+    },
+    {
+      "article_id": "regenerative-medicine-improvement-orders",
+      "scheduled_at": "2026-10-11T19:30:00+09:00"
+    },
+    {
+      "article_id": "lhub-line-fanclub-management",
+      "scheduled_at": "2026-10-12T19:30:00+09:00"
+    },
+    {
+      "article_id": "line-electronic-prescription-checklist-online-clinic",
+      "scheduled_at": "2026-10-14T19:30:00+09:00"
+    },
+    {
+      "article_id": "subscription-model-for-fortune-tellers-lhub-membership",
       "scheduled_at": "2026-10-16T19:30:00+09:00"
+    },
+    {
+      "article_id": "lhub-line-salon-reservation",
+      "scheduled_at": "2026-10-18T19:30:00+09:00"
+    },
+    {
+      "article_id": "lhub-beauty-clinic-unified-ops",
+      "scheduled_at": "2026-10-19T19:30:00+09:00"
+    },
+    {
+      "article_id": "prevent-patient-forgetfulness-lhub-dental-clinics",
+      "scheduled_at": "2026-10-21T19:30:00+09:00"
+    },
+    {
+      "article_id": "lhub-line-sales-reservations-customer-management",
+      "scheduled_at": "2026-10-23T19:30:00+09:00"
+    },
+    {
+      "article_id": "lhub-retention-guide-line-subscription",
+      "scheduled_at": "2026-10-25T19:30:00+09:00"
+    },
+    {
+      "article_id": "seitai-sekkotsuin-smart-lhub",
+      "scheduled_at": "2026-10-28T19:30:00+09:00"
+    },
+    {
+      "article_id": "seiyu-lhub-recording-requests",
+      "scheduled_at": "2026-10-30T19:30:00+09:00"
     }
   ]
 }
