@@ -28,6 +28,6 @@ jobs:
       - name: Rebuild Facebook ledger in temporary output
         run: python3 scripts/select_facebook_candidates.py --output /tmp/facebook-post-ledger.json
       - name: Install Node dependencies
-        run: npm ci
+        run: npm install --no-audit --no-fund
       - name: Astro check and build
         run: npm run build
