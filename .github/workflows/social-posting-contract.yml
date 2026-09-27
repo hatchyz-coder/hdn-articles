@@ -1,0 +1,33 @@
+name: Social Posting Contract
+
+on:
+  pull_request:
+    paths:
+      - "social/**"
+      - "data/facebook-*.json"
+      - "docs/facebook-reader-value-scheduling.md"
+      - "docs/editorial/distribution-contract.md"
+      - "scripts/finalize_social_posts.py"
+      - "scripts/select_facebook_candidates.py"
+      - "tests/test_finalize_social_posts.py"
+      - "tests/test_select_facebook_candidates.py"
+      - "tests/test_social_schedule_contract.py"
+      - ".github/workflows/social-posting-contract.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  social-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Python social contract tests
+        run: python3 -m unittest tests.test_finalize_social_posts tests.test_select_facebook_candidates tests.test_social_schedule_contract
+      - name: Rebuild Facebook ledger in temporary output
+        run: python3 scripts/select_facebook_candidates.py --output /tmp/facebook-post-ledger.json
+      - name: Install Node dependencies
+        run: npm ci
+      - name: Astro check and build
+        run: npm run build
