@@ -155,6 +155,78 @@ def evaluate(markdown: str) -> dict:
     }
 
 
+
+def _body_character_count(markdown: str) -> int:
+    return len(re.sub(r'\s+', '', _body(markdown)))
+
+
+def repair_markdown(markdown: str, max_removed_ratio: float = 0.25) -> dict:
+    """Remove only unsafe body lines, then re-run the deterministic gate.
+
+    Frontmatter is never edited. The repair is accepted only when the resulting article
+    passes the gate and at least 75% of the original body remains, preventing a badly
+    grounded draft from being gutted merely to force publication.
+    """
+    published = _published_at(markdown)
+    lines = markdown.splitlines()
+    repaired: list[str] = []
+    removed: list[str] = []
+    in_frontmatter = False
+    frontmatter_done = False
+
+    for index, line in enumerate(lines):
+        if index == 0 and line.strip() == '---':
+            in_frontmatter = True
+            repaired.append(line)
+            continue
+        if in_frontmatter:
+            repaired.append(line)
+            if line.strip() == '---':
+                in_frontmatter = False
+                frontmatter_done = True
+            continue
+
+        # Preserve structure. Only factual prose/table rows that trigger findings are removed.
+        stripped = line.strip()
+        if not stripped or stripped.startswith('#') or re.fullmatch(r'\|?\s*:?-{3,}.*', stripped):
+            repaired.append(line)
+            continue
+
+        probe = evaluate(f'---\npublishedAt: {published.isoformat()}\n---\n\n{line}\n')
+        if probe['publication_fact_gate']:
+            repaired.append(line)
+        else:
+            removed.append(line)
+
+    repaired_markdown = '\n'.join(repaired)
+    if markdown.endswith('\n'):
+        repaired_markdown += '\n'
+
+    original_chars = max(1, _body_character_count(markdown))
+    repaired_chars = _body_character_count(repaired_markdown)
+    removed_ratio = 1.0 - (repaired_chars / original_chars)
+    result = evaluate(repaired_markdown)
+    accepted = bool(result['publication_fact_gate']) and removed_ratio <= max_removed_ratio
+
+    return {
+        'accepted': accepted,
+        'markdown': repaired_markdown,
+        'removed_lines': removed,
+        'removed_ratio': round(max(0.0, removed_ratio), 4),
+        'gate': result,
+    }
+
+
+def repair_file_pair(japanese_path: Path, english_path: Path, max_removed_ratio: float = 0.25) -> dict:
+    """Repair JP/EN in memory and write only when both independently pass."""
+    jp = repair_markdown(japanese_path.read_text(encoding='utf-8'), max_removed_ratio)
+    en = repair_markdown(english_path.read_text(encoding='utf-8'), max_removed_ratio)
+    accepted = bool(jp['accepted'] and en['accepted'])
+    if accepted:
+        japanese_path.write_text(jp['markdown'], encoding='utf-8')
+        english_path.write_text(en['markdown'], encoding='utf-8')
+    return {'accepted': accepted, 'japanese': jp, 'english': en}
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('--article-path', required=True, type=Path)
