@@ -128,24 +128,74 @@ jobs:
         run: |
           echo "No article was published in this slot. Editorial gate: ${{ steps.editorial.outputs.reason }}" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Finalize social copy with production URL
+
+      - name: Publication fact gate
+        id: fact_gate
         if: steps.editorial.outputs.selected == 'true'
+        env:
+          SLUG: ${{ steps.editorial.outputs.slug }}
+        run: |
+          set +e
+          python scripts/publication_fact_gate.py \
+            --article-path "src/content/articles/${SLUG}.md" \
+            --report-path /tmp/fact-gate-jp.json
+          jp_status=$?
+          python scripts/publication_fact_gate.py \
+            --article-path "src/content/articles-en/${SLUG}.md" \
+            --report-path /tmp/fact-gate-en.json
+          en_status=$?
+          set -e
+
+          if [ "$jp_status" -eq 0 ] && [ "$en_status" -eq 0 ]; then
+            echo "passed=true" >> "$GITHUB_OUTPUT"
+            echo "reason=ok" >> "$GITHUB_OUTPUT"
+          else
+            reason=$(python - <<'PY'
+import json
+from pathlib import Path
+for path in (Path("/tmp/fact-gate-jp.json"), Path("/tmp/fact-gate-en.json")):
+    if path.exists():
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if not data.get("publication_fact_gate", False):
+            print(data.get("reason", "publication_fact_gate_failed"))
+            break
+else:
+    print("publication_fact_gate_failed")
+PY
+)
+            echo "passed=false" >> "$GITHUB_OUTPUT"
+            echo "reason=$reason" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Report publication fact gate block
+        if: steps.editorial.outputs.selected == 'true' && steps.fact_gate.outputs.passed != 'true'
+        run: |
+          {
+            echo "## Publication Fact Gate"
+            echo ""
+            echo "Publication blocked before PR creation."
+            echo "Reason: ${{ steps.fact_gate.outputs.reason }}"
+            echo "The Drive seed was not persisted as published; a later slot may regenerate it."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Finalize social copy with production URL
+        if: steps.editorial.outputs.selected == 'true' && steps.fact_gate.outputs.passed == 'true'
         env:
           SLUG: ${{ steps.editorial.outputs.slug }}
         run: python scripts/finalize_social_posts.py --article-path "src/content/articles/${SLUG}.md"
 
       - name: Lint
-        if: steps.editorial.outputs.selected == 'true'
+        if: steps.editorial.outputs.selected == 'true' && steps.fact_gate.outputs.passed == 'true'
         run: |
           if npm run | grep -q " lint"; then npm run lint; else echo "No lint script configured."; fi
 
       - name: Typecheck
-        if: steps.editorial.outputs.selected == 'true'
+        if: steps.editorial.outputs.selected == 'true' && steps.fact_gate.outputs.passed == 'true'
         run: |
           if npm run | grep -q " typecheck"; then npm run typecheck; else npx astro check; fi
 
       - name: Tests
-        if: steps.editorial.outputs.selected == 'true'
+        if: steps.editorial.outputs.selected == 'true' && steps.fact_gate.outputs.passed == 'true'
         run: |
           if npm run | grep -q " test"; then
             npm test
@@ -156,17 +206,17 @@ jobs:
           fi
 
       - name: Build
-        if: steps.editorial.outputs.selected == 'true'
+        if: steps.editorial.outputs.selected == 'true' && steps.fact_gate.outputs.passed == 'true'
         run: npm run build
 
       - name: Migration check
-        if: steps.editorial.outputs.selected == 'true'
+        if: steps.editorial.outputs.selected == 'true' && steps.fact_gate.outputs.passed == 'true'
         run: |
           if npm run | grep -q "migration:check"; then npm run migration:check; else echo "No migration check configured."; fi
 
       - name: Create and merge audited publication PR
         id: merge
-        if: steps.editorial.outputs.selected == 'true'
+        if: steps.editorial.outputs.selected == 'true' && steps.fact_gate.outputs.passed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           SLUG: ${{ steps.editorial.outputs.slug }}
@@ -207,7 +257,7 @@ jobs:
           echo "pr_number=$pr_number" >> "$GITHUB_OUTPUT"
 
       - name: Persist state after successful publication merge
-        if: steps.editorial.outputs.selected == 'true' && steps.merge.outcome == 'success'
+        if: steps.editorial.outputs.selected == 'true' && steps.fact_gate.outputs.passed == 'true' && steps.merge.outcome == 'success'
         run: |
           set -euo pipefail
           tmpdir="$(mktemp -d)"
@@ -235,7 +285,7 @@ jobs:
           fi
 
       - name: Deploy published article
-        if: steps.editorial.outputs.selected == 'true' && steps.merge.outcome == 'success'
+        if: steps.editorial.outputs.selected == 'true' && steps.fact_gate.outputs.passed == 'true' && steps.merge.outcome == 'success'
         env:
           GH_TOKEN: ${{ github.token }}
           MAIN_SHA: ${{ steps.merge.outputs.main_sha }}
@@ -261,7 +311,7 @@ jobs:
           gh run watch "$run_id" --exit-status
 
       - name: Publication summary
-        if: steps.editorial.outputs.selected == 'true'
+        if: steps.editorial.outputs.selected == 'true' && steps.fact_gate.outputs.passed == 'true'
         env:
           SLUG: ${{ steps.editorial.outputs.slug }}
           SCORE: ${{ steps.editorial.outputs.score }}

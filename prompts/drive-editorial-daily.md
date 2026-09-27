@@ -68,6 +68,20 @@ Never expose Drive file names, IDs, URLs or folder names; private client/company
 
 Never fabricate achievements or imply that HDN personally observed or delivered a result unless a public source establishes it.
 
+## Deterministic publication fact contract
+
+The generated Markdown must be safe for a deterministic publication gate after generation.
+
+For every high-risk factual claim:
+- concrete percentages, multiples, prices, fees, user counts, durations, conversion/revenue/outcome metrics, and named case-study results must include a PUBLIC evidence URL in the same sentence or Markdown table row;
+- claims about LINE, LINE Official Account, LHub, PayPay, or another named product/service capability (API, payment, recurring billing, subscription, automation, integration, connection, etc.) must include an OFFICIAL product/company documentation URL in the same sentence or Markdown table row;
+- do not emit opaque browser/tool citation markers such as `【0†L1-L9】`; readers must receive a usable public URL;
+- if claim-level evidence cannot be supplied, remove the number/case claim or rewrite it as a clearly non-factual general recommendation;
+- the References list alone does not establish claim-level evidence;
+- interpret time-sensitive statements relative to the supplied `today` date. An already-ended service/event must be written in the past tense, never as an upcoming change.
+
+Preserve PUBLISH THROUGH EDITING: prefer deleting/generalizing one unsupported sentence over rejecting an otherwise useful article.
+
 ## Article requirements
 
 If `should_generate` is true, return publication-ready Japanese and English companion articles.
