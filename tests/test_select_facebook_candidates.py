@@ -64,19 +64,29 @@ class FacebookCandidateTests(unittest.TestCase):
         record.post_status = "reconciliation_mismatch"
         self.assertNotEqual(record.post_status, "published")
 
-    def test_editorial_plan_rejects_too_close_slots(self):
+    def test_editorial_plan_rejects_slots_less_than_24_hours_apart(self):
         with tempfile.TemporaryDirectory() as directory:
             plan = Path(directory) / "plan.json"
             plan.write_text(json.dumps({"posts": [
                 {"article_id": "one", "scheduled_at": "2026-10-01T19:30:00+09:00"},
-                {"article_id": "two", "scheduled_at": "2026-10-02T19:30:00+09:00"},
+                {"article_id": "two", "scheduled_at": "2026-10-02T18:30:00+09:00"},
             ]}), encoding="utf-8")
-            with self.assertRaisesRegex(ValueError, "at least 48 hours"):
+            with self.assertRaisesRegex(ValueError, "at least 24 hours"):
                 selector.load_plan(plan)
 
-    def test_editorial_plan_accepts_three_day_cadence(self):
+    def test_editorial_plan_rejects_duplicate_article(self):
+        with tempfile.TemporaryDirectory() as directory:
+            plan = Path(directory) / "plan.json"
+            plan.write_text(json.dumps({"posts": [
+                {"article_id": "same", "scheduled_at": "2026-10-01T19:30:00+09:00"},
+                {"article_id": "same", "scheduled_at": "2026-10-03T19:30:00+09:00"},
+            ]}), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "duplicate article_id"):
+                selector.load_plan(plan)
+
+    def test_editorial_plan_accepts_four_per_week_schedule(self):
         plan = selector.load_plan(ROOT / "data/facebook-editorial-plan.json")
-        self.assertEqual(len(plan), 8)
+        self.assertEqual(len(plan), 18)
 
     def test_every_planned_article_passes_reader_value_gate(self):
         plan = selector.load_plan(ROOT / "data/facebook-editorial-plan.json")
