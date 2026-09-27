@@ -77,7 +77,7 @@ def evaluate(path: Path, evidence: dict, desired_at: str | None) -> Record:
         body,
     )
     breakdown = {
-        "facebook_fit": 20 if 1000 <= len(copy) <= 1800 and copy.startswith("【") else 0,
+        "facebook_fit": 20 if 1200 <= len(copy) <= 1500 and copy.startswith("【") else 0,
         "evidence": min(20, len(sources) * 5),
         "concrete_examples": 15 if concrete_mentions >= 8 or practical_steps >= 4 else 5,
         "reader_utility": 15 if utility_mentions >= 8 else 5,
@@ -138,8 +138,8 @@ def load_plan(plan_path: Path) -> dict[str, str]:
         moments.append((moment, article_id))
     moments.sort()
     for (previous, _), (current, article_id) in zip(moments, moments[1:]):
-        if (current - previous).total_seconds() < 60 * 60 * 48:
-            raise ValueError(f"Facebook posts must be spaced by at least 48 hours: {article_id}")
+        if (current - previous).total_seconds() < 60 * 60 * 24:
+            raise ValueError(f"Facebook posts must not share a day and must be spaced by at least 24 hours: {article_id}")
     return plan
 
 
@@ -159,7 +159,8 @@ def build_ledger(evidence_path: Path, desired_at: str | None, plan_path: Path = 
         "generated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
         "policy": {
             "minimum_reader_value_score": 80,
-            "minimum_schedule_gap_hours": 48,
+            "minimum_schedule_gap_hours": 24,
+            "target_posts_per_week": 4,
             "filler_forbidden": True,
             "all_categories_scanned": True,
         },
