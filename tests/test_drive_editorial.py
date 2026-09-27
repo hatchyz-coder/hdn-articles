@@ -193,7 +193,9 @@ class DriveEditorialTests(unittest.TestCase):
 
     def test_prompt_requires_daily_lhub_reader_value_contract(self):
         prompt = editorial.PROMPT_PATH.read_text(encoding="utf-8")
-        self.assertIn("one useful LHub article every calendar day", prompt)
+        self.assertIn("exactly one useful LHub article every calendar day", prompt)
+        self.assertIn("A quality shortfall is not a reason to skip the day", prompt)
+        self.assertIn("do not accept a zero-publication day", prompt)
         self.assertIn("2,000–3,000 Japanese characters", prompt)
         self.assertIn("emotionally recognizable", prompt)
         self.assertIn("make LHub feel concretely useful", prompt)
