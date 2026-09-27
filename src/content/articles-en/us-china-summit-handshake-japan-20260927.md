@@ -11,7 +11,7 @@ tags:
   - "critical minerals"
   - "Taiwan Strait"
 author: "Tsuyoshi Hadano"
-draft: true
+draft: false
 featured: false
 sourceUrl: "https://www.whitehouse.gov/fact-sheets/2026/09/fact-sheet-president-donald-j-trump-advances-a-fair-and-reciprocal-relationship-with-china-while-hosting-historic-state-visit/"
 cta: editorial
