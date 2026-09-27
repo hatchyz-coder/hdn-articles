@@ -54,6 +54,24 @@ Clearly unrelated consumer-entertainment topics should not be forced into HDN. H
 
 You receive existing article titles. If the seed overlaps an existing article, first try a materially different reader question, current development, operational layer, audience, comparison, data angle or implementation problem. Reject for duplicate intent only when differentiation would be artificial.
 
+## Daily LHub publication success standard
+
+The operational target is one useful LHub article every calendar day. Treat each Drive seed as material to rescue and improve, not as a reason to skip publication.
+
+When the seed already contains a usable structure or message, preserve its core idea rather than rewriting merely for novelty. Edit where editing improves reader value: remove unsafe facts, clarify the problem, add practical context, and strengthen the path from problem to action.
+
+For Japanese LHub articles:
+- aim for roughly 2,000–3,000 Japanese characters when the topic supports it; a shorter source is not a reason to keep the published article thin;
+- make the opening emotionally recognizable: show the reader a real operational frustration, missed opportunity, or moment of relief without inventing personal anecdotes;
+- make LHub feel concretely useful through reader-facing situations such as reservation friction, forgotten follow-up, scattered customer information, repeated manual work, missed inquiries, or post-purchase communication;
+- include enough concrete "how this helps" detail that a reader can imagine using the idea tomorrow;
+- avoid feature dumping. Translate functions into outcomes, workflow changes, and reduced hassle;
+- preserve restraint: emotional resonance must come from recognizable work situations and consequences, never fabricated success stories or unsupported numbers.
+
+A strong article should leave the intended reader with at least one of these reactions: "that is exactly the problem we have", "this would make the work easier", or "I can see how we would use this".
+
+Daily publication does not override privacy, factual accuracy, medical/legal safety, or the Publication Fact Gate. If one seed cannot be made safe, rotate to the next eligible seed rather than lowering the standard.
+
 ## HDN Editorial Quality Standard
 
 Do not produce generic AI prose. Avoid textbook introductions, mechanical numbered progressions, repetitive sentence endings, unsupported claims, fake firsthand experience, invented anecdotes/results, press-release tone and fear-based clickbait.
@@ -86,7 +104,7 @@ Preserve PUBLISH THROUGH EDITING: prefer deleting/generalizing one unsupported s
 
 If `should_generate` is true, return publication-ready Japanese and English companion articles.
 
-Japanese: roughly 1,800–3,500 Japanese characters where warranted; description 60–160 characters; useful non-template headings; FAQ only when useful; public references actually used; appropriate category/tags; CTA `consultation`, `lhub`, `self-pay`, or `sns`.
+Japanese: aim for roughly 2,000–3,000 Japanese characters for standard LHub articles, while allowing 1,800–3,500 when the topic genuinely warrants a shorter or longer treatment; description 60–160 characters; useful non-template headings; FAQ only when useful; public references actually used; appropriate category/tags; CTA `consultation`, `lhub`, `self-pay`, or `sns`.
 
 English: not a literal translation; full body for an international healthcare/business audience; description 50–180 characters; same factual/privacy boundary.
 
