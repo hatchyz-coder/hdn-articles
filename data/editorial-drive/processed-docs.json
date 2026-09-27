@@ -413,8 +413,8 @@
     },
     "e4832157142d9da7e9dbb34887a90bad2ff02f777c9d33b810911e1802445653": {
       "modifiedTime": "2026-07-23T03:43:19.175Z",
-      "status": "api_timeout",
-      "startedAt": "2026-08-25T02:10:19.757831+00:00",
+      "status": "processing",
+      "startedAt": "2026-09-27T23:41:48.858189+00:00",
       "retry_count": 0,
       "finishedAt": "2026-08-25T02:11:44.262765+00:00",
       "reason": "AI confidentiality flags",
@@ -661,5 +661,12 @@
       "score": 88
     }
   },
-  "updatedAt": "2026-09-26T23:15:25.659897+00:00"
+  "updatedAt": "2026-09-27T23:41:49.769085Z",
+  "fallbackReserves": {
+    "lhub-reserve-post-purchase-followup": {
+      "usedAt": "2026-09-27T23:41:49.769045Z",
+      "trigger": "api_rate_limited",
+      "reserveFile": "01-post-purchase-followup.json"
+    }
+  }
 }
