@@ -32,6 +32,12 @@ FALLBACK_REASONS = {
     "generator_error",
     "completed_without_selection",
     "rotation_attempts_exhausted",
+    "api_timeout",
+    "os_timeout",
+    "low_score",
+    "duplicate_source",
+    "confidential",
+    "manual_review_retry_limit",
 }
 
 
