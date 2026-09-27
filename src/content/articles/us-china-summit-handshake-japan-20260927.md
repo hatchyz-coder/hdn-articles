@@ -11,7 +11,7 @@ tags:
   - "経済安全保障"
   - "重要鉱物"
 author: "羽田野 剛士"
-draft: true
+draft: false
 featured: false
 sourceUrl: "https://www.whitehouse.gov/fact-sheets/2026/09/fact-sheet-president-donald-j-trump-advances-a-fair-and-reciprocal-relationship-with-china-while-hosting-historic-state-visit/"
 cta: editorial
