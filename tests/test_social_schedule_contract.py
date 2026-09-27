@@ -39,6 +39,31 @@ class SocialScheduleContractTests(unittest.TestCase):
             urls.append(url)
         self.assertEqual(len(urls), len(set(urls)))
 
+    def test_every_planned_linkedin_and_x_copy_meets_contract(self):
+        for item in self.plan["posts"]:
+            slug = item["article_id"]
+            url = f"https://article.hdnjapan.com/articles/{slug}/"
+            facebook = (ROOT / "social" / slug / "facebook.md").read_text(encoding="utf-8").strip()
+
+            linkedin_path = ROOT / "social" / slug / "linkedin.md"
+            x_path = ROOT / "social" / slug / "x.md"
+            self.assertTrue(linkedin_path.is_file(), slug)
+            self.assertTrue(x_path.is_file(), slug)
+
+            linkedin = linkedin_path.read_text(encoding="utf-8").strip()
+            x_copy = x_path.read_text(encoding="utf-8").strip()
+
+            self.assertTrue(linkedin.startswith("【"), slug)
+            self.assertIn(" / ", linkedin.splitlines()[0], slug)
+            self.assertIn("English follows below.", linkedin, slug)
+            self.assertLessEqual(len(linkedin), 3000, slug)
+            self.assertIn(url, linkedin, slug)
+            self.assertNotEqual(linkedin, facebook, slug)
+
+            self.assertTrue(x_copy.startswith("【"), slug)
+            self.assertIn(url, x_copy, slug)
+            self.assertNotEqual(x_copy, facebook, slug)
+
     def test_plan_and_metricool_evidence_match(self):
         self.assertEqual(len(self.records), 18)
         for item in self.plan["posts"]:
