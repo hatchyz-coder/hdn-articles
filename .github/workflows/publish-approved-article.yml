@@ -251,29 +251,26 @@ jobs:
           linkedin = (social / 'linkedin.md').read_text(encoding='utf-8').strip()
           facebook = (social / 'facebook.md').read_text(encoding='utf-8').strip()
 
-          body = f'''✅ 日英同時公開が完了しました。draft解除・3媒体の投稿文への公開URL反映・全検証・mainへのmerge・GitHub Pages deploy・smoke testまで成功しています。
-
-日本語記事: {article_url}
-English: {english_url}
-
-### X
-```text
-{x}
-```
-**X用リンク:** {article_url}
-
-### LinkedIn
-```text
-{linkedin}
-```
-**LinkedIn用リンク:** {article_url}
-
-### Facebook
-```text
-{facebook}
-```
-**Facebook用リンク:** {article_url}
-'''
+          body = (
+              "✅ 日英同時公開が完了しました。draft解除・3媒体の投稿文への公開URL反映・全検証・mainへのmerge・GitHub Pages deploy・smoke testまで成功しています。\n\n"
+              f"日本語記事: {article_url}\n"
+              f"English: {english_url}\n\n"
+              "### X\n"
+              "\`\`\`text\n"
+              f"{x}\n"
+              "\`\`\`\n"
+              f"**X用リンク:** {article_url}\n\n"
+              "### LinkedIn\n"
+              "\`\`\`text\n"
+              f"{linkedin}\n"
+              "\`\`\`\n"
+              f"**LinkedIn用リンク:** {article_url}\n\n"
+              "### Facebook\n"
+              "\`\`\`text\n"
+              f"{facebook}\n"
+              "\`\`\`\n"
+              f"**Facebook用リンク:** {article_url}\n"
+          )
           Path('/tmp/publication-comment.md').write_text(body, encoding='utf-8')
           PY
           gh pr comment "$PR_NUMBER" --repo "$REPOSITORY" --body-file /tmp/publication-comment.md
