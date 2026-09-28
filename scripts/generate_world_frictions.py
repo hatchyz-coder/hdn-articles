@@ -29,8 +29,6 @@ PROMPT_PATH = ROOT / "prompts" / "world-frictions-system.md"
 
 API_URL = "https://api.openai.com/v1/responses"
 DEFAULT_MODEL = "gpt-5.6-terra"
-DEFAULT_SCORE_THRESHOLD = 86
-DEFAULT_REVIEW_THRESHOLD = 88
 JST = timezone(timedelta(hours=9))
 ALLOWED_CONTENT_TYPES = {
     "news-analysis",
@@ -52,8 +50,6 @@ DERIVATIVE_KEYS = {
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--score-threshold", type=int, default=int(os.getenv("WORLD_FRICTIONS_SCORE_THRESHOLD", DEFAULT_SCORE_THRESHOLD)))
-    parser.add_argument("--review-threshold", type=int, default=int(os.getenv("WORLD_FRICTIONS_REVIEW_THRESHOLD", DEFAULT_REVIEW_THRESHOLD)))
     parser.add_argument("--model", default=os.getenv("WORLD_FRICTIONS_MODEL") or DEFAULT_MODEL)
     return parser.parse_args()
 
@@ -196,14 +192,13 @@ def existing_world_frictions() -> list[dict[str, str]]:
     return rows
 
 
-def discovery_prompt(existing: list[dict[str, str]], threshold: int) -> str:
+def discovery_prompt(existing: list[dict[str, str]]) -> str:
     today = datetime.now(JST).date().isoformat()
     recent = existing[-50:]
     return json.dumps(
         {
             "task": "Scout the web and select at most one World Frictions topic. Return only a compact research brief for a separate writer.",
             "today_jst": today,
-            "quality_threshold": threshold,
             "existing_articles_to_avoid": recent,
             "scouting": {
                 "lookback": "Prefer developments from the last 14 days, but allow an older fact only when a current development creates a genuinely new angle.",
@@ -226,19 +221,10 @@ def discovery_prompt(existing: list[dict[str, str]], threshold: int) -> str:
                 "Prefer primary sources and research; use high-quality reporting for context. Social posts can only be illustrative examples.",
                 "Do not publish a rumor, unverified accusation, personality attack, partisan advocacy, or a topic whose central claim depends on anonymous allegations.",
                 "Avoid duplicating existing World Frictions articles in topic, thesis, main source, or framing.",
-                f"If no candidate honestly deserves {threshold}/100 or higher, return publish=false. Never publish filler to satisfy the schedule.",
+                "Publish by default when a topic can satisfy the factual, source, duplication, legal-risk and structural-insight gates. Do not reject merely because it could be polished further.",
             ],
-            "score_dimensions": {
-                "relatable_discomfort": 20,
-                "purpose_reality_gap": 15,
-                "structural_depth": 20,
-                "source_strength": 20,
-                "originality_vs_existing": 15,
-                "cross_channel_readability": 10,
-            },
             "output_contract": {
                 "publish": "boolean",
-                "score": "integer 0-100",
                 "slug": "lowercase ASCII words separated by hyphens; blank if publish=false",
                 "selection_reason": "short Japanese explanation",
                 "thesis": "one-sentence Japanese thesis",
@@ -372,13 +358,9 @@ def check_duplicate(candidate: dict[str, Any], existing: list[dict[str, str]], s
             raise ValueError(f"primary source overlaps existing World Frictions article: {row.get('slug')}")
 
 
-def validate_candidate(candidate: dict[str, Any], *, threshold: int, existing: list[dict[str, str]], retrieved: set[str]) -> tuple[list[dict[str, str]], int]:
+def validate_candidate(candidate: dict[str, Any], *, existing: list[dict[str, str]], retrieved: set[str]) -> tuple[list[dict[str, str]], int]:
     if candidate.get("publish") is not True:
         raise ValueError("candidate is not marked for publication")
-    score = int(candidate.get("score", 0))
-    if score < threshold:
-        raise ValueError(f"writer score {score} is below threshold {threshold}")
-
     canonical = candidate.get("canonical")
     english = candidate.get("english_canonical")
     if not isinstance(canonical, dict) or not isinstance(english, dict):
@@ -431,7 +413,7 @@ def validate_candidate(candidate: dict[str, Any], *, threshold: int, existing: l
     return sources, matched
 
 
-def review_prompt(candidate: dict[str, Any], existing: list[dict[str, str]], threshold: int) -> str:
+def review_prompt(candidate: dict[str, Any], existing: list[dict[str, str]]) -> str:
     return json.dumps(
         {
             "task": "Act as an independent fact-checking and editorial review desk. Search the web again and decide whether this World Frictions draft is safe and strong enough for fully automatic publication without human review.",
@@ -441,7 +423,6 @@ def review_prompt(candidate: dict[str, Any], existing: list[dict[str, str]], thr
                 "english_canonical": candidate.get("english_canonical"),
             },
             "existing_articles": existing[-50:],
-            "minimum_overall_score": threshold,
             "reject_if": [
                 "a central factual claim is unsupported, exaggerated or contradicted by a credible source",
                 "the draft treats an allegation, anonymous anecdote or inference as established fact",
@@ -454,11 +435,12 @@ def review_prompt(candidate: dict[str, Any], existing: list[dict[str, str]], thr
             ],
             "output": {
                 "pass": "boolean",
-                "overall_score": "0-100",
-                "factual_confidence": "0-100",
-                "source_quality": "0-100",
-                "novelty": "0-100",
-                "reputational_risk": "0-100 where lower is safer",
+                "facts_supported": "boolean",
+                "source_set_sufficient": "boolean",
+                "not_duplicate": "boolean",
+                "risk_acceptable": "boolean",
+                "jp_en_consistent": "boolean",
+                "structural_insight": "boolean",
                 "reason": "short Japanese explanation",
                 "issues": "array of concrete issues; empty when pass=true",
             },
@@ -472,24 +454,21 @@ def review_prompt(candidate: dict[str, Any], existing: list[dict[str, str]], thr
     )
 
 
-def validate_review(review: dict[str, Any], threshold: int) -> None:
+def validate_review(review: dict[str, Any]) -> None:
     if review.get("pass") is not True:
         raise ValueError(f"independent review rejected publication: {review.get('reason', '')}")
-    overall = int(review.get("overall_score", 0))
-    factual = int(review.get("factual_confidence", 0))
-    source_quality = int(review.get("source_quality", 0))
-    novelty = int(review.get("novelty", 0))
-    risk = int(review.get("reputational_risk", 100))
-    if overall < threshold:
-        raise ValueError(f"review score {overall} is below {threshold}")
-    if factual < 90:
-        raise ValueError(f"factual confidence {factual} is below 90")
-    if source_quality < 85:
-        raise ValueError(f"source quality {source_quality} is below 85")
-    if novelty < 75:
-        raise ValueError(f"novelty {novelty} is below 75")
-    if risk > 20:
-        raise ValueError(f"reputational risk {risk} is above 20")
+    required = (
+        "facts_supported",
+        "source_set_sufficient",
+        "not_duplicate",
+        "risk_acceptable",
+        "jp_en_consistent",
+        "structural_insight",
+    )
+    failed = [key for key in required if review.get(key) is not True]
+    if failed:
+        raise ValueError("independent review hard gate failed: " + ", ".join(failed))
+
 
 
 def source_lines(sources: list[dict[str, str]]) -> list[str]:
@@ -601,19 +580,19 @@ def main() -> int:
     args = parse_args()
     existing = existing_world_frictions()
     base_instructions = PROMPT_PATH.read_text(encoding="utf-8")
-    instructions = base_instructions + "\n\nAUTOMATION ADDENDUM\nYou are running without human editorial approval. Be more conservative, not less. If evidence or novelty is marginal, return publish=false."
+    instructions = base_instructions + "\n\nAUTOMATION ADDENDUM\nYou are running without human editorial approval. Publish by default when hard factual, source, duplication, legal-risk and structural checks pass. Do not block publication for subjective score or polish alone."
 
     brief, discovery_payload = call_openai(
         model=args.model,
         instructions=instructions,
-        input_text=discovery_prompt(existing, args.score_threshold),
+        input_text=discovery_prompt(existing),
         max_output_tokens=3500,
         web_search=True,
     )
 
     if brief.get("publish") is not True:
         reason = str(brief.get("selection_reason") or "No candidate cleared the editorial threshold.").strip()
-        write_github_output(publish="false", reason=reason, score=int(brief.get("score", 0) or 0))
+        write_github_output(publish="false", reason=reason)
         write_summary(["## World Frictions", "", "No article was published.", "", f"Reason: {reason}"])
         print(f"SKIP: {reason}")
         return 0
@@ -623,7 +602,7 @@ def main() -> int:
         brief_sources, _ = validate_sources(brief.get("sources"), retrieved)
     except Exception as exc:
         reason = f"Discovery output failed source gate: {exc}"
-        write_github_output(publish="false", reason=reason, score=int(brief.get("score", 0) or 0))
+        write_github_output(publish="false", reason=reason)
         write_summary(["## World Frictions", "", "No article was published.", "", reason])
         print(f"SKIP: {reason}")
         return 0
@@ -653,10 +632,10 @@ def main() -> int:
         **derivatives,
     }
     try:
-        sources, matched = validate_candidate(candidate, threshold=args.score_threshold, existing=existing, retrieved=retrieved)
+        sources, matched = validate_candidate(candidate, existing=existing, retrieved=retrieved)
     except Exception as exc:
         reason = f"Writer output failed deterministic gate: {exc}"
-        write_github_output(publish="false", reason=reason, score=int(candidate.get("score", 0) or 0))
+        write_github_output(publish="false", reason=reason)
         write_summary(["## World Frictions", "", "No article was published.", "", reason])
         print(f"SKIP: {reason}")
         return 0
@@ -669,29 +648,25 @@ def main() -> int:
     review, _review_payload = call_openai(
         model=args.model,
         instructions=reviewer_instructions,
-        input_text=review_prompt(candidate, existing, args.review_threshold),
+        input_text=review_prompt(candidate, existing),
         max_output_tokens=4000,
         web_search=True,
     )
     try:
-        validate_review(review, args.review_threshold)
+        validate_review(review)
     except Exception as exc:
         reason = f"Independent review gate rejected publication: {exc}"
-        write_github_output(publish="false", reason=reason, score=int(candidate.get("score", 0) or 0))
+        write_github_output(publish="false", reason=reason)
         write_summary(["## World Frictions", "", "No article was published.", "", reason, "", f"Reviewer: {review.get('reason', '')}"])
         print(f"SKIP: {reason}")
         return 0
 
     canonical_url, written = write_bundle(candidate, sources)
     slug = str(candidate["slug"])
-    score = int(candidate.get("score", 0))
-    review_score = int(review.get("overall_score", 0))
     reason = str(candidate.get("selection_reason", "")).strip()
     write_github_output(
         publish="true",
         slug=slug,
-        score=score,
-        review_score=review_score,
         title=str(candidate["canonical"]["title"]).strip(),
         canonical_url=canonical_url,
         reason=reason,
@@ -701,8 +676,7 @@ def main() -> int:
             "## World Frictions candidate passed",
             "",
             f"- Slug: `{slug}`",
-            f"- Writer score: {score}",
-            f"- Independent review: {review_score}",
+            "- Hard factual/source/risk review: passed",
             f"- Search-grounded selected sources matched: {matched}/{len(sources)}",
             f"- Canonical URL after deploy: {canonical_url}",
             f"- Selection: {reason}",
@@ -711,7 +685,7 @@ def main() -> int:
             *[f"- `{path.relative_to(ROOT)}`" for path in written],
         ]
     )
-    print(json.dumps({"publish": True, "slug": slug, "score": score, "review_score": review_score, "canonical_url": canonical_url}, ensure_ascii=False))
+    print(json.dumps({"publish": True, "slug": slug, "canonical_url": canonical_url}, ensure_ascii=False))
     return 0
 
 
