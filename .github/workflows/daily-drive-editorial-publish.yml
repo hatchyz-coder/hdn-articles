@@ -14,10 +14,12 @@ on:
         default: '72'
         type: string
   schedule:
-    # Two independent daily slots: 06:00 and 09:00 JST. Each run publishes at most one
-    # quality-gated JP/EN pair, so a failure in one slot does not corrupt the other.
-    - cron: '0 21 * * *'
-    - cron: '0 0 * * *'
+    # Four distributed daily slots in JST. Minute offsets avoid the top-of-hour load peak.
+    # Daily preflight stops later slots before dependency setup once one LHub article exists.
+    - cron: '17 21 * * *' # 06:17 JST
+    - cron: '23 0 * * *'  # 09:23 JST
+    - cron: '37 3 * * *'  # 12:37 JST
+    - cron: '43 8 * * *'  # 17:43 JST
 
 permissions:
   actions: write
@@ -41,7 +43,23 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Daily LHub preflight
+        id: preflight
+        run: python3 scripts/lhub_daily_preflight.py
+
+      - name: Report already-published preflight
+        if: steps.preflight.outputs.published == 'true'
+        run: |
+          {
+            echo "## LHub Daily Guarantee preflight"
+            echo ""
+            echo "Result: already_published_today"
+            echo "Published slug: ${{ steps.preflight.outputs.published_slug }}"
+            echo "Full pipeline skipped before Python/Node dependency setup."
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Set up Python
+        if: steps.preflight.outputs.published != 'true'
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -49,16 +67,19 @@ jobs:
           cache-dependency-path: requirements.txt
 
       - name: Set up Node
+        if: steps.preflight.outputs.published != 'true'
         uses: actions/setup-node@v4
         with:
           node-version: '22'
 
       - name: Install dependencies
+        if: steps.preflight.outputs.published != 'true'
         run: |
           pip install -r requirements.txt
           if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
       - name: Restore private-seed processing state
+        if: steps.preflight.outputs.published != 'true'
         run: |
           mkdir -p data/editorial-drive
           if git ls-remote --exit-code --heads origin editorial-drive-state >/dev/null 2>&1; then
@@ -68,6 +89,7 @@ jobs:
 
       - name: Generate one publication-ready article pair
         id: editorial
+        if: steps.preflight.outputs.published != 'true'
         env:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
@@ -97,8 +119,26 @@ jobs:
             --report-path /tmp/editorial-drive-run.json \
             -- "${args[@]}"
 
+      - name: Report reserve inventory
+        if: steps.preflight.outputs.published != 'true'
+        env:
+          RESERVE_REMAINING: ${{ steps.editorial.outputs.reserve_remaining }}
+          RESERVE_HEALTH: ${{ steps.editorial.outputs.reserve_health }}
+        run: |
+          {
+            echo "## LHub reserve inventory"
+            echo ""
+            echo "Reserve remaining: ${RESERVE_REMAINING:-unknown}"
+            echo "Reserve health: ${RESERVE_HEALTH:-unknown}"
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$RESERVE_HEALTH" = "critical" ]; then
+            echo "::warning title=LHub reserve critical::Only ${RESERVE_REMAINING} unused reserves remain. Target is 14."
+          elif [ "$RESERVE_HEALTH" = "warning" ]; then
+            echo "::warning title=LHub reserve warning::Only ${RESERVE_REMAINING} unused reserves remain. Target is 14."
+          fi
+
       - name: Persist state when no article is suitable
-        if: steps.editorial.outputs.selected != 'true'
+        if: steps.preflight.outputs.published != 'true' && steps.editorial.outputs.selected != 'true'
         run: |
           set -euo pipefail
           tmpdir="$(mktemp -d)"
@@ -126,7 +166,7 @@ jobs:
           fi
 
       - name: Report editorial skip
-        if: steps.editorial.outputs.selected != 'true'
+        if: steps.preflight.outputs.published != 'true' && steps.editorial.outputs.selected != 'true'
         run: |
           echo "No article was published in this slot. Editorial gate: ${{ steps.editorial.outputs.reason }}" >> "$GITHUB_STEP_SUMMARY"
 
@@ -225,6 +265,7 @@ jobs:
           SCORE: ${{ steps.editorial.outputs.score }}
           PUBLICATION_MODE: ${{ steps.editorial.outputs.mode || 'generated' }}
           FALLBACK_TRIGGER: ${{ steps.editorial.outputs.fallback_trigger || '' }}
+          RESERVE_REMAINING: ${{ steps.editorial.outputs.reserve_remaining || '' }}
         run: |
           set -euo pipefail
           branch="content/daily-drive-${SLUG}-${GITHUB_RUN_ID}"
@@ -241,6 +282,7 @@ jobs:
           - Publication mode: ${PUBLICATION_MODE}
           - Editorial score: ${SCORE}
           - Fallback trigger: ${FALLBACK_TRIGGER:-none}
+          - Reserve remaining: ${RESERVE_REMAINING:-unknown}
           - Source verification: generated articles require current web research; reserve articles are pre-validated against official LHub documentation
           - Japanese and English: publication-ready pair
           - Social copy: X / LinkedIn / Facebook finalized with production URL
@@ -322,6 +364,7 @@ jobs:
           SCORE: ${{ steps.editorial.outputs.score }}
           PUBLICATION_MODE: ${{ steps.editorial.outputs.mode || 'generated' }}
           FALLBACK_TRIGGER: ${{ steps.editorial.outputs.fallback_trigger || '' }}
+          RESERVE_REMAINING: ${{ steps.editorial.outputs.reserve_remaining || '' }}
         run: |
           {
             echo "## Drive editorial publication slot"
@@ -331,5 +374,6 @@ jobs:
             echo "Publication mode: ${PUBLICATION_MODE}"
             echo "Editorial score: ${SCORE}"
             if [ -n "${FALLBACK_TRIGGER}" ]; then echo "Fallback trigger: ${FALLBACK_TRIGGER}"; fi
+            echo "Reserve remaining: ${RESERVE_REMAINING:-unknown}"
             echo "Daily Guarantee prevented duplicate-day publication and recorded the publication mode."
           } >> "$GITHUB_STEP_SUMMARY"
