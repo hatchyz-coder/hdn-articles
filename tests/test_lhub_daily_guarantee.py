@@ -31,9 +31,9 @@ class LHubDailyGuaranteeTests(unittest.TestCase):
                 ["today"],
             )
 
-    def test_all_seven_reserves_are_valid_and_fact_gated(self):
+    def test_all_fifteen_reserves_are_valid_and_fact_gated(self):
         paths = sorted((ROOT / "fallback" / "lhub").glob("*.json"))
-        self.assertEqual(len(paths), 7)
+        self.assertEqual(len(paths), 15)
         for path in paths:
             data = json.loads(path.read_text(encoding="utf-8"))
             jp, en = guarantee.validate_reserve(data, "2026-09-27")
@@ -62,6 +62,37 @@ class LHubDailyGuaranteeTests(unittest.TestCase):
                 )
             self.assertIsNotNone(chosen)
             self.assertEqual(chosen[1]["slug"], "fresh-reserve")
+
+    def test_unused_reserve_count_excludes_used_and_existing_slugs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            reserve_dir = root / "reserve"
+            articles = root / "articles"
+            english = root / "articles-en"
+            reserve_dir.mkdir()
+            articles.mkdir()
+            english.mkdir()
+            source = json.loads(next((ROOT / "fallback" / "lhub").glob("*.json")).read_text(encoding="utf-8"))
+            for slug in ("used-reserve", "existing-reserve", "fresh-reserve"):
+                item = dict(source)
+                item["slug"] = slug
+                (reserve_dir / f"{slug}.json").write_text(json.dumps(item, ensure_ascii=False), encoding="utf-8")
+            (articles / "existing-reserve.md").write_text("---\ndraft: false\n---\n", encoding="utf-8")
+            with mock.patch.object(guarantee, "ARTICLE_DIR", articles), \
+                 mock.patch.object(guarantee, "ENGLISH_DIR", english):
+                slugs = guarantee.unused_reserve_slugs(
+                    reserve_dir,
+                    {"fallbackReserves": {"used-reserve": {"usedAt": "x"}}},
+                )
+            self.assertEqual(slugs, ["fresh-reserve"])
+
+    def test_reserve_health_thresholds(self):
+        self.assertEqual(guarantee.reserve_health(14), "healthy")
+        self.assertEqual(guarantee.reserve_health(11), "healthy")
+        self.assertEqual(guarantee.reserve_health(10), "warning")
+        self.assertEqual(guarantee.reserve_health(8), "warning")
+        self.assertEqual(guarantee.reserve_health(7), "critical")
+        self.assertEqual(guarantee.reserve_health(0), "critical")
 
     def test_materialize_writes_pair_and_social_without_api(self):
         data = json.loads(next((ROOT / "fallback" / "lhub").glob("*.json")).read_text(encoding="utf-8"))
