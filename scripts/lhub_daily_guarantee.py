@@ -21,6 +21,8 @@ DEFAULT_RESERVE_DIR = ROOT / "fallback" / "lhub"
 ARTICLE_DIR = ROOT / "src" / "content" / "articles"
 ENGLISH_DIR = ROOT / "src" / "content" / "articles-en"
 SOCIAL_DIR = ROOT / "social"
+RESERVE_WARNING_THRESHOLD = 10
+RESERVE_CRITICAL_THRESHOLD = 7
 
 FALLBACK_REASONS = {
     "api_rate_limited",
@@ -197,6 +199,31 @@ def validate_reserve(data: dict[str, Any], day: str) -> tuple[str, str]:
     return jp, en
 
 
+def unused_reserve_slugs(reserve_dir: Path, state: dict[str, Any]) -> list[str]:
+    used = state.get("fallbackReserves", {})
+    slugs: list[str] = []
+    for path in sorted(reserve_dir.glob("*.json")):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        slug = str(data.get("slug", "")).strip()
+        if not slug or slug in used:
+            continue
+        if (ARTICLE_DIR / f"{slug}.md").exists() or (ENGLISH_DIR / f"{slug}.md").exists():
+            continue
+        slugs.append(slug)
+    return slugs
+
+
+def reserve_health(remaining: int) -> str:
+    if remaining <= RESERVE_CRITICAL_THRESHOLD:
+        return "critical"
+    if remaining <= RESERVE_WARNING_THRESHOLD:
+        return "warning"
+    return "healthy"
+
+
 def choose_reserve(reserve_dir: Path, state: dict[str, Any], day: str) -> tuple[Path, dict[str, Any], str, str] | None:
     used = state.get("fallbackReserves", {})
     for path in sorted(reserve_dir.glob("*.json")):
@@ -256,6 +283,10 @@ def run_normal_path(args: argparse.Namespace) -> tuple[int, dict[str, str]]:
 def main() -> int:
     args = parse_args()
     day = datetime.now(JST).date().isoformat()
+    state = load_state(args.state_path)
+    reserve_remaining = len(unused_reserve_slugs(args.reserve_dir, state))
+    health = reserve_health(reserve_remaining)
+
     published = published_lhub_slugs_for_day(ARTICLE_DIR, day)
     if published:
         emit({
@@ -263,6 +294,8 @@ def main() -> int:
             "reason": "already_published_today",
             "mode": "already_published",
             "published_slug": published[0],
+            "reserve_remaining": reserve_remaining,
+            "reserve_health": health,
         })
         print(f"Daily Guarantee: LHub article already published today: {published[0]}")
         return 0
@@ -270,18 +303,19 @@ def main() -> int:
     returncode, outputs = run_normal_path(args)
     if outputs.get("selected", "").lower() == "true":
         outputs["mode"] = "generated"
+        outputs["reserve_remaining"] = reserve_remaining
+        outputs["reserve_health"] = health
         emit(outputs)
         return 0
 
     reason = outputs.get("reason") or ("generator_error" if returncode else "completed_without_selection")
     if reason not in FALLBACK_REASONS:
-        emit({**outputs, "selected": False, "reason": reason, "mode": "normal_failed_no_fallback"})
+        emit({**outputs, "selected": False, "reason": reason, "mode": "normal_failed_no_fallback", "reserve_remaining": reserve_remaining, "reserve_health": health})
         return returncode
 
-    state = load_state(args.state_path)
     chosen = choose_reserve(args.reserve_dir, state, day)
     if not chosen:
-        emit({"selected": False, "reason": "fallback_reserve_exhausted", "mode": "fallback_unavailable"})
+        emit({"selected": False, "reason": "fallback_reserve_exhausted", "mode": "fallback_unavailable", "reserve_remaining": reserve_remaining, "reserve_health": health})
         print("Daily Guarantee: no unused validated LHub reserve remains", file=sys.stderr)
         return 1
 
@@ -293,6 +327,7 @@ def main() -> int:
         "reserveFile": path.name,
     }
     save_state(args.state_path, state)
+    remaining_after = len(unused_reserve_slugs(args.reserve_dir, state))
     emit({
         "selected": True,
         "reason": "fallback_reserve",
@@ -300,6 +335,8 @@ def main() -> int:
         "fallback_trigger": reason,
         "slug": data["slug"],
         "score": "reserve",
+        "reserve_remaining": remaining_after,
+        "reserve_health": reserve_health(remaining_after),
     })
     print(f"Daily Guarantee: materialized reserve {data['slug']} after {reason}")
     return 0
