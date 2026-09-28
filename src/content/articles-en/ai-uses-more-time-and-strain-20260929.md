@@ -1,7 +1,7 @@
 ---
 title: "Why Does Using AI Feel So Draining? The Hidden Work of Checking, Waiting and Worry"
 socialTitle: "We delegated work to AI. Why are we managing it instead?"
-description: "AI promises faster work, yet users report repeated instructions, verification, unnecessary approval stops and lost focus. Firsthand accounts from Japan and abroad, alongside developer research, reveal the hidden work AI can return to people."
+description: "AI promises speed, yet users report repeated instructions, checks, approval stops and lost focus. Firsthand accounts and research reveal the work AI returns to people."
 publishedAt: 2026-09-29
 category: "World Frictions"
 tags:
