@@ -12,7 +12,7 @@ tags:
   - "productivity"
   - "developer experience"
 author: "Tsuyoshi Hadano"
-draft: false
+draft: true
 featured: true
 sourceUrl: "https://zenn.dev/shingoirie/articles/210b4f6d73ec6c"
 cta: editorial
