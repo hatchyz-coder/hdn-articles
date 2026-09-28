@@ -24,3 +24,6 @@ When we calculate AI’s efficiency, do we count the time and worry people spend
 
 #違和感シリーズ #生成AI #AI開発 #働き方 #生産性  
 #AI #SoftwareDevelopment #DeveloperExperience #Productivity #Work
+
+記事はこちら
+https://article.hdnjapan.com/articles/ai-uses-more-time-and-strain-20260929/

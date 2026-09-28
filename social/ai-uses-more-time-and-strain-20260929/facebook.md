@@ -19,3 +19,6 @@ AIが引き取った作業だけでなく、AIを監督するために増えた�
 記事では、国内Zenn・Qiitaと海外Redditの実際の投稿、Stack Overflowと研究機関の調査を紹介しています。
 
 #違和感シリーズ #生成AI #AI開発 #働き方 #生産性 #開発者体験
+
+記事はこちら
+https://article.hdnjapan.com/articles/ai-uses-more-time-and-strain-20260929/

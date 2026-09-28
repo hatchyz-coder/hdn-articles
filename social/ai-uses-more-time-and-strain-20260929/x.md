@@ -5,3 +5,6 @@
 国内外の利用者の生の声と開発者調査から、生成の速さの裏で人間に戻される確認・待ち時間・気苦労を考えました。
 
 #違和感シリーズ #生成AI #働き方
+
+続きはこちら
+https://article.hdnjapan.com/articles/ai-uses-more-time-and-strain-20260929/

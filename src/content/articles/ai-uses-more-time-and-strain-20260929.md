@@ -12,7 +12,7 @@ tags:
   - "生産性"
   - "開発者体験"
 author: "羽田野 剛士"
-draft: true
+draft: false
 featured: true
 sourceUrl: "https://zenn.dev/shingoirie/articles/210b4f6d73ec6c"
 cta: editorial
