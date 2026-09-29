@@ -86,7 +86,7 @@ class WorldFrictionsAutoPublishTests(unittest.TestCase):
         self.assertIn("ハッチの事前確認を必須としません", text)
         self.assertIn("hard gateを満たさない場合は公開を見送ります", text)
         self.assertIn("再試行", text)
-        self.assertIn("1日最大1本", text)
+        self.assertIn("同日重複を防ぎます", text)
 
 
 if __name__ == "__main__":
