@@ -84,7 +84,7 @@ class WorldFrictionsAutoPublishTests(unittest.TestCase):
         text = CONTRACT.read_text(encoding="utf-8")
         self.assertIn("自動公開", text)
         self.assertIn("ハッチの事前確認を必須としません", text)
-        self.assertIn("基準を満たさなければ公開しません", text)
+        self.assertIn("hard gateを満たさない場合は公開を見送ります", text)
         self.assertIn("再試行", text)
         self.assertIn("1日最大1本", text)
 
