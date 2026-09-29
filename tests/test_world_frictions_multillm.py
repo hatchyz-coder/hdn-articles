@@ -24,7 +24,7 @@ class WorldFrictionsMultiLLMTests(unittest.TestCase):
 
     def test_rate_limit_retry_is_present(self):
         text = WRAPPER.read_text(encoding="utf-8")
-        self.assertIn("response.status_code!=429", text)
+        self.assertIn("response.status_code==429", text)
         self.assertIn("_retry_wait", text)
         self.assertIn("range(4)", text)
 
