@@ -1,20 +1,20 @@
 {
-  "generated_at": "2026-09-28T00:15:13.850692+00:00",
+  "generated_at": "2026-09-29T01:25:00.566773+00:00",
   "dry_run": false,
   "source_id": "",
   "metrics": {
     "targeted_sources": 20,
     "successful_sources": 5,
     "no_candidate_sources": 0,
-    "skipped_sources": 15,
-    "failed_sources": 0,
+    "skipped_sources": 14,
+    "failed_sources": 1,
     "unsupported_sources": 0,
     "encoding_error_sources": 0,
     "fetched_candidates": 50,
-    "new_candidates": 0,
-    "duplicate_candidates": 50,
-    "http_requests": 6,
-    "execution_seconds": 10.482,
+    "new_candidates": 10,
+    "duplicate_candidates": 40,
+    "http_requests": 8,
+    "execution_seconds": 45.829,
     "source_results": [
       {
         "source_id": "mhlw",
@@ -43,10 +43,10 @@
       {
         "source_id": "jftc",
         "source_name": "公正取引委員会",
-        "status": "success",
-        "candidate_count": 10,
-        "reason": "Candidates found",
-        "error": ""
+        "status": "failed",
+        "candidate_count": 0,
+        "reason": "HTTPSConnectionPool(host='www.jftc.go.jp', port=443): Read timed out. (read timeout=20)",
+        "error": "HTTPSConnectionPool(host='www.jftc.go.jp', port=443): Read timed out. (read timeout=20)"
       },
       {
         "source_id": "ppc",
@@ -59,9 +59,9 @@
       {
         "source_id": "digital",
         "source_name": "デジタル庁",
-        "status": "skipped",
-        "candidate_count": 0,
-        "reason": "Skipped after reaching MAX_TOTAL candidate limit",
+        "status": "success",
+        "candidate_count": 10,
+        "reason": "Candidates found",
         "error": ""
       },
       {
@@ -181,10 +181,86 @@
   "source_status_counts": {
     "success": 5,
     "no_candidates": 0,
-    "skipped": 15,
+    "skipped": 14,
     "unsupported": 0,
-    "failed": 0,
+    "failed": 1,
     "encoding_error": 0
   },
-  "top_candidates": []
+  "top_candidates": [
+    {
+      "source_id": "digital",
+      "source_name": "デジタル庁",
+      "category": "government",
+      "title": "本文へ移動",
+      "url": "https://www.digital.go.jp/",
+      "published_at": "2026-09-28T00:00:00+00:00",
+      "discovered_at": "2026-09-29T01:25:00.563683+00:00",
+      "content_type": "html",
+      "matched_keywords": [],
+      "priority": 4,
+      "status": "new",
+      "fingerprint": "3c1dc638a967df1610e962c496a63fa0c78207e1cf59d4f3909bf4bcf7b84ede",
+      "score": 43
+    },
+    {
+      "source_id": "digital",
+      "source_name": "デジタル庁",
+      "category": "government",
+      "title": "一般の方",
+      "url": "https://www.digital.go.jp/individual",
+      "published_at": "",
+      "discovered_at": "2026-09-29T01:25:00.563931+00:00",
+      "content_type": "html",
+      "matched_keywords": [],
+      "priority": 4,
+      "status": "new",
+      "fingerprint": "4a4d22f5df47bbe18038d3604e54c173b40d3c3e7f0532ca96807941d0fe9565",
+      "score": 33
+    },
+    {
+      "source_id": "digital",
+      "source_name": "デジタル庁",
+      "category": "government",
+      "title": "行政・事業者の方",
+      "url": "https://www.digital.go.jp/business",
+      "published_at": "",
+      "discovered_at": "2026-09-29T01:25:00.564139+00:00",
+      "content_type": "html",
+      "matched_keywords": [],
+      "priority": 4,
+      "status": "new",
+      "fingerprint": "e7a0ddffbf5d7cbcaaaf8bfe0ed28e8cafbf4e3e7d6b946bf034611325a64d39",
+      "score": 33
+    },
+    {
+      "source_id": "digital",
+      "source_name": "デジタル庁",
+      "category": "government",
+      "title": "プレスルーム",
+      "url": "https://www.digital.go.jp/press",
+      "published_at": "",
+      "discovered_at": "2026-09-29T01:25:00.564338+00:00",
+      "content_type": "html",
+      "matched_keywords": [],
+      "priority": 4,
+      "status": "new",
+      "fingerprint": "37942fc210714acb9d42c1d4c8b232543586e070e054dfe1f9c20ccc52385496",
+      "score": 33
+    },
+    {
+      "source_id": "digital",
+      "source_name": "デジタル庁",
+      "category": "government",
+      "title": "English",
+      "url": "https://www.digital.go.jp/en",
+      "published_at": "",
+      "discovered_at": "2026-09-29T01:25:00.564556+00:00",
+      "content_type": "html",
+      "matched_keywords": [],
+      "priority": 4,
+      "status": "new",
+      "fingerprint": "074f6c437be966c6894c0ce549f0e2374b3982ff2371fa7e0c7bff5a6b6dedbc",
+      "score": 33
+    }
+  ]
 }
