@@ -1,7 +1,7 @@
 ---
 title: "Has Japan Really 'Decided to Legislate' Dark Patterns? What the 2026 Proposals Actually Say"
 socialTitle: "Japan's dark-pattern rules: what may be banned, and what happens if businesses violate them?"
-description: "A primary-source review of Japan's September 2026 proposals on dark patterns, chat-based solicitation, final checkout screens, cancellation obstruction, subscriptions, enforcement, penalties, and global comparisons."
+description: "A primary-source guide to Japan's 2026 proposals on dark patterns, chat solicitation, checkout, cancellation, subscriptions, enforcement and global rules."
 publishedAt: 2026-09-28
 updatedAt: 2026-09-30
 category: "World Frictions"
