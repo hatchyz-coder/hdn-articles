@@ -17,7 +17,7 @@ class WorldFrictionsMultiLLMTests(unittest.TestCase):
         text = WRAPPER.read_text(encoding="utf-8")
         self.assertIn("groq/compound-mini", text)
         self.assertIn('"web_search"', text)
-        self.assertIn('"visit_website"', text)
+        self.assertNotIn('["web_search","visit_website"]', text)
         self.assertIn("executed_tools", text)
 
     def test_rate_limit_retry_is_present(self):
@@ -35,7 +35,8 @@ class WorldFrictionsMultiLLMTests(unittest.TestCase):
         text = WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("generate_world_frictions_multillm.py", text)
         self.assertIn("WORLD_FRICTIONS_PROVIDER_CHAIN", text)
-        self.assertIn("WORLD_FRICTIONS_GROQ_RESEARCH_MODEL", text)\n        self.assertIn("WORLD_FRICTIONS_GROQ_WRITER_MODEL", text)
+        self.assertIn("WORLD_FRICTIONS_GROQ_RESEARCH_MODEL", text)
+        self.assertIn("WORLD_FRICTIONS_GROQ_WRITER_MODEL", text)
         self.assertIn("GROQ_API_KEY", text)
         self.assertNotIn("WORLD_FRICTIONS_GEMINI_MODEL", text)
 
