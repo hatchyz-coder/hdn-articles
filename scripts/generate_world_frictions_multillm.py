@@ -46,10 +46,23 @@ def _retry_wait(r:requests.Response,attempt:int)->float:
 def _groq_call(*,instructions:str,input_text:str,max_output_tokens:int,web_search:bool):
     key=os.getenv("GROQ_API_KEY")
     if not key: raise RuntimeError("GROQ_API_KEY is not configured")
-    model=os.getenv("WORLD_FRICTIONS_GROQ_MODEL","groq/compound")
-    request_text=("Use built-in web search and visit websites as needed. Return raw JSON only. Every source URL included in JSON must come from actual web research. Be concise while preserving required fields.\n\n"+input_text) if web_search else input_text
-    body={"model":model,"messages":[{"role":"system","content":instructions},{"role":"user","content":request_text}],"max_completion_tokens":min(max_output_tokens,6000),"response_format":{"type":"json_object"}}
-    if web_search and model.startswith("groq/compound"): body["compound_custom"]={"tools":{"enabled_tools":["web_search","visit_website"]}}
+    model=(
+        os.getenv("WORLD_FRICTIONS_GROQ_RESEARCH_MODEL","groq/compound-mini")
+        if web_search else
+        os.getenv("WORLD_FRICTIONS_GROQ_WRITER_MODEL","openai/gpt-oss-20b")
+    )
+    request_text=("Use built-in web search. Return raw JSON only. Every source URL included in JSON must come from actual web research. Be concise while preserving required fields.\n\n"+input_text) if web_search else input_text
+    token_cap=1800 if model.startswith("groq/compound") else 5000
+    body={"model":model,"messages":[{"role":"system","content":instructions},{"role":"user","content":request_text}],"max_completion_tokens":min(max_output_tokens,token_cap)}
+    if model.startswith("groq/compound"):
+        # Compound already promises a synthesized response. Avoid response_format and
+        # visit_website here: both inflate the internal agent request and previously
+        # caused a 413 before the compact discovery response was returned.
+        if web_search:
+            body["compound_custom"]={"tools":{"enabled_tools":["web_search"]}}
+            body["search_settings"]={"country":"japan"}
+    else:
+        body["response_format"]={"type":"json_object"}
     response=None
     for attempt in range(4):
         response=requests.post("https://api.groq.com/openai/v1/chat/completions",timeout=600,headers={"Authorization":f"Bearer {key}","Content-Type":"application/json","Groq-Model-Version":"latest"},json=body)
