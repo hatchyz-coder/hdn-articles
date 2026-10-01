@@ -66,13 +66,13 @@ class DriveEditorialTests(unittest.TestCase):
             editorial._fit_description("短すぎます", 60, 160, "description")
 
     def test_compound_request_uses_documented_minimal_shape(self):
-        body = editorial._groq_request_body("groq/compound", "instructions", "payload")
+        body = editorial._groq_request_body("groq/compound-mini", "instructions", "payload")
         self.assertNotIn("response_format", body)
         self.assertNotIn("compound_custom", body)
         self.assertNotIn("tools", body)
 
     def test_gpt_oss_fallback_uses_documented_browser_search_shape(self):
-        body = editorial._groq_request_body("openai/gpt-oss-120b", "instructions", "payload")
+        body = editorial._groq_request_body("openai/gpt-oss-20b", "instructions", "payload")
         self.assertEqual(body["tools"], [{"type": "browser_search"}])
         self.assertNotIn("response_format", body)
         self.assertIn("return a single JSON object", body["messages"][1]["content"])
@@ -105,8 +105,8 @@ class DriveEditorialTests(unittest.TestCase):
             editorial.os.environ,
             {
                 "GROQ_API_KEY": "test-key",
-                "HDN_GROQ_MODEL": "groq/compound",
-                "HDN_GROQ_FALLBACK_MODEL": "openai/gpt-oss-120b",
+                "HDN_GROQ_MODEL": "groq/compound-mini",
+                "HDN_GROQ_FALLBACK_MODEL": "openai/gpt-oss-20b",
             },
             clear=False,
         ), mock.patch.object(editorial.requests, "post", side_effect=fake_post, create=True), mock.patch.object(
@@ -115,7 +115,16 @@ class DriveEditorialTests(unittest.TestCase):
             result = editorial.call_openai_once({}, "seed", {}, timer, False)
 
         self.assertEqual(result, {"ok": True})
-        self.assertEqual(posted_models, ["groq/compound", "openai/gpt-oss-120b"])
+        self.assertEqual(posted_models, ["groq/compound-mini", "openai/gpt-oss-20b"])
+
+
+    def test_daily_drive_defaults_avoid_rejected_and_oversized_models(self):
+        self.assertEqual(editorial.DEFAULT_GROQ_MODEL, "groq/compound-mini")
+        self.assertEqual(editorial.DEFAULT_GROQ_FALLBACK_MODEL, "openai/gpt-oss-20b")
+
+    def test_daily_drive_bounds_private_seed_and_existing_title_context(self):
+        self.assertEqual(editorial.MAX_SEED_CHARS, 12000)
+        self.assertEqual(editorial.MAX_EXISTING_TITLES, 40)
 
     def test_healthcare_seed_scores_above_off_brand_seed_for_diagnostics_only(self):
         self.assertGreater(editorial.relevance_score("クリニックのLINE患者導線改善"), 0)
