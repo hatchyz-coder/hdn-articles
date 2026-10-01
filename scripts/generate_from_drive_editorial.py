@@ -24,9 +24,11 @@ ROOT = Path(__file__).resolve().parents[1]
 PROMPT_PATH = ROOT / "prompts" / "drive-editorial-daily.md"
 EN_ARTICLE_DIR = ROOT / "src" / "content" / "articles-en"
 MAX_SCAN = 500
-DEFAULT_GROQ_MODEL = "groq/compound"
-DEFAULT_GROQ_FALLBACK_MODEL = "openai/gpt-oss-120b"
+DEFAULT_GROQ_MODEL = "groq/compound-mini"
+DEFAULT_GROQ_FALLBACK_MODEL = "openai/gpt-oss-20b"
 PROVIDER_REJECTION_STATUSES = {400, 404, 422}
+MAX_SEED_CHARS = 12000
+MAX_EXISTING_TITLES = 40
 
 # Fingerprint of the approved Drive editorial folder. The raw private folder ID is never
 # committed to this public repository, while a misconfigured Actions variable fails closed.
@@ -234,10 +236,10 @@ def call_openai_once(doc: dict[str, Any], source_text: str, source_processing: d
     user_input = {
         "today": date.today().isoformat(),
         "seed_title": doc.get("name"),
-        "seed_text": source_text,
+        "seed_text": source_text[:MAX_SEED_CHARS],
         "source_processing": source_processing,
         "allowed_links": base.ALLOWED_LINKS,
-        "existing_article_titles": _existing_titles(),
+        "existing_article_titles": _existing_titles()[-MAX_EXISTING_TITLES:],
         "editorial_goal": "Use the private draft only as a seed. Research current public news/trends and rebuild the article for HDN's current audience.",
     }
     payload_input = json.dumps(user_input, ensure_ascii=False)
@@ -321,7 +323,7 @@ def _existing_titles() -> list[str]:
         match = pattern.search(path.read_text(encoding="utf-8"))
         if match:
             titles.append(match.group(1))
-    return titles[-100:]
+    return titles[-MAX_EXISTING_TITLES:]
 
 
 def _safe_refs(data: dict[str, Any]) -> list[dict[str, str]]:
