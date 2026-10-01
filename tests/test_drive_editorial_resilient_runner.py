@@ -71,7 +71,7 @@ class DriveEditorialResilientRunnerTests(unittest.TestCase):
             encoding="utf-8"
         )
         self.assertIn(
-            "HDN_GROQ_FALLBACK_MODEL: ${{ vars.HDN_GROQ_FALLBACK_MODEL || 'openai/gpt-oss-120b' }}",
+            "HDN_GROQ_FALLBACK_MODEL: ${{ vars.HDN_GROQ_FALLBACK_MODEL || 'openai/gpt-oss-20b' }}",
             workflow,
         )
 
