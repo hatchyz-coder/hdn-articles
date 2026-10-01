@@ -81,7 +81,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--folder-id", default=os.getenv("GOOGLE_DRIVE_KNOWLEDGE_FOLDER_ID", ""))
     parser.add_argument("--service-account-json", default=os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON", ""))
     parser.add_argument("--exclude-file", type=Path)
-    parser.add_argument("--min-score", type=int, default=70)
+    parser.add_argument("--min-score", type=int, default=0)  # retained for CLI compatibility; no score gate
     parser.add_argument("--state-path", type=Path, default=STATE_PATH)
     parser.add_argument("--report-path", type=Path, default=REPORT_PATH)
     parser.add_argument("--max-drive-files", type=int, default=MAX_SEED_FILES)
@@ -715,14 +715,14 @@ def main() -> int:
         mark_finished(state, doc, "api_timeout", {"reason": str(exc), "sourceProcessing": source_processing}, permanent=False)
         return finish(args, state, report, timer, False, "api_timeout")
 
-    score = int(data.get("score", 0))
     ai_flags = [str(flag) for flag in data.get("confidentiality_flags", []) if str(flag).strip()]
     if ai_flags:
-        mark_finished(state, doc, "skipped_confidential", {"reason": "AI confidentiality flags", "flags": ai_flags, "score": score}, permanent=True)
-        return finish(args, state, {**report, "score": score, "flags": ai_flags}, timer, False, "confidential")
-    if not data.get("should_generate") or score < args.min_score:
-        mark_finished(state, doc, "low_score", {"reason": data.get("skip_reason", "low score"), "score": score}, permanent=True)
-        return finish(args, state, {**report, "score": score}, timer, False, "low_score")
+        mark_finished(state, doc, "skipped_confidential", {"reason": "AI confidentiality flags", "flags": ai_flags}, permanent=True)
+        return finish(args, state, {**report, "flags": ai_flags}, timer, False, "confidential")
+    if not data.get("should_generate"):
+        reason = str(data.get("skip_reason") or "hard publication blocker").strip()
+        mark_finished(state, doc, "hard_blocker", {"reason": reason}, permanent=True)
+        return finish(args, state, report, timer, False, "hard_blocker")
 
     slug = normalize_slug(str(data.get("suggested_slug", "")), doc["id"])
     try:
@@ -734,21 +734,20 @@ def main() -> int:
             state,
             doc,
             "already_published",
-            {"reason": "duplicate_slug", "slug": slug, "score": score},
+            {"reason": "duplicate_slug", "slug": slug},
             permanent=True,
         )
-        return finish(args, state, {**report, "score": score, "slug": slug}, timer, False, "duplicate_slug")
+        return finish(args, state, {**report, "slug": slug}, timer, False, "duplicate_slug")
     research_review = {
         "additionalVerificationTopics": data.get("additional_verification_topics", []),
         "officialSourceCandidates": data.get("official_source_candidates", []),
         "unsupportedClaimsFromSourceOnly": data.get("unsupported_claims_from_source_only", []),
     }
-    mark_finished(state, doc, "generated", {"slug": slug, "score": score, "researchReview": research_review, "sourceProcessing": source_processing}, permanent=True)
+    mark_finished(state, doc, "generated", {"slug": slug, "researchReview": research_review, "sourceProcessing": source_processing}, permanent=True)
     timer.metrics["articlesGenerated"] = 1
     report.update({
         "selected": True,
         "slug": slug,
-        "score": score,
         "eeat": data.get("eeat", {}),
         "researchReview": research_review,
         "outputs": [str(path.relative_to(ROOT)) for path in outputs],
@@ -758,7 +757,6 @@ def main() -> int:
     write_output("source_url", doc_url)
     write_output("source_name", doc.get("name", ""))
     write_output("modified_time", str(doc.get("modifiedTime", "")))
-    write_output("score", str(score))
     write_output("eeat", json.dumps(data.get("eeat", {}), ensure_ascii=False))
     write_output("research_review", json.dumps(research_review, ensure_ascii=False))
     return finish(args, state, report, timer, True, "generated")

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Run the Drive editorial generator with bounded retry and candidate rotation.
 
-This wrapper keeps the existing quality gate intact. It retries transient generation
+This wrapper keeps the hard safety and publication gates intact. It retries transient generation
 failures inside the same publication slot and advances past permanently skipped seeds so
 one weak candidate does not waste the entire scheduled slot.
 """
@@ -21,7 +21,7 @@ from publication_fact_gate import repair_file_pair
 
 TRANSIENT_REASONS = {"api_timeout"}
 ROTATE_REASONS = {
-    "low_score",
+    "hard_blocker",
     "duplicate_source",
     "confidential",
     "manual_review_retry_limit",

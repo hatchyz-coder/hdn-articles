@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Guarantee at most one LHub article per JST day with an API-independent reserve fallback."""
+"""Guarantee the LHub daily publication target with an API-independent reserve fallback."""
 from __future__ import annotations
 
 import argparse
@@ -23,6 +23,7 @@ ENGLISH_DIR = ROOT / "src" / "content" / "articles-en"
 SOCIAL_DIR = ROOT / "social"
 RESERVE_WARNING_THRESHOLD = 10
 RESERVE_CRITICAL_THRESHOLD = 7
+DAILY_TARGET = 2
 
 FALLBACK_REASONS = {
     "api_rate_limited",
@@ -36,7 +37,7 @@ FALLBACK_REASONS = {
     "rotation_attempts_exhausted",
     "api_timeout",
     "os_timeout",
-    "low_score",
+    "hard_blocker",
     "duplicate_source",
     "confidential",
     "manual_review_retry_limit",
@@ -288,16 +289,18 @@ def main() -> int:
     health = reserve_health(reserve_remaining)
 
     published = published_lhub_slugs_for_day(ARTICLE_DIR, day)
-    if published:
+    if len(published) >= DAILY_TARGET:
         emit({
             "selected": False,
-            "reason": "already_published_today",
-            "mode": "already_published",
-            "published_slug": published[0],
+            "reason": "daily_target_reached",
+            "mode": "daily_target_reached",
+            "published_slug": published[-1],
+            "published_count": len(published),
+            "daily_target": DAILY_TARGET,
             "reserve_remaining": reserve_remaining,
             "reserve_health": health,
         })
-        print(f"Daily Guarantee: LHub article already published today: {published[0]}")
+        print(f"Daily Guarantee: LHub daily target reached ({len(published)}/{DAILY_TARGET})")
         return 0
 
     returncode, outputs = run_normal_path(args)
@@ -334,7 +337,6 @@ def main() -> int:
         "mode": "fallback_reserve",
         "fallback_trigger": reason,
         "slug": data["slug"],
-        "score": "reserve",
         "reserve_remaining": remaining_after,
         "reserve_health": reserve_health(remaining_after),
     })

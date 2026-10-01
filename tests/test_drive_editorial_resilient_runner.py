@@ -23,10 +23,10 @@ class DriveEditorialResilientRunnerTests(unittest.TestCase):
         self.assertTrue(retry)
         self.assertEqual(reason, "api_timeout")
 
-    def test_low_score_rotates_to_next_candidate_without_lowering_gate(self):
-        retry, reason = resilient.should_continue(0, {"selected": False, "reason": "low_score"})
+    def test_hard_blocker_rotates_to_next_candidate(self):
+        retry, reason = resilient.should_continue(0, {"selected": False, "reason": "hard_blocker"})
         self.assertTrue(retry)
-        self.assertEqual(reason, "low_score")
+        self.assertEqual(reason, "hard_blocker")
 
     def test_confidential_seed_rotates_to_next_candidate(self):
         retry, reason = resilient.should_continue(0, {"selected": False, "reason": "confidential"})

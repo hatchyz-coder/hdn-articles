@@ -108,16 +108,17 @@ class LHubDailyGuaranteeTests(unittest.TestCase):
                 for channel in ("x.md", "linkedin.md", "facebook.md"):
                     self.assertTrue((root / "social" / data["slug"] / channel).exists())
 
-    def test_normal_path_is_not_called_when_today_is_already_published(self):
+    def test_normal_path_is_not_called_when_two_articles_are_already_published(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             articles = root / "articles"
             articles.mkdir()
             today = datetime.now(guarantee.JST).date().isoformat()
-            (articles / "today.md").write_text(
-                f"---\ntitle: Today\ndescription: {'a'*60}\npublishedAt: {today}\ndraft: false\nsection: lhub-usecase\n---\nbody\n",
-                encoding="utf-8",
-            )
+            for name in ("today-a.md", "today-b.md"):
+                (articles / name).write_text(
+                    f"---\ntitle: Today\ndescription: {'a'*60}\npublishedAt: {today}\ndraft: false\nsection: lhub-usecase\n---\nbody\n",
+                    encoding="utf-8",
+                )
             state = root / "state.json"
             reserve = root / "reserve"
             reserve.mkdir()

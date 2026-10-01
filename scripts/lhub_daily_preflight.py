@@ -14,6 +14,7 @@ from pathlib import Path
 JST = timezone(timedelta(hours=9))
 ROOT = Path(__file__).resolve().parents[1]
 ARTICLE_DIR = ROOT / "src" / "content" / "articles"
+DAILY_TARGET = 2
 
 
 def frontmatter_value(markdown: str, key: str) -> str:
@@ -52,14 +53,19 @@ def emit(key: str, value: str) -> None:
 def main() -> int:
     day = datetime.now(JST).date().isoformat()
     published = published_lhub_slugs_for_day(ARTICLE_DIR, day)
+    count = len(published)
+    target_reached = count >= DAILY_TARGET
     emit("day", day)
-    emit("published", "true" if published else "false")
-    emit("reason", "already_published_today" if published else "not_published_today")
-    emit("published_slug", published[0] if published else "")
-    if published:
-        print(f"Daily preflight: LHub article already published today: {published[0]}")
+    emit("published", "true" if target_reached else "false")
+    emit("reason", "daily_target_reached" if target_reached else "daily_target_not_reached")
+    emit("published_slug", published[-1] if published else "")
+    emit("published_count", str(count))
+    emit("daily_target", str(DAILY_TARGET))
+    emit("remaining", str(max(0, DAILY_TARGET - count)))
+    if target_reached:
+        print(f"Daily preflight: LHub daily target reached ({count}/{DAILY_TARGET})")
     else:
-        print("Daily preflight: no LHub article published today; continue to full pipeline")
+        print(f"Daily preflight: LHub daily target not reached ({count}/{DAILY_TARGET}); continue")
     return 0
 
 

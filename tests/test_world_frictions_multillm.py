@@ -13,16 +13,18 @@ class WorldFrictionsMultiLLMTests(unittest.TestCase):
         self.assertIn('WORLD_FRICTIONS_PROVIDER_CHAIN","groq"', text)
         self.assertIn("GROQ_API_KEY", text)
 
-    def test_groq_uses_compound_web_search(self):
+    def test_groq_uses_model_fallback_and_web_search(self):
         text = WRAPPER.read_text(encoding="utf-8")
         self.assertIn("groq/compound", text)
+        self.assertIn("openai/gpt-oss-120b", text)
+        self.assertIn("WORLD_FRICTIONS_GROQ_FALLBACK_MODEL", text)
         self.assertIn('"web_search"', text)
         self.assertIn('"visit_website"', text)
         self.assertIn("executed_tools", text)
 
     def test_rate_limit_retry_is_present(self):
         text = WRAPPER.read_text(encoding="utf-8")
-        self.assertIn("response.status_code!=429", text)
+        self.assertIn("response.status_code==429", text)
         self.assertIn("_retry_wait", text)
         self.assertIn("range(4)", text)
 
@@ -36,6 +38,7 @@ class WorldFrictionsMultiLLMTests(unittest.TestCase):
         self.assertIn("generate_world_frictions_multillm.py", text)
         self.assertIn("WORLD_FRICTIONS_PROVIDER_CHAIN", text)
         self.assertIn("WORLD_FRICTIONS_GROQ_MODEL", text)
+        self.assertIn("WORLD_FRICTIONS_GROQ_FALLBACK_MODEL", text)
         self.assertIn("GROQ_API_KEY", text)
         self.assertNotIn("WORLD_FRICTIONS_GEMINI_MODEL", text)
 
