@@ -59,5 +59,15 @@ class WorldFrictionsMultiLLMTests(unittest.TestCase):
         self.assertGreaterEqual(core.count("web_search=True"), 2)
 
 
+    def test_publication_stops_at_human_approved_draft_pr(self):
+        text = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("--draft", text)
+        self.assertIn("explicit human approval", text)
+        self.assertNotIn("gh pr merge", text)
+        self.assertNotIn("gh workflow run deploy-pages.yml", text)
+        self.assertNotIn("git push origin origin/main:staging", text)
+        self.assertNotIn("Published automatically", text)
+
+
 if __name__ == "__main__":
     unittest.main()
