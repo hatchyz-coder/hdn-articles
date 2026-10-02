@@ -41,7 +41,8 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
       WORLD_FRICTIONS_PROVIDER_CHAIN: ${{ vars.WORLD_FRICTIONS_PROVIDER_CHAIN || 'groq' }}
-      WORLD_FRICTIONS_GROQ_MODEL: ${{ vars.WORLD_FRICTIONS_GROQ_MODEL || 'groq/compound' }}
+      WORLD_FRICTIONS_GROQ_RESEARCH_MODEL: ${{ vars.WORLD_FRICTIONS_GROQ_RESEARCH_MODEL || 'groq/compound-mini' }}
+      WORLD_FRICTIONS_GROQ_WRITER_MODEL: ${{ vars.WORLD_FRICTIONS_GROQ_WRITER_MODEL || 'openai/gpt-oss-20b' }}
       WORLD_FRICTIONS_SCORE_THRESHOLD: '86'
       WORLD_FRICTIONS_REVIEW_THRESHOLD: '88'
     steps:
@@ -245,84 +246,18 @@ jobs:
           - independent web-search fact review passed
           - OGP, typecheck, tests and production build passed before merge
 
-          Routine World Frictions publication is explicitly authorized to merge without human approval when all automated gates pass.
+          This Draft PR is the release boundary. Merge, publication, deployment, and external distribution require explicit human approval.
           EOF
 
           pr_url="$(gh pr create \
             --repo "$GITHUB_REPOSITORY" \
             --base main \
             --head "$branch" \
-            --title "Auto-publish World Frictions: ${TITLE}" \
-            --body-file "$body_file")"
+            --title "Prepare World Frictions: ${TITLE}" \
+            --body-file "$body_file" \
+            --draft)"
           echo "pr_url=$pr_url" >> "$GITHUB_OUTPUT"
           echo "branch=$branch" >> "$GITHUB_OUTPUT"
-
-      - name: Merge automatically after all gates pass
-        if: steps.generate.outputs.publish == 'true'
-        env:
-          PR_URL: ${{ steps.pr.outputs.pr_url }}
-        run: |
-          set -euo pipefail
-          gh pr merge "$PR_URL" --repo "$GITHUB_REPOSITORY" --squash --delete-branch
-
-      - name: Keep staging synchronized with production source
-        if: steps.generate.outputs.publish == 'true'
-        run: |
-          set -euo pipefail
-          git fetch origin main staging
-          git push origin origin/main:staging
-
-      - name: Dispatch production deployment
-        if: steps.generate.outputs.publish == 'true'
-        id: deploy
-        run: |
-          set -euo pipefail
-          before="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow deploy-pages.yml --event workflow_dispatch --limit 1 --json databaseId --jq '.[0].databaseId // 0')"
-          gh workflow run deploy-pages.yml --repo "$GITHUB_REPOSITORY" --ref main
-
-          run_id=""
-          for attempt in $(seq 1 12); do
-            sleep 5
-            candidate="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow deploy-pages.yml --event workflow_dispatch --limit 1 --json databaseId --jq '.[0].databaseId // 0')"
-            if [ "$candidate" != "0" ] && [ "$candidate" != "$before" ]; then
-              run_id="$candidate"
-              break
-            fi
-          done
-          if [ -z "$run_id" ]; then
-            echo "Could not resolve the deployment workflow run." >&2
-            exit 1
-          fi
-          echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
-          gh run watch "$run_id" --repo "$GITHUB_REPOSITORY" --exit-status
-
-      - name: Smoke test live canonical pages
-        if: steps.generate.outputs.publish == 'true'
-        env:
-          SLUG: ${{ steps.generate.outputs.slug }}
-        run: |
-          set -euo pipefail
-          for path in \
-            "world-frictions/" \
-            "articles/${SLUG}/" \
-            "en/articles/${SLUG}/" \
-            "og/ja/${SLUG}.png" \
-            "og/en/${SLUG}.png"; do
-            ok=false
-            for attempt in $(seq 1 8); do
-              if curl --fail --silent --show-error --location --max-time 20 \
-                "https://article.hdnjapan.com/${path}" -o /tmp/world-frictions-smoke; then
-                test -s /tmp/world-frictions-smoke
-                ok=true
-                break
-              fi
-              sleep 10
-            done
-            if [ "$ok" != true ]; then
-              echo "Production smoke test failed: ${path}" >&2
-              exit 1
-            fi
-          done
 
       - name: Publication summary
         if: steps.generate.outputs.publish == 'true'
@@ -334,17 +269,12 @@ jobs:
           PR_URL: ${{ steps.pr.outputs.pr_url }}
         run: |
           {
-            echo "## Published automatically"
+            echo "## Draft publication candidate prepared"
             echo
             echo "- ${TITLE}"
             echo "- Writer score: ${SCORE}/100"
             echo "- Independent review: ${REVIEW_SCORE}/100"
             echo "- PR: ${PR_URL}"
-            echo "- Canonical: https://article.hdnjapan.com/articles/${SLUG}/"
+            echo "- Release gate: human approval is required before merge, deployment, or publication"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Dispatch canonical completion verification
-        if: steps.generate.outputs.publish == 'true'
-        env:
-          SLUG: ${{ steps.generate.outputs.slug }}
-        run: gh workflow run world-frictions-completion-gate.yml --repo "$GITHUB_REPOSITORY" --ref main -f slug="$SLUG"

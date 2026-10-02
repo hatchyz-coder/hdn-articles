@@ -607,7 +607,7 @@ def main() -> int:
         model=args.model,
         instructions=instructions,
         input_text=discovery_prompt(existing, args.score_threshold),
-        max_output_tokens=3500,
+        max_output_tokens=1800,
         web_search=True,
     )
 
@@ -632,7 +632,7 @@ def main() -> int:
         model=args.model,
         instructions=instructions,
         input_text=writer_prompt({**brief, "sources": brief_sources}),
-        max_output_tokens=6000,
+        max_output_tokens=5000,
         web_search=False,
     )
     canonical = written.get("canonical")
@@ -643,7 +643,7 @@ def main() -> int:
         model=args.model,
         instructions=instructions,
         input_text=derivative_prompt(canonical, english, brief_sources),
-        max_output_tokens=5200,
+        max_output_tokens=3800,
         web_search=False,
     )
     candidate = {
@@ -670,7 +670,7 @@ def main() -> int:
         model=args.model,
         instructions=reviewer_instructions,
         input_text=review_prompt(candidate, existing, args.review_threshold),
-        max_output_tokens=4000,
+        max_output_tokens=1800,
         web_search=True,
     )
     try:

@@ -15,9 +15,9 @@ class WorldFrictionsMultiLLMTests(unittest.TestCase):
 
     def test_groq_uses_compound_web_search(self):
         text = WRAPPER.read_text(encoding="utf-8")
-        self.assertIn("groq/compound", text)
+        self.assertIn("groq/compound-mini", text)
         self.assertIn('"web_search"', text)
-        self.assertIn('"visit_website"', text)
+        self.assertNotIn('["web_search","visit_website"]', text)
         self.assertIn("executed_tools", text)
 
     def test_rate_limit_retry_is_present(self):
@@ -35,7 +35,8 @@ class WorldFrictionsMultiLLMTests(unittest.TestCase):
         text = WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("generate_world_frictions_multillm.py", text)
         self.assertIn("WORLD_FRICTIONS_PROVIDER_CHAIN", text)
-        self.assertIn("WORLD_FRICTIONS_GROQ_MODEL", text)
+        self.assertIn("WORLD_FRICTIONS_GROQ_RESEARCH_MODEL", text)
+        self.assertIn("WORLD_FRICTIONS_GROQ_WRITER_MODEL", text)
         self.assertIn("GROQ_API_KEY", text)
         self.assertNotIn("WORLD_FRICTIONS_GEMINI_MODEL", text)
 
@@ -45,9 +46,9 @@ class WorldFrictionsMultiLLMTests(unittest.TestCase):
         self.assertIn("def writer_prompt", core)
         self.assertIn("def derivative_prompt", core)
         self.assertNotIn("max_output_tokens=28000", core)
-        self.assertIn("max_output_tokens=3500", core)
-        self.assertIn("max_output_tokens=6000", core)
-        self.assertIn("max_output_tokens=5200", core)
+        self.assertIn("max_output_tokens=1800", core)
+        self.assertIn("max_output_tokens=5000", core)
+        self.assertIn("max_output_tokens=3800", core)
 
     def test_only_research_and_review_calls_require_web_search(self):
         core = (ROOT / "scripts" / "generate_world_frictions.py").read_text(encoding="utf-8")
@@ -56,6 +57,16 @@ class WorldFrictionsMultiLLMTests(unittest.TestCase):
         self.assertIn("input_text=derivative_prompt", core)
         self.assertGreaterEqual(core.count("web_search=False"), 2)
         self.assertGreaterEqual(core.count("web_search=True"), 2)
+
+
+    def test_publication_stops_at_human_approved_draft_pr(self):
+        text = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("--draft", text)
+        self.assertIn("explicit human approval", text)
+        self.assertNotIn("gh pr merge", text)
+        self.assertNotIn("gh workflow run deploy-pages.yml", text)
+        self.assertNotIn("git push origin origin/main:staging", text)
+        self.assertNotIn("Published automatically", text)
 
 
 if __name__ == "__main__":

@@ -33,14 +33,13 @@ class WorldFrictionsAutoPublishTests(unittest.TestCase):
         self.assertIn("Stop duplicate or out-of-window retry cleanly", text)
         self.assertIn("steps.daily_guard.outputs.run == 'true'", text)
 
-    def test_no_human_confirmation_is_required_after_automated_gates(self):
+    def test_human_approval_is_required_after_automated_gates(self):
         text = WORKFLOW.read_text(encoding="utf-8")
-        self.assertIn("Merge automatically after all gates pass", text)
-        self.assertIn("gh pr merge", text)
-        self.assertIn("gh workflow run deploy-pages.yml", text)
-        self.assertIn("Smoke test live canonical pages", text)
-        self.assertNotIn("approval_required", text)
-        self.assertNotIn("manual_approval", text)
+        self.assertIn("--draft", text)
+        self.assertIn("explicit human approval", text)
+        self.assertNotIn("gh pr merge", text)
+        self.assertNotIn("gh workflow run deploy-pages.yml", text)
+        self.assertNotIn("Smoke test live canonical pages", text)
 
     def test_generator_forces_fresh_web_search_and_independent_review(self):
         text = GENERATOR.read_text(encoding="utf-8")
@@ -78,11 +77,11 @@ class WorldFrictionsAutoPublishTests(unittest.TestCase):
         self.assertIn("at least three distinct HTTPS sources", text)
         self.assertIn("at least one primary or research source", text)
 
-    def test_contract_records_autonomous_publication_policy(self):
+    def test_contract_records_approval_gated_publication_policy(self):
         text = CONTRACT.read_text(encoding="utf-8")
-        self.assertIn("自動公開", text)
-        self.assertIn("ハッチの事前確認を必須としません", text)
-        self.assertIn("基準を満たさなければ公開しません", text)
+        self.assertIn("Draft PR", text)
+        self.assertIn("人による明示承認", text)
+        self.assertIn("基準を満たさなければDraft PRも作成しません", text)
         self.assertIn("再試行", text)
         self.assertIn("1日最大1本", text)
 
