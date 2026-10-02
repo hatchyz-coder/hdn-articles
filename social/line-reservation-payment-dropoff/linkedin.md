@@ -1,0 +1,1 @@
+Clinics can use LHub to unify LINE-based patient workflows: pre-visit questionnaires, bookings, payments, and follow-ups. This article outlines key features (tag management, rich menus, payment links, automation) and practical checks before implementation. Consult with HDN Japan for a tailored plan: https://forms.gle/148jgfSnDgDZ2HsEA
