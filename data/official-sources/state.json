@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-01T01:01:03.332146+00:00",
+  "updated_at": "2026-10-02T01:14:30.487558+00:00",
   "seen_urls": [
     "https://translation.mhlw.go.jp/LUCMHLW/ns/w1/jaen/",
     "https://translation.mhlw.go.jp/LUCMHLW/ns/w1/jako/",
@@ -137,7 +137,7 @@
     "fc6215de00199c8cc095d5a40803cb4bcc0cb81b1e7da610e92a05997535ee38"
   ],
   "last_run": {
-    "generated_at": "2026-10-01T01:01:03.332131+00:00",
+    "generated_at": "2026-10-02T01:14:30.487542+00:00",
     "dry_run": false,
     "source_id": "",
     "metrics": {
@@ -152,7 +152,7 @@
       "new_candidates": 0,
       "duplicate_candidates": 50,
       "http_requests": 6,
-      "execution_seconds": 10.44,
+      "execution_seconds": 7.696,
       "source_results": [
         {
           "source_id": "mhlw",
