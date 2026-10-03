@@ -106,7 +106,7 @@ class DriveEditorialTests(unittest.TestCase):
                 "HDN_GROQ_FALLBACK_MODEL": "groq/compound",
             },
             clear=False,
-        ), mock.patch.object(editorial.requests, "post", side_effect=fake_post):
+        ), mock.patch.object(editorial.requests, "post", side_effect=fake_post, create=True):
             result = editorial.call_openai_once({}, "seed", {}, timer, False)
 
         self.assertEqual(result, {"ok": True})
