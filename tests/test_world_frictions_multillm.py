@@ -15,18 +15,16 @@ class WorldFrictionsMultiLLMTests(unittest.TestCase):
 
     def test_groq_uses_current_browser_search_model(self):
         text = WRAPPER.read_text(encoding="utf-8")
-        self.assertIn("groq/compound", text)
-        self.assertIn("openai/gpt-oss-120b", text)
-        self.assertIn("WORLD_FRICTIONS_GROQ_FALLBACK_MODEL", text)
-        self.assertIn('"web_search"', text)
-        self.assertIn('"visit_website"', text)
+        self.assertIn("openai/gpt-oss-20b", text)
+        self.assertIn("DECOMMISSIONED_GROQ_MODELS", text)
+        self.assertIn('"browser_search"', text)
+        self.assertIn('"tool_choice"', text)
         self.assertIn("executed_tools", text)
 
-    def test_rate_limit_retry_is_present(self):
+    def test_rate_limit_stops_current_slot_without_retry_storm(self):
         text = WRAPPER.read_text(encoding="utf-8")
         self.assertIn("response.status_code==429", text)
-        self.assertIn("_retry_wait", text)
-        self.assertIn("range(4)", text)
+        self.assertIn("stop this slot and use the next scheduled retry", text)
 
     def test_legacy_editorial_gates_remain_in_control(self):
         text = WRAPPER.read_text(encoding="utf-8")
