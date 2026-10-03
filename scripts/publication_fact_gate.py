@@ -160,6 +160,20 @@ def _body_character_count(markdown: str) -> int:
     return len(re.sub(r'\s+', '', _body(markdown)))
 
 
+def _generalize_unverified_feature_line(line: str) -> str:
+    """Replace an unsupported product-capability assertion with safe workflow guidance."""
+    if re.search(r'[ぁ-んァ-ン一-龯]', line):
+        return (
+            '特定製品の未確認機能を前提にせず、必要な情報・担当者・次の行動を先に整理し、'
+            '実際に利用できる機能は公式情報で確認してから運用へ落とし込みます。'
+        )
+    return (
+        'Do not assume an unverified product capability. Define the required information, '
+        'owner, and next action first, then confirm product-specific functions in official '
+        'documentation before implementation.'
+    )
+
+
 def repair_markdown(markdown: str, max_removed_ratio: float = 0.25) -> dict:
     """Remove only unsafe body lines, then re-run the deterministic gate.
 
@@ -195,8 +209,20 @@ def repair_markdown(markdown: str, max_removed_ratio: float = 0.25) -> dict:
         probe = evaluate(f'---\npublishedAt: {published.isoformat()}\n---\n\n{line}\n')
         if probe['publication_fact_gate']:
             repaired.append(line)
-        else:
-            removed.append(line)
+            continue
+
+        kinds = {finding.get('kind') for finding in probe.get('findings', [])}
+        if kinds == {'unverified_product_feature'}:
+            generalized = _generalize_unverified_feature_line(line)
+            generalized_probe = evaluate(
+                f'---\npublishedAt: {published.isoformat()}\n---\n\n{generalized}\n'
+            )
+            if generalized_probe['publication_fact_gate']:
+                repaired.append(generalized)
+                removed.append(line)
+                continue
+
+        removed.append(line)
 
     repaired_markdown = '\n'.join(repaired)
     if markdown.endswith('\n'):
