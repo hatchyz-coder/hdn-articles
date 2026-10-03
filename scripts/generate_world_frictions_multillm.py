@@ -5,11 +5,12 @@ import json, os, re, time
 from typing import Any
 import requests
 import generate_world_frictions as core
+from world_frictions_reserve import materialize_next_reserve
 
 def _json_from_text(text:str)->dict[str,Any]:
     cleaned=re.sub(r"^```(?:json)?\s*|\s*```$","",(text or "").strip(),flags=re.I|re.S)
     if not cleaned: raise RuntimeError("provider response did not contain output text")
-    value=json.loads(cleaned)
+    value=json.loads(cleaned, strict=False)
     if not isinstance(value,dict): raise RuntimeError("provider JSON response must be an object")
     return value
 
@@ -99,6 +100,9 @@ def _openai_call(*,model:str,instructions:str,input_text:str,max_output_tokens:i
 
 def _provider_chain(): return [x.strip().lower() for x in os.getenv("WORLD_FRICTIONS_PROVIDER_CHAIN","groq").split(",") if x.strip()]
 
+class ProviderUnavailable(RuntimeError):
+    pass
+
 def provider_call_openai(*,model:str,instructions:str,input_text:str,max_output_tokens:int,web_search:bool):
     errors=[]
     for provider in _provider_chain():
@@ -107,9 +111,30 @@ def provider_call_openai(*,model:str,instructions:str,input_text:str,max_output_
             if provider=="groq": return _groq_call(instructions=instructions,input_text=input_text,max_output_tokens=max_output_tokens,web_search=web_search)
             if provider=="openai": return _openai_call(model=model,instructions=instructions,input_text=input_text,max_output_tokens=max_output_tokens,web_search=web_search)
             errors.append(f"{provider}: unsupported provider")
-        except Exception as exc: errors.append(f"{provider}: {exc}"); print(f"PROVIDER_FAIL: {provider}: {exc}")
-    reason="All configured World Frictions providers failed: "+" | ".join(errors); core.write_github_output(publish="false",reason=reason); core.write_summary(["## World Frictions provider failure","",reason]); raise RuntimeError(reason)
+        except Exception as exc:
+            errors.append(f"{provider}: {exc}")
+            print(f"PROVIDER_FAIL: {provider}: {exc}")
+    raise ProviderUnavailable("All configured World Frictions providers failed: "+" | ".join(errors))
 
 def main()->int:
-    core._ORIGINAL_CALL_OPENAI=core.call_openai; core.call_openai=provider_call_openai; return core.main()
+    core._ORIGINAL_CALL_OPENAI=core.call_openai
+    core.call_openai=provider_call_openai
+    try:
+        return core.main()
+    except ProviderUnavailable as exc:
+        reason=str(exc)
+        reserve=materialize_next_reserve(reason)
+        if reserve is not None:
+            core.write_summary([
+                "## World Frictions provider fallback",
+                "",
+                "Live research provider was unavailable; a pre-validated reserve passed to the normal bundle/test/build/deploy gates.",
+                "",
+                f"Reserve slug: {reserve['slug']}",
+            ])
+            return 0
+        core.write_github_output(publish="false",reason=reason)
+        core.write_summary(["## World Frictions provider failure","",reason,"","No unused validated reserve remained."])
+        print(f"SKIP: {reason}")
+        return 0
 if __name__=="__main__": raise SystemExit(main())
