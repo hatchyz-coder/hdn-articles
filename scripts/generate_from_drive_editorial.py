@@ -24,11 +24,11 @@ ROOT = Path(__file__).resolve().parents[1]
 PROMPT_PATH = ROOT / "prompts" / "drive-editorial-daily.md"
 EN_ARTICLE_DIR = ROOT / "src" / "content" / "articles-en"
 MAX_SCAN = 500
-DEFAULT_GROQ_MODEL = "groq/compound-mini"
+DEFAULT_GROQ_MODEL = "openai/gpt-oss-20b"
 DEFAULT_GROQ_FALLBACK_MODEL = "openai/gpt-oss-20b"
 PROVIDER_REJECTION_STATUSES = {400, 404, 422}
-MAX_SEED_CHARS = 12000
-MAX_EXISTING_TITLES = 40
+MAX_SEED_CHARS = 8000
+MAX_EXISTING_TITLES = 24
 
 # Fingerprint of the approved Drive editorial folder. The raw private folder ID is never
 # committed to this public repository, while a misconfigured Actions variable fails closed.
@@ -180,17 +180,19 @@ def select_target_doc(drive: Any, state: dict[str, Any], folder_id: str, args: A
         return (candidates[0], "daily_backlog_queue") if candidates else (None, "daily_backlog_queue")
 
 
-def _groq_models() -> list[str]:
-    """Return a de-duplicated primary/fallback model chain.
+DECOMMISSIONED_GROQ_MODELS = {"groq/compound", "groq/compound-mini"}
 
-    Repository variables may retain a provider model that later becomes unavailable.
-    Keeping the fallback in code prevents one stale variable from stopping publication.
-    """
+def _groq_models() -> list[str]:
+    """Use current Groq models only, even when repository variables are stale."""
     configured = [
         os.environ.get("HDN_GROQ_MODEL", DEFAULT_GROQ_MODEL).strip(),
         os.environ.get("HDN_GROQ_FALLBACK_MODEL", DEFAULT_GROQ_FALLBACK_MODEL).strip(),
+        DEFAULT_GROQ_MODEL,
     ]
-    return list(dict.fromkeys(model for model in configured if model))
+    return list(dict.fromkeys(
+        model for model in configured
+        if model and model not in DECOMMISSIONED_GROQ_MODELS
+    ))
 
 
 def _groq_request_body(model: str, instructions: str, payload_input: str) -> dict[str, Any]:
@@ -203,19 +205,14 @@ def _groq_request_body(model: str, instructions: str, payload_input: str) -> dic
                 "Do not invent citations or URLs.\n\n" + payload_input
             )},
         ],
-        "max_completion_tokens": 6000,
+        "max_completion_tokens": 5000,
     }
-    if model.startswith("groq/compound"):
-        # Compound performs its own tool orchestration. Keep the provider's documented
-        # minimal request shape; response_format/compound_custom combinations have been
-        # rejected by the provider even while the model itself remains listed.
-        return body
-
     if model.startswith("openai/gpt-oss-"):
-        # Groq's documented built-in browser-search example does not combine the
-        # tool with response_format. The provider rejects that combination with
-        # invalid_request_error, so keep the JSON-only requirement in the prompt.
+        # Browser Search is supported by current GPT-OSS models on Groq.
+        # Structured outputs are intentionally omitted because Browser Search is
+        # incompatible with response_format.
         body["tools"] = [{"type": "browser_search"}]
+        body["tool_choice"] = "required"
         return body
     body["response_format"] = {"type": "json_object"}
     return body
@@ -275,6 +272,13 @@ def call_openai_once(doc: dict[str, Any], source_text: str, source_processing: d
                 base.write_output("selected", "false")
                 base.write_output("reason", "api_rate_limited")
                 raise RuntimeError("Groq API HTTP 429 (api_rate_limited); defer until next scheduled slot")
+
+            if response.status_code == 413:
+                # Do not repeat an oversized request in the same slot. Daily Guarantee
+                # immediately switches to a pre-validated reserve article.
+                base.write_output("selected", "false")
+                base.write_output("reason", "api_payload_too_large")
+                raise RuntimeError("Groq API HTTP 413 (api_payload_too_large); use reserve fallback")
 
             has_fallback = index + 1 < len(models)
             if response.status_code in PROVIDER_REJECTION_STATUSES and has_fallback:
