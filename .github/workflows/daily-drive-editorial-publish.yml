@@ -6,6 +6,11 @@ on:
       - main
     paths:
       - '.github/workflows/daily-drive-editorial-publish.yml'
+      - 'scripts/generate_from_drive_editorial.py'
+      - 'scripts/run_drive_editorial_resilient.py'
+      - 'scripts/lhub_daily_guarantee.py'
+      - 'scripts/publication_fact_gate.py'
+      - 'fallback/lhub/**'
   workflow_dispatch:
     inputs:
       document_id:
