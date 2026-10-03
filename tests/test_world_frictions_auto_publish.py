@@ -20,8 +20,9 @@ class WorldFrictionsAutoPublishTests(unittest.TestCase):
         self.assertIn("push:", text)
         self.assertIn("workflow_dispatch:", text)
         self.assertIn("cancel-in-progress: false", text)
-        self.assertIn("WORLD_FRICTIONS_SCORE_THRESHOLD: '86'", text)
-        self.assertIn("WORLD_FRICTIONS_REVIEW_THRESHOLD: '88'", text)
+        self.assertIn("WORLD_FRICTIONS_GROQ_FALLBACK_MODEL", text)
+        self.assertNotIn("WORLD_FRICTIONS_SCORE_THRESHOLD", text)
+        self.assertNotIn("WORLD_FRICTIONS_REVIEW_THRESHOLD", text)
 
     def test_workflow_has_daily_idempotency_and_midnight_drift_guard(self):
         text = WORKFLOW.read_text(encoding="utf-8")
@@ -48,15 +49,16 @@ class WorldFrictionsAutoPublishTests(unittest.TestCase):
         self.assertIn('"tool_choice": "required"', text)
         self.assertIn('"web_search_call.action.sources"', text)
         self.assertIn("validate_review", text)
-        self.assertIn("factual confidence", text)
-        self.assertIn("source quality", text)
-        self.assertIn("reputational risk", text)
+        self.assertIn("facts_supported", text)
+        self.assertIn("source_set_sufficient", text)
+        self.assertIn("risk_acceptable", text)
 
-    def test_generator_can_skip_instead_of_publishing_filler(self):
+    def test_generator_uses_hard_gates_instead_of_scores(self):
         text = GENERATOR.read_text(encoding="utf-8")
-        self.assertIn("Never publish filler", text)
+        self.assertNotIn("score-threshold", text)
+        self.assertNotIn("review-threshold", text)
+        self.assertIn("Publish by default", text)
         self.assertIn('publish="false"', text)
-        self.assertIn("No article was published", text)
 
     def test_generator_produces_canonical_pair_and_distribution_bundle(self):
         text = GENERATOR.read_text(encoding="utf-8")
@@ -82,9 +84,9 @@ class WorldFrictionsAutoPublishTests(unittest.TestCase):
         text = CONTRACT.read_text(encoding="utf-8")
         self.assertIn("自動公開", text)
         self.assertIn("ハッチの事前確認を必須としません", text)
-        self.assertIn("基準を満たさなければ公開しません", text)
+        self.assertIn("hard gateを満たさない場合は公開を見送ります", text)
         self.assertIn("再試行", text)
-        self.assertIn("1日最大1本", text)
+        self.assertIn("同日重複を防ぎます", text)
 
 
 if __name__ == "__main__":
