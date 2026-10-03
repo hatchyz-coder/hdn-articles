@@ -30,7 +30,7 @@ ROTATE_REASONS = {
 STOP_REASONS = {
     "no_candidate", "dry_run",
     "api_rate_limited", "api_quota_exhausted", "api_unconfigured",
-    "api_model_unavailable",
+    "api_model_unavailable", "api_payload_too_large",
 }
 DEFAULT_MAX_ATTEMPTS = 4
 DEFAULT_BACKOFF_SECONDS = 8
