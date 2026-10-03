@@ -35,6 +35,7 @@ FALLBACK_REASONS = {
     "completed_without_selection",
     "rotation_attempts_exhausted",
     "api_timeout",
+    "api_payload_too_large",
     "os_timeout",
     "low_score",
     "duplicate_source",

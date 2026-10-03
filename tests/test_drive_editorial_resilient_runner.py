@@ -66,6 +66,13 @@ class DriveEditorialResilientRunnerTests(unittest.TestCase):
         self.assertFalse(retry)
         self.assertEqual(reason, "api_model_unavailable")
 
+    def test_payload_too_large_stops_without_retry_storm(self):
+        retry, reason = resilient.should_continue(
+            1, {"selected": False, "reason": "api_payload_too_large"},
+        )
+        self.assertFalse(retry)
+        self.assertEqual(reason, "api_payload_too_large")
+
     def test_daily_workflow_configures_free_research_fallback(self):
         workflow = (ROOT / ".github/workflows/daily-drive-editorial-publish.yml").read_text(
             encoding="utf-8"
@@ -80,7 +87,7 @@ class DriveEditorialResilientRunnerTests(unittest.TestCase):
         section = workflow.split("      - name: Generate article and channel drafts", 1)[1]
         section = section.split("      - name: Build and validate site", 1)[0]
         self.assertIn("GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}", section)
-        self.assertIn("HDN_GROQ_MODEL: ${{ vars.HDN_GROQ_MODEL || 'groq/compound' }}", section)
+        self.assertIn("HDN_GROQ_MODEL: ${{ vars.HDN_GROQ_MODEL || 'openai/gpt-oss-20b' }}", section)
 
     def test_parse_github_outputs_uses_last_value(self):
         outputs = resilient.parse_github_outputs("selected=false\nreason=api_timeout\nreason=generated\n")

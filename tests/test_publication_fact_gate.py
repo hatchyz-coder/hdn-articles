@@ -88,5 +88,17 @@ LINE Pay の終了を見越し、PayPayなど代替プラットフォームへ�
         )))
 
 
+    def test_safe_repair_generalizes_unverified_product_feature(self):
+        original = article(
+            'LHubからPayPay APIへ接続できます。\n'
+            '利用者が迷わないよう、次の行動を一つに絞ります。'
+        )
+        repaired = gate.repair_markdown(original)
+        self.assertTrue(repaired['accepted'])
+        self.assertTrue(repaired['gate']['publication_fact_gate'])
+        self.assertIn('特定製品の未確認機能を前提にせず', repaired['markdown'])
+        self.assertNotIn('LHubからPayPay APIへ接続できます。', repaired['markdown'])
+
+
 if __name__ == '__main__':
     unittest.main()

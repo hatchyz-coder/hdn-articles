@@ -43,30 +43,56 @@ def _retry_wait(r:requests.Response,attempt:int)->float:
     except Exception: pass
     return min(20*(attempt+1),120)
 
+DECOMMISSIONED_GROQ_MODELS={"groq/compound","groq/compound-mini"}
+
+def _groq_models():
+    primary=os.getenv("WORLD_FRICTIONS_GROQ_MODEL","openai/gpt-oss-20b").strip()
+    fallback=os.getenv("WORLD_FRICTIONS_GROQ_FALLBACK_MODEL","openai/gpt-oss-20b").strip()
+    return list(dict.fromkeys(
+        x for x in (primary,fallback,"openai/gpt-oss-20b")
+        if x and x not in DECOMMISSIONED_GROQ_MODELS
+    ))
+
 def _groq_call(*,instructions:str,input_text:str,max_output_tokens:int,web_search:bool):
     key=os.getenv("GROQ_API_KEY")
     if not key: raise RuntimeError("GROQ_API_KEY is not configured")
-    model=os.getenv("WORLD_FRICTIONS_GROQ_MODEL","groq/compound")
-    request_text=("Use built-in web search and visit websites as needed. Return raw JSON only. Every source URL included in JSON must come from actual web research. Be concise while preserving required fields.\n\n"+input_text) if web_search else input_text
-    body={"model":model,"messages":[{"role":"system","content":instructions},{"role":"user","content":request_text}],"max_completion_tokens":min(max_output_tokens,6000),"response_format":{"type":"json_object"}}
-    if web_search and model.startswith("groq/compound"): body["compound_custom"]={"tools":{"enabled_tools":["web_search","visit_website"]}}
-    response=None
-    for attempt in range(4):
-        response=requests.post("https://api.groq.com/openai/v1/chat/completions",timeout=600,headers={"Authorization":f"Bearer {key}","Content-Type":"application/json","Groq-Model-Version":"latest"},json=body)
-        if response.ok: break
-        if response.status_code!=429: raise RuntimeError(f"Groq API failed ({response.status_code}): {response.text[:1000]}")
-        wait=_retry_wait(response,attempt); print(f"GROQ_RATE_LIMIT: waiting {wait:.1f}s before retry {attempt+2}/4"); time.sleep(wait)
-    if response is None or not response.ok: raise RuntimeError(f"Groq API failed ({response.status_code if response else 'unknown'}): {response.text[:1000] if response else 'no response'}")
-    payload=response.json(); choices=payload.get("choices") or []
-    if not choices: raise RuntimeError("Groq response did not contain choices")
-    message=choices[0].get("message") or {}; text=str(message.get("content") or "").strip(); urls=[]
-    for tool in message.get("executed_tools") or []:
-        if not isinstance(tool,dict): continue
-        sr=tool.get("search_results") or {}; results=sr.get("results") if isinstance(sr,dict) else None
-        if isinstance(results,list):
-            for item in results:
-                if isinstance(item,dict) and isinstance(item.get("url"),str): urls.append(item["url"])
-    return _json_from_text(text),_synthetic_payload(text,urls)
+    request_text=("Use built-in browser search as needed. Return raw JSON only. Every source URL included in JSON must come from actual web research. Be concise while preserving required fields.\n\n"+input_text) if web_search else input_text
+    errors=[]
+    for model in _groq_models():
+        body={"model":model,"messages":[{"role":"system","content":instructions},{"role":"user","content":request_text}],"max_completion_tokens":min(max_output_tokens,5000)}
+        if web_search and model.startswith("openai/gpt-oss-"):
+            body["tools"]=[{"type":"browser_search"}]
+            body["tool_choice"]="required"
+        else:
+            body["response_format"]={"type":"json_object"}
+        response=None
+        for attempt in range(4):
+            response=requests.post("https://api.groq.com/openai/v1/chat/completions",timeout=600,headers={"Authorization":f"Bearer {key}","Content-Type":"application/json","Groq-Model-Version":"latest"},json=body)
+            if response.ok: break
+            if response.status_code==429:
+                errors.append(f"{model}: rate_limited")
+                print(f"GROQ_RATE_LIMIT model={model}: stop this slot and use the next scheduled retry")
+                break
+            if response.status_code in {400,404,422}:
+                errors.append(f"{model}: {response.status_code} {response.text[:300]}")
+                print(f"GROQ_MODEL_FALLBACK: model={model} status={response.status_code}")
+                break
+            raise RuntimeError(f"Groq API failed ({response.status_code}): {response.text[:1000]}")
+        if response is None or not response.ok:
+            if response is not None and response.status_code==429:
+                errors.append(f"{model}: rate_limited")
+            continue
+        payload=response.json(); choices=payload.get("choices") or []
+        if not choices: errors.append(f"{model}: no choices"); continue
+        message=choices[0].get("message") or {}; text=str(message.get("content") or "").strip(); urls=[]
+        for tool in message.get("executed_tools") or []:
+            if not isinstance(tool,dict): continue
+            sr=tool.get("search_results") or {}; results=sr.get("results") if isinstance(sr,dict) else None
+            if isinstance(results,list):
+                for item in results:
+                    if isinstance(item,dict) and isinstance(item.get("url"),str): urls.append(item["url"])
+        return _json_from_text(text),_synthetic_payload(text,urls)
+    raise RuntimeError("Groq models failed: "+" | ".join(errors))
 
 def _openai_call(*,model:str,instructions:str,input_text:str,max_output_tokens:int,web_search:bool):
     return core._ORIGINAL_CALL_OPENAI(model=model,instructions=instructions,input_text=input_text,max_output_tokens=max_output_tokens,web_search=web_search)
@@ -82,7 +108,7 @@ def provider_call_openai(*,model:str,instructions:str,input_text:str,max_output_
             if provider=="openai": return _openai_call(model=model,instructions=instructions,input_text=input_text,max_output_tokens=max_output_tokens,web_search=web_search)
             errors.append(f"{provider}: unsupported provider")
         except Exception as exc: errors.append(f"{provider}: {exc}"); print(f"PROVIDER_FAIL: {provider}: {exc}")
-    reason="All configured World Frictions providers failed: "+" | ".join(errors); core.write_github_output(publish="false",reason=reason,score=0); core.write_summary(["## World Frictions provider failure","",reason]); raise RuntimeError(reason)
+    reason="All configured World Frictions providers failed: "+" | ".join(errors); core.write_github_output(publish="false",reason=reason); core.write_summary(["## World Frictions provider failure","",reason]); raise RuntimeError(reason)
 
 def main()->int:
     core._ORIGINAL_CALL_OPENAI=core.call_openai; core.call_openai=provider_call_openai; return core.main()
