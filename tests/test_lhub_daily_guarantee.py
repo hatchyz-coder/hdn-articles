@@ -31,9 +31,9 @@ class LHubDailyGuaranteeTests(unittest.TestCase):
                 ["today"],
             )
 
-    def test_all_fifteen_reserves_are_valid_and_fact_gated(self):
+    def test_reserve_pool_is_valid_fact_gated_and_replenished(self):
         paths = sorted((ROOT / "fallback" / "lhub").glob("*.json"))
-        self.assertEqual(len(paths), 15)
+        self.assertGreaterEqual(len(paths), 29)
         for path in paths:
             data = json.loads(path.read_text(encoding="utf-8"))
             jp, en = guarantee.validate_reserve(data, "2026-09-27")
@@ -41,6 +41,11 @@ class LHubDailyGuaranteeTests(unittest.TestCase):
             self.assertTrue(evaluate(en)["publication_fact_gate"], path.name)
             self.assertGreaterEqual(guarantee.body_char_count(jp), 2000)
             self.assertLessEqual(guarantee.body_char_count(jp), 3000)
+        self.assertGreaterEqual(
+            len(guarantee.unused_reserve_slugs(ROOT / "fallback" / "lhub", {})),
+            14,
+        )
+        self.assertIn("api_payload_too_large", guarantee.FALLBACK_REASONS)
 
     def test_used_or_existing_reserve_is_not_selected(self):
         with tempfile.TemporaryDirectory() as tmp:
