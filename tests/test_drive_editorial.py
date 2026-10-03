@@ -65,40 +65,37 @@ class DriveEditorialTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "description must be 60-160"):
             editorial._fit_description("短すぎます", 60, 160, "description")
 
-    def test_compound_request_uses_documented_minimal_shape(self):
-        body = editorial._groq_request_body("groq/compound-mini", "instructions", "payload")
-        self.assertNotIn("response_format", body)
-        self.assertNotIn("compound_custom", body)
-        self.assertNotIn("tools", body)
+    def test_decommissioned_models_are_filtered_before_request(self):
+        with mock.patch.dict(
+            editorial.os.environ,
+            {
+                "HDN_GROQ_MODEL": "groq/compound-mini",
+                "HDN_GROQ_FALLBACK_MODEL": "groq/compound",
+            },
+            clear=False,
+        ):
+            self.assertEqual(editorial._groq_models(), ["openai/gpt-oss-20b"])
 
-    def test_gpt_oss_fallback_uses_documented_browser_search_shape(self):
+    def test_gpt_oss_browser_search_shape_is_bounded(self):
         body = editorial._groq_request_body("openai/gpt-oss-20b", "instructions", "payload")
         self.assertEqual(body["tools"], [{"type": "browser_search"}])
+        self.assertEqual(body["tool_choice"], "required")
         self.assertNotIn("response_format", body)
+        self.assertLessEqual(body["max_completion_tokens"], 5000)
         self.assertIn("return a single JSON object", body["messages"][1]["content"])
 
-    def test_provider_rejection_falls_back_once(self):
+    def test_stale_model_variables_still_call_current_model_only(self):
         class FakeResponse:
-            def __init__(self, status_code, payload):
-                self.status_code = status_code
-                self._payload = payload
-
+            status_code = 200
             def json(self):
-                return self._payload
-
+                return {"choices": [{"message": {"content": '{"ok": true}'}}]}
             def raise_for_status(self):
-                if self.status_code >= 400:
-                    raise RuntimeError(f"HTTP {self.status_code}")
+                return None
 
-        responses = [
-            FakeResponse(404, {"error": {"code": "model_not_available"}}),
-            FakeResponse(200, {"choices": [{"message": {"content": '{"ok": true}'}}]}),
-        ]
         posted_models = []
-
         def fake_post(_url, **kwargs):
             posted_models.append(kwargs["json"]["model"])
-            return responses.pop(0)
+            return FakeResponse()
 
         timer = editorial.base.RunTimer()
         with mock.patch.dict(
@@ -106,25 +103,22 @@ class DriveEditorialTests(unittest.TestCase):
             {
                 "GROQ_API_KEY": "test-key",
                 "HDN_GROQ_MODEL": "groq/compound-mini",
-                "HDN_GROQ_FALLBACK_MODEL": "openai/gpt-oss-20b",
+                "HDN_GROQ_FALLBACK_MODEL": "groq/compound",
             },
             clear=False,
-        ), mock.patch.object(editorial.requests, "post", side_effect=fake_post, create=True), mock.patch.object(
-            editorial.requests, "Timeout", TimeoutError, create=True
-        ):
+        ), mock.patch.object(editorial.requests, "post", side_effect=fake_post):
             result = editorial.call_openai_once({}, "seed", {}, timer, False)
 
         self.assertEqual(result, {"ok": True})
-        self.assertEqual(posted_models, ["groq/compound-mini", "openai/gpt-oss-20b"])
+        self.assertEqual(posted_models, ["openai/gpt-oss-20b"])
 
-
-    def test_daily_drive_defaults_avoid_rejected_and_oversized_models(self):
-        self.assertEqual(editorial.DEFAULT_GROQ_MODEL, "groq/compound-mini")
+    def test_daily_drive_defaults_use_current_model(self):
+        self.assertEqual(editorial.DEFAULT_GROQ_MODEL, "openai/gpt-oss-20b")
         self.assertEqual(editorial.DEFAULT_GROQ_FALLBACK_MODEL, "openai/gpt-oss-20b")
 
     def test_daily_drive_bounds_private_seed_and_existing_title_context(self):
-        self.assertEqual(editorial.MAX_SEED_CHARS, 12000)
-        self.assertEqual(editorial.MAX_EXISTING_TITLES, 40)
+        self.assertEqual(editorial.MAX_SEED_CHARS, 8000)
+        self.assertEqual(editorial.MAX_EXISTING_TITLES, 24)
 
     def test_healthcare_seed_scores_above_off_brand_seed_for_diagnostics_only(self):
         self.assertGreater(editorial.relevance_score("クリニックのLINE患者導線改善"), 0)
