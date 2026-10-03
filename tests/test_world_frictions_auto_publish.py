@@ -21,6 +21,8 @@ class WorldFrictionsAutoPublishTests(unittest.TestCase):
         self.assertIn("workflow_dispatch:", text)
         self.assertIn("cancel-in-progress: false", text)
         self.assertIn("WORLD_FRICTIONS_GROQ_FALLBACK_MODEL", text)
+        self.assertIn("openai/gpt-oss-20b", text)
+        self.assertNotIn("|| \'groq/compound\'", text)
         self.assertNotIn("WORLD_FRICTIONS_SCORE_THRESHOLD", text)
         self.assertNotIn("WORLD_FRICTIONS_REVIEW_THRESHOLD", text)
 
