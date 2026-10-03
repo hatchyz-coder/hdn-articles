@@ -33,7 +33,7 @@ class LHubDailyGuaranteeTests(unittest.TestCase):
 
     def test_reserve_pool_is_valid_fact_gated_and_replenished(self):
         paths = sorted((ROOT / "fallback" / "lhub").glob("*.json"))
-        self.assertGreaterEqual(len(paths), 29)
+        self.assertGreaterEqual(len(paths), 30)
         for path in paths:
             data = json.loads(path.read_text(encoding="utf-8"))
             jp, en = guarantee.validate_reserve(data, "2026-09-27")
@@ -43,7 +43,7 @@ class LHubDailyGuaranteeTests(unittest.TestCase):
             self.assertLessEqual(guarantee.body_char_count(jp), 3000)
         self.assertGreaterEqual(
             len(guarantee.unused_reserve_slugs(ROOT / "fallback" / "lhub", {})),
-            14,
+            15,
         )
         self.assertIn("api_payload_too_large", guarantee.FALLBACK_REASONS)
 

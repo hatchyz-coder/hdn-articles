@@ -71,7 +71,7 @@ jobs:
           # Mon/Wed/Fri publication day. This prevents a heavily delayed run from
           # drifting across midnight and creating an unintended next-day article.
           normal_day = weekday in {1, 3, 5}
-          eligible_event = event_name == 'workflow_dispatch' or normal_day
+          eligible_event = event_name in {'workflow_dispatch', 'push'} or normal_day
 
           already_published = False
           existing_slug = ''

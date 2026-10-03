@@ -116,6 +116,10 @@ class DriveEditorialTests(unittest.TestCase):
         self.assertEqual(editorial.DEFAULT_GROQ_MODEL, "openai/gpt-oss-20b")
         self.assertEqual(editorial.DEFAULT_GROQ_FALLBACK_MODEL, "openai/gpt-oss-20b")
 
+    def test_provider_json_allows_literal_control_characters(self):
+        raw = '{"text":"line1\nline2"}'.replace('\\n', '\n')
+        self.assertEqual(editorial.json.loads(raw, strict=False)["text"], "line1\nline2")
+
     def test_daily_drive_bounds_private_seed_and_existing_title_context(self):
         self.assertEqual(editorial.MAX_SEED_CHARS, 8000)
         self.assertEqual(editorial.MAX_EXISTING_TITLES, 24)

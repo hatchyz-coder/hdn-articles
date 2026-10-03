@@ -317,7 +317,7 @@ def call_openai_once(doc: dict[str, Any], source_text: str, source_processing: d
                     chunks.append(content.get("text", ""))
         output_text = "\n".join(chunks)
     output_text = re.sub(r"^```(?:json)?\s*|\s*```$", "", output_text.strip(), flags=re.I | re.S)
-    return json.loads(output_text)
+    return json.loads(output_text, strict=False)
 
 
 def _existing_titles() -> list[str]:
