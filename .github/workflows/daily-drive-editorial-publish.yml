@@ -93,7 +93,7 @@ jobs:
         env:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          HDN_GROQ_MODEL: ${{ vars.HDN_GROQ_MODEL || 'groq/compound-mini' }}
+          HDN_GROQ_MODEL: ${{ vars.HDN_GROQ_MODEL || 'openai/gpt-oss-20b' }}
           HDN_GROQ_FALLBACK_MODEL: ${{ vars.HDN_GROQ_FALLBACK_MODEL || 'openai/gpt-oss-20b' }}
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
           DRIVE_EDITORIAL_FOLDER_ID: ${{ vars.GOOGLE_DRIVE_LHUB_ARCHIVE_FOLDER_ID }}
