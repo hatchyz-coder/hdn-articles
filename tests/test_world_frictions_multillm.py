@@ -28,7 +28,8 @@ class WorldFrictionsMultiLLMTests(unittest.TestCase):
 
     def test_provider_outage_is_clean_skip_not_workflow_failure(self):
         text = WRAPPER.read_text(encoding="utf-8")
-        self.assertIn("SKIP_PROVIDER_UNAVAILABLE", text)
+        self.assertIn("PROVIDER_UNAVAILABLE_USING_RESERVE", text)
+        self.assertIn("reserve.materialize_reserve", text)
         self.assertIn('str(exc).startswith("All configured World Frictions providers failed:")', text)
         self.assertIn("return 0", text)
 
