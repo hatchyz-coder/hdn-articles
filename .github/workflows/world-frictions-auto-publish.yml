@@ -21,6 +21,10 @@ on:
       - main
     paths:
       - '.github/workflows/world-frictions-auto-publish.yml'
+      - 'scripts/generate_world_frictions.py'
+      - 'scripts/generate_world_frictions_multillm.py'
+      - 'tests/test_world_frictions_auto_publish.py'
+      - 'tests/test_world_frictions_multillm.py'
   workflow_dispatch:
 
 permissions:
