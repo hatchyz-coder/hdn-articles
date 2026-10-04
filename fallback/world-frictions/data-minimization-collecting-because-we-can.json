@@ -1,0 +1,50 @@
+{
+  "slug": "data-minimization-collecting-because-we-can",
+  "title": "【取れるデータは、全部取るべきなのか】データ最小化と「念のため収集」の違和感",
+  "social_title": "集められるデータと、集めるべきデータは違う",
+  "description": "データが多いほど分析できることは増えます。しかし保有する情報が増えるほど、説明、管理、漏えい時の影響も増えます。データ最小化を実務から考えます。",
+  "summary": "「後で使うかもしれない」で集めた情報は、ずっと管理対象になります。収集できることと必要であることを分けて考えます。",
+  "tags": [
+    "世界の違和感",
+    "プライバシー",
+    "データ",
+    "ガバナンス"
+  ],
+  "title_en": "Just Because Data Can Be Collected Does Not Mean It Should Be",
+  "social_title_en": "The hidden cost of collecting data just in case",
+  "description_en": "More data can expand analytical options, but it also expands explanation, governance, and breach impact. Data minimization is an operational design principle.",
+  "summary_en": "Data collected 'just in case' becomes a permanent governance obligation. Capability to collect is not the same as necessity to collect.",
+  "tags_en": [
+    "World Frictions",
+    "Privacy",
+    "Data",
+    "Governance"
+  ],
+  "topic": "データ最小化",
+  "tension": "将来使うかもしれない情報を集めるほど、現在の管理責任が膨らみやすい",
+  "question": "その情報がなくても目的を達成できるなら、本当に収集する必要があるでしょうか",
+  "practice": "フォームやデータ項目ごとに、利用目的、保存期間、閲覧者、削除条件を一行で説明できるか確認します",
+  "lens": "データ量を資産だけでなく、継続的な管理義務としても評価する必要があります",
+  "topic_en": "data minimization",
+  "tension_en": "collecting information for possible future use creates immediate and continuing governance obligations",
+  "question_en": "If the purpose can be achieved without a data field, is collecting it actually necessary?",
+  "practice_en": "For each field, document purpose, retention, access, and deletion conditions in one clear line.",
+  "lens_en": "Data volume should be evaluated not only as an asset but also as a continuing governance obligation.",
+  "sources": [
+    {
+      "title": "EU General Data Protection Regulation",
+      "url": "https://eur-lex.europa.eu/eli/reg/2016/679/oj",
+      "kind": "primary"
+    },
+    {
+      "title": "NIST Privacy Framework",
+      "url": "https://www.nist.gov/privacy-framework",
+      "kind": "primary"
+    },
+    {
+      "title": "OECD Privacy and Data Protection",
+      "url": "https://www.oecd.org/en/topics/sub-issues/privacy-and-data-protection.html",
+      "kind": "primary"
+    }
+  ]
+}
