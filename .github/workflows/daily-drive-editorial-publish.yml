@@ -11,6 +11,9 @@ on:
       - 'scripts/lhub_daily_guarantee.py'
       - 'scripts/publication_fact_gate.py'
       - 'fallback/lhub/**'
+      - 'tests/test_lhub_daily_guarantee.py'
+      - 'tests/test_drive_editorial.py'
+      - 'tests/test_drive_editorial_resilient_runner.py'
   workflow_dispatch:
     inputs:
       document_id:
