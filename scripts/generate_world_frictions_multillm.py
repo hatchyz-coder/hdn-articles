@@ -112,8 +112,24 @@ def provider_call_openai(*,model:str,instructions:str,input_text:str,max_output_
 def main()->int:
     core._ORIGINAL_CALL_OPENAI=core.call_openai
     core.call_openai=provider_call_openai
+    captured={}
+    original_write=core.write_github_output
+
+    def capture_outputs(**values):
+        captured.update(values)
+        publish=values.get("publish")
+        if publish in {False, "false"}:
+            return
+        original_write(**values)
+
+    core.write_github_output=capture_outputs
     try:
-        return core.main()
+        result=core.main()
+        if captured.get("publish") in {False, "false"}:
+            reason=str(captured.get("reason") or "fresh_path_not_publishable")
+            print(f"FRESH_PATH_UNAVAILABLE_USING_RESERVE: {reason}")
+            reserve.materialize_reserve(reason)
+        return result
     except RuntimeError as exc:
         if str(exc).startswith("All configured World Frictions providers failed:"):
             print(f"PROVIDER_UNAVAILABLE_USING_RESERVE: {exc}")
