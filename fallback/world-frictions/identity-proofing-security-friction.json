@@ -1,0 +1,50 @@
+{
+  "slug": "identity-proofing-security-friction",
+  "title": "【本人確認を厳しくするほど、本当に安全になるのか】認証と利用者負担の違和感",
+  "social_title": "本人確認の厳格化は、どこまで利用者に負担させるのか",
+  "description": "本人確認を厳しくすれば安全性は上がるように見えます。しかし手順を増やすだけでは、利用者体験と例外対応の負担が膨らみます。安全と摩擦の設計を考えます。",
+  "summary": "本人確認は安全性のために必要です。ただし、手順の多さと安全性は同じではありません。利用者負担を構造から見直します。",
+  "tags": [
+    "世界の違和感",
+    "本人確認",
+    "セキュリティ",
+    "UX"
+  ],
+  "title_en": "Does Stricter Identity Proofing Always Mean Better Security?",
+  "social_title_en": "Security, identity proofing, and user friction",
+  "description_en": "Identity proofing improves assurance, but more steps do not automatically mean better design. Security and user friction need to be evaluated together.",
+  "summary_en": "Identity assurance matters, but security should not be confused with procedural complexity. The burden on users and support teams is part of the design.",
+  "tags_en": [
+    "World Frictions",
+    "Identity",
+    "Security",
+    "UX"
+  ],
+  "topic": "本人確認と認証",
+  "tension": "安全性を高めるための手順が、利用者とサポート担当者の追加負担になりやすい",
+  "question": "本人確認の強度を上げる時、失敗した利用者が戻れる経路まで設計されているでしょうか",
+  "practice": "認証成功率だけでなく、途中離脱、再試行、問い合わせ、代替手段の有無を一緒に観察します",
+  "lens": "安全性と利用者体験は相反するものではなく、同じリスク設計の中で調整する必要があります",
+  "topic_en": "identity proofing and authentication",
+  "tension_en": "security procedures can shift operational burden to users and support teams",
+  "question_en": "When assurance requirements increase, is there a usable recovery path for people who cannot complete the standard flow?",
+  "practice_en": "Track retries, abandonment, support contacts, and recovery options alongside authentication success.",
+  "lens_en": "Security and customer experience should be treated as parts of the same risk design problem.",
+  "sources": [
+    {
+      "title": "NIST SP 800-63A-4 Identity Proofing and Enrollment",
+      "url": "https://csrc.nist.gov/pubs/sp/800/63/A/4/final",
+      "kind": "primary"
+    },
+    {
+      "title": "NIST SP 800-63-4 Digital Identity Guidelines",
+      "url": "https://csrc.nist.gov/pubs/sp/800/63/4/final",
+      "kind": "primary"
+    },
+    {
+      "title": "NIST Digital Identity Guidelines Revision 4",
+      "url": "https://pages.nist.gov/800-63-4/",
+      "kind": "primary"
+    }
+  ]
+}
