@@ -1,0 +1,50 @@
+{
+  "slug": "ai-human-oversight-paper-control",
+  "title": "【人が監督している、で本当に十分か】AIと「名目上の人間確認」の違和感",
+  "social_title": "AIの最後に人を置けば、それで人間の監督になるのか",
+  "description": "AIの判断に人間の確認を加える設計は安心に見えます。しかし情報量や時間が足りなければ、確認は形式だけになります。人間の監督を実務から考えます。",
+  "summary": "AIの後ろに人を置くだけでは、監督が機能するとは限りません。人が本当に判断できる条件を考えます。",
+  "tags": [
+    "世界の違和感",
+    "AI",
+    "人間の監督",
+    "ガバナンス"
+  ],
+  "title_en": "Is Human Oversight Real if the Human Cannot Meaningfully Intervene?",
+  "social_title_en": "The difference between oversight and rubber-stamping",
+  "description_en": "Adding a human reviewer after an AI decision can look reassuring, but oversight fails if the person lacks time, context, or authority to intervene.",
+  "summary_en": "A human in the loop is not automatically meaningful oversight. The real question is whether the person can understand, challenge, and change the outcome.",
+  "tags_en": [
+    "World Frictions",
+    "AI",
+    "Human Oversight",
+    "Governance"
+  ],
+  "topic": "AIの人間監督",
+  "tension": "人を最後に置くだけで監督したことになり、実際の判断権限や情報が不足しやすい",
+  "question": "確認担当者には、AIの結果を覆すための情報、時間、権限が本当に与えられているでしょうか",
+  "practice": "一つのAI判断について、人が見られる情報、判断時間、変更権限、エスカレーション先を明文化します",
+  "lens": "監督の有無ではなく、監督が実際に機能できる条件が揃っているかを見る必要があります",
+  "topic_en": "human oversight of AI",
+  "tension_en": "placing a person at the end of a workflow can create the appearance of oversight without meaningful authority",
+  "question_en": "Does the reviewer actually have the information, time, and authority needed to overturn the AI output?",
+  "practice_en": "Document what information the reviewer can see, how much time is available, what can be changed, and where escalation goes.",
+  "lens_en": "The relevant question is not whether a human is present, but whether meaningful intervention is possible.",
+  "sources": [
+    {
+      "title": "NIST AI Risk Management Framework",
+      "url": "https://www.nist.gov/itl/ai-risk-management-framework",
+      "kind": "primary"
+    },
+    {
+      "title": "NIST AI Resource Center",
+      "url": "https://airc.nist.gov/",
+      "kind": "primary"
+    },
+    {
+      "title": "EU Artificial Intelligence Act",
+      "url": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+      "kind": "primary"
+    }
+  ]
+}
