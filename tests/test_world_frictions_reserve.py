@@ -44,7 +44,9 @@ class WorldFrictionsReserveTests(unittest.TestCase):
     def test_runtime_fallback_is_wired_into_multillm_runner(self):
         text = (SCRIPTS / "generate_world_frictions_multillm.py").read_text(encoding="utf-8")
         self.assertIn("PROVIDER_UNAVAILABLE_USING_RESERVE", text)
+        self.assertIn("FRESH_PATH_UNAVAILABLE_USING_RESERVE", text)
         self.assertIn("reserve.materialize_reserve", text)
+        self.assertIn("capture_outputs", text)
         self.assertNotIn("SKIP_PROVIDER_UNAVAILABLE", text)
 
     def test_workflow_exposes_reserve_inventory(self):

@@ -36,7 +36,8 @@ class WorldFrictionsMultiLLMTests(unittest.TestCase):
     def test_legacy_editorial_gates_remain_in_control(self):
         text = WRAPPER.read_text(encoding="utf-8")
         self.assertIn("core.call_openai=provider_call_openai", text)
-        self.assertIn("return core.main()", text)
+        self.assertIn("result=core.main()", text)
+        self.assertIn("return result", text)
 
     def test_workflow_routes_through_groq_runner(self):
         text = WORKFLOW.read_text(encoding="utf-8")
