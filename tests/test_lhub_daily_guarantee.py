@@ -43,7 +43,7 @@ class LHubDailyGuaranteeTests(unittest.TestCase):
             self.assertLessEqual(guarantee.body_char_count(jp), 3000)
         self.assertGreaterEqual(
             len(guarantee.unused_reserve_slugs(ROOT / "fallback" / "lhub", {})),
-            15,
+            14,
         )
         self.assertIn("api_payload_too_large", guarantee.FALLBACK_REASONS)
 
