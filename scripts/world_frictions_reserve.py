@@ -265,12 +265,21 @@ def validate_spec(spec: dict[str, Any], *, check_duplicate: bool = True) -> tupl
     candidate = _candidate(spec)
     sources, _ = core.validate_sources(candidate["canonical"]["sources"], set())
     if check_duplicate:
-        core.check_duplicate(candidate, core.existing_world_frictions(), sources)
-    core.validate_candidate(
-        candidate,
-        existing=core.existing_world_frictions() if check_duplicate else [],
-        retrieved=set(),
-    )
+        core.validate_candidate(
+            candidate,
+            existing=core.existing_world_frictions(),
+            retrieved=set(),
+        )
+    else:
+        # Static reserve-contract validation may run after a reserve has been
+        # materialized in the same workflow workspace. Ignore only the slug/title
+        # duplicate check here; runtime selection always uses check_duplicate=True.
+        original_check_duplicate = core.check_duplicate
+        core.check_duplicate = lambda *_args, **_kwargs: None
+        try:
+            core.validate_candidate(candidate, existing=[], retrieved=set())
+        finally:
+            core.check_duplicate = original_check_duplicate
     return candidate, sources
 
 
