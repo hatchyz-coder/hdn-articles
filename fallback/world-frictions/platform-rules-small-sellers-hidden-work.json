@@ -1,0 +1,50 @@
+{
+  "slug": "platform-rules-small-sellers-hidden-work",
+  "title": "【プラットフォームが便利になるほど、出品者の作業は増えていないか】規約と運用の違和感",
+  "social_title": "便利なプラットフォームの裏で、誰が調整作業をしているのか",
+  "description": "プラットフォームは取引を簡単にします。しかし規約変更、表示条件、審査対応などの調整作業が小規模事業者へ偏ることがあります。見えない運用負担を考えます。",
+  "summary": "買い手にとって便利な仕組みの裏で、出品者や小規模事業者が細かな調整を引き受けることがあります。負担の移動を見ます。",
+  "tags": [
+    "世界の違和感",
+    "プラットフォーム",
+    "事業者",
+    "デジタル市場"
+  ],
+  "title_en": "As Platforms Become Easier to Use, Does Seller Work Increase?",
+  "social_title_en": "The hidden operational work behind convenient platforms",
+  "description_en": "Platforms simplify transactions for buyers, but rule changes, ranking conditions, and compliance work can shift operational burden toward smaller sellers.",
+  "summary_en": "A smoother marketplace for users can depend on invisible adjustment work by sellers. This piece looks at where platform convenience relocates effort.",
+  "tags_en": [
+    "World Frictions",
+    "Platforms",
+    "Small Business",
+    "Digital Markets"
+  ],
+  "topic": "プラットフォームと小規模事業者",
+  "tension": "利用者側の便利さを維持するための調整作業が、出品者や小規模事業者へ集まりやすい",
+  "question": "規約や表示条件が変わった時、その変更へ対応するコストは誰が負担しているでしょうか",
+  "practice": "規約変更、審査、商品情報修正、問い合わせ対応など、プラットフォーム運用に伴う手作業を月単位で棚卸しします",
+  "lens": "プラットフォームの効率性は、買い手の体験だけでなく参加事業者の運用コストも含めて評価する必要があります",
+  "topic_en": "platform rules and small sellers",
+  "tension_en": "convenience for buyers can concentrate adjustment and compliance work on smaller sellers",
+  "question_en": "When platform rules or visibility conditions change, who absorbs the cost of adapting to them?",
+  "practice_en": "Inventory the manual work created by rule changes, review processes, listing corrections, and support over a month.",
+  "lens_en": "Platform efficiency should include the operating cost imposed on participating businesses, not only the buyer experience.",
+  "sources": [
+    {
+      "title": "EU Platform-to-Business Regulation",
+      "url": "https://eur-lex.europa.eu/eli/reg/2019/1150/oj",
+      "kind": "primary"
+    },
+    {
+      "title": "EU Digital Services Act",
+      "url": "https://eur-lex.europa.eu/eli/reg/2022/2065/oj",
+      "kind": "primary"
+    },
+    {
+      "title": "European Commission: Platform-to-business trading practices",
+      "url": "https://digital-strategy.ec.europa.eu/en/policies/platform-business-trading-practices",
+      "kind": "primary"
+    }
+  ]
+}
