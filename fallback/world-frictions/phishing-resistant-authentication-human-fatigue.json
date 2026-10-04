@@ -1,0 +1,50 @@
+{
+  "slug": "phishing-resistant-authentication-human-fatigue",
+  "title": "【安全のための認証が、人を疲れさせていないか】多要素認証と摩擦の違和感",
+  "social_title": "認証を増やすほど安全、とは限らない",
+  "description": "多要素認証は重要ですが、確認操作を増やすだけでは認証疲れや回避行動を生みます。フィッシング耐性と利用者負担を分けて考えます。",
+  "summary": "安全性を上げるには、確認回数を増やすより攻撃に強い方式を選ぶ視点が重要です。認証疲れの構造を見ます。",
+  "tags": [
+    "世界の違和感",
+    "セキュリティ",
+    "認証",
+    "MFA"
+  ],
+  "title_en": "More Authentication Prompts Do Not Automatically Mean More Security",
+  "social_title_en": "Authentication fatigue and phishing resistance",
+  "description_en": "Multi-factor authentication matters, but adding prompts can increase fatigue without improving phishing resistance. Security quality and user burden are different questions.",
+  "summary_en": "Security should be measured by resistance to attack, not by the number of prompts a user must approve. This piece examines authentication fatigue.",
+  "tags_en": [
+    "World Frictions",
+    "Security",
+    "Authentication",
+    "MFA"
+  ],
+  "topic": "多要素認証と認証疲れ",
+  "tension": "確認操作を増やすほど安全に見える一方、利用者の疲労が回避行動を生みやすい",
+  "question": "認証回数ではなく、攻撃そのものに強い方式へ移行できているでしょうか",
+  "practice": "認証失敗、再試行、承認要求の頻度、サポート問い合わせを確認し、回数ではなく方式を見直します",
+  "lens": "セキュリティ強度と利用者の操作量を同じ尺度で評価しないことが重要です",
+  "topic_en": "multi-factor authentication and authentication fatigue",
+  "tension_en": "more prompts can look safer while encouraging fatigue and unsafe workarounds",
+  "question_en": "Are we improving resistance to attack, or merely increasing the number of actions required from the user?",
+  "practice_en": "Review failure, retry, prompt frequency, and support data, then evaluate the authentication method rather than prompt count.",
+  "lens_en": "Security strength and interaction volume are different measures and should not be confused.",
+  "sources": [
+    {
+      "title": "NIST SP 800-63B-4 Authentication and Authenticator Management",
+      "url": "https://pages.nist.gov/800-63-4/sp800-63b.html",
+      "kind": "primary"
+    },
+    {
+      "title": "NIST SP 800-63B-4 PDF",
+      "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-63B-4.pdf",
+      "kind": "primary"
+    },
+    {
+      "title": "CISA Implementing Phishing-Resistant MFA",
+      "url": "https://www.cisa.gov/resources-tools/resources/implementing-phishing-resistant-mfa",
+      "kind": "primary"
+    }
+  ]
+}
