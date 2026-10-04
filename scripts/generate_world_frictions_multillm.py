@@ -5,6 +5,7 @@ import json, os, re, time
 from typing import Any
 import requests
 import generate_world_frictions as core
+import world_frictions_reserve as reserve
 
 def _json_from_text(text:str)->dict[str,Any]:
     cleaned=re.sub(r"^```(?:json)?\s*|\s*```$","",(text or "").strip(),flags=re.I|re.S)
@@ -106,7 +107,7 @@ def provider_call_openai(*,model:str,instructions:str,input_text:str,max_output_
             if provider=="openai": return _openai_call(model=model,instructions=instructions,input_text=input_text,max_output_tokens=max_output_tokens,web_search=web_search)
             errors.append(f"{provider}: unsupported provider")
         except Exception as exc: errors.append(f"{provider}: {exc}"); print(f"PROVIDER_FAIL: {provider}: {exc}")
-    reason="All configured World Frictions providers failed: "+" | ".join(errors); core.write_github_output(publish="false",reason=reason); core.write_summary(["## World Frictions provider failure","",reason]); raise RuntimeError(reason)
+    reason="All configured World Frictions providers failed: "+" | ".join(errors); core.write_summary(["## World Frictions provider failure","",reason]); raise RuntimeError(reason)
 
 def main()->int:
     core._ORIGINAL_CALL_OPENAI=core.call_openai
@@ -115,7 +116,8 @@ def main()->int:
         return core.main()
     except RuntimeError as exc:
         if str(exc).startswith("All configured World Frictions providers failed:"):
-            print(f"SKIP_PROVIDER_UNAVAILABLE: {exc}")
+            print(f"PROVIDER_UNAVAILABLE_USING_RESERVE: {exc}")
+            reserve.materialize_reserve(str(exc))
             return 0
         raise
 if __name__=="__main__": raise SystemExit(main())

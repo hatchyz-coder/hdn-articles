@@ -1,0 +1,50 @@
+{
+  "slug": "automated-decisions-right-to-understand",
+  "title": "【判断が速くなるほど、理由は見えなくなるのか】自動意思決定と説明の違和感",
+  "social_title": "自動判断の速さと、説明できることは両立するか",
+  "description": "自動意思決定は処理を速くできます。しかし結果だけが返り、理由や訂正経路が見えなければ、利用者は判断を受け入れるしかありません。説明可能性を構造から考えます。",
+  "summary": "判断の自動化では、速度だけでなく理由を理解し、必要なら訂正できることが重要です。説明と異議申立ての設計を考えます。",
+  "tags": [
+    "世界の違和感",
+    "AI",
+    "自動意思決定",
+    "透明性"
+  ],
+  "title_en": "As Decisions Get Faster, Do Reasons Become Harder to See?",
+  "social_title_en": "Automated decisions and the right to understand",
+  "description_en": "Automated decisions can increase speed, but a result without an understandable reason or correction path leaves users unable to respond meaningfully.",
+  "summary_en": "Speed is only one property of a decision system. People also need a practical way to understand, question, and correct consequential outcomes.",
+  "tags_en": [
+    "World Frictions",
+    "AI",
+    "Automated Decisions",
+    "Transparency"
+  ],
+  "topic": "自動意思決定と説明可能性",
+  "tension": "処理速度が上がるほど、理由説明と訂正の経路が省略されやすい",
+  "question": "結果を受け取った人は、その判断の根拠を理解し、間違いを訂正する具体的な手段を持っているでしょうか",
+  "practice": "一つの自動判断について、通知内容、理由説明、訂正方法、人へのエスカレーションを同じ導線上に置けるか確認します",
+  "lens": "透明性は技術文書の公開ではなく、影響を受ける人が行動できる説明になっているかで評価すべきです",
+  "topic_en": "automated decision-making and explanation",
+  "tension_en": "faster processing can remove the explanation and correction paths that people need",
+  "question_en": "Can the affected person understand the basis of the outcome and take a concrete action when it is wrong?",
+  "practice_en": "For one automated decision, align notification, explanation, correction, and human escalation in the same user journey.",
+  "lens_en": "Transparency should be measured by whether the affected person can act on the explanation, not by the existence of technical documentation.",
+  "sources": [
+    {
+      "title": "EU Artificial Intelligence Act",
+      "url": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+      "kind": "primary"
+    },
+    {
+      "title": "OECD AI Principles",
+      "url": "https://oecd.ai/en/ai-principles",
+      "kind": "primary"
+    },
+    {
+      "title": "Council of Europe Framework Convention on AI",
+      "url": "https://www.coe.int/en/web/artificial-intelligence/the-framework-convention-on-artificial-intelligence",
+      "kind": "primary"
+    }
+  ]
+}

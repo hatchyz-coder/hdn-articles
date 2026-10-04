@@ -1,0 +1,50 @@
+{
+  "slug": "accessibility-convenience-for-whom",
+  "title": "【その便利さは、誰にとっての便利さか】アクセシビリティが後回しになる違和感",
+  "social_title": "便利なUIが、全員に便利とは限らない",
+  "description": "操作が速く、画面がすっきりしていても、使える人が限られていれば便利とは言い切れません。アクセシビリティを追加要件ではなく設計条件として考えます。",
+  "summary": "平均的な利用者に最適化した便利さが、別の利用者には壁になることがあります。便利さの対象を問い直します。",
+  "tags": [
+    "世界の違和感",
+    "アクセシビリティ",
+    "UX",
+    "デジタル"
+  ],
+  "title_en": "Convenient for Whom? Accessibility as a Design Condition",
+  "social_title_en": "Convenience is not universal",
+  "description_en": "A fast and elegant interface is not truly convenient if significant groups cannot use it. Accessibility should be treated as a design condition, not an add-on.",
+  "summary_en": "Optimizing for an average user can turn convenience into a barrier for others. Accessibility changes how we define a successful digital experience.",
+  "tags_en": [
+    "World Frictions",
+    "Accessibility",
+    "UX",
+    "Digital Design"
+  ],
+  "topic": "デジタルアクセシビリティ",
+  "tension": "平均的な利用者への最適化が、別の利用者を例外として扱いやすい",
+  "question": "便利さを評価する時、操作できなかった人の体験まで数えているでしょうか",
+  "practice": "キーボード操作、読み上げ、文字拡大、色以外の手掛かりなど、複数の利用条件で同じ導線を確認します",
+  "lens": "アクセシビリティは後付けの配慮ではなく、最初から想定する利用条件の幅として捉える必要があります",
+  "topic_en": "digital accessibility",
+  "tension_en": "optimization for an average user can push other users into exception paths",
+  "question_en": "When convenience is measured, are the experiences of people who could not complete the task included?",
+  "practice_en": "Test the same flow with keyboard use, screen reading, zoom, and non-color cues instead of relying on a single default interaction.",
+  "lens_en": "Accessibility is not an optional accommodation layer; it is part of the range of conditions a design must support.",
+  "sources": [
+    {
+      "title": "W3C Web Content Accessibility Guidelines 2.2",
+      "url": "https://www.w3.org/TR/WCAG22/",
+      "kind": "primary"
+    },
+    {
+      "title": "European Accessibility Act",
+      "url": "https://eur-lex.europa.eu/eli/dir/2019/882/oj",
+      "kind": "primary"
+    },
+    {
+      "title": "W3C Introduction to Web Accessibility",
+      "url": "https://www.w3.org/WAI/fundamentals/accessibility-intro/",
+      "kind": "primary"
+    }
+  ]
+}

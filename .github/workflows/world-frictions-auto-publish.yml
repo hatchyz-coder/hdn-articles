@@ -23,6 +23,9 @@ on:
       - '.github/workflows/world-frictions-auto-publish.yml'
       - 'scripts/generate_world_frictions.py'
       - 'scripts/generate_world_frictions_multillm.py'
+      - 'scripts/world_frictions_reserve.py'
+      - 'fallback/world-frictions/**'
+      - 'tests/test_world_frictions_reserve.py'
       - 'tests/test_world_frictions_auto_publish.py'
       - 'tests/test_world_frictions_multillm.py'
   workflow_dispatch:
@@ -151,6 +154,22 @@ jobs:
         run: |
           echo "No World Frictions article cleared the automated editorial gates."
           echo "Reason: ${{ steps.generate.outputs.reason }}"
+
+      - name: Report World Frictions reserve inventory
+        if: steps.daily_guard.outputs.run == 'true'
+        env:
+          RESERVE_REMAINING: ${{ steps.generate.outputs.reserve_remaining }}
+          RESERVE_HEALTH: ${{ steps.generate.outputs.reserve_health }}
+        run: |
+          if [ -n "$RESERVE_REMAINING" ]; then
+            echo "Reserve remaining: $RESERVE_REMAINING"
+            echo "Reserve health: $RESERVE_HEALTH"
+            if [ "$RESERVE_HEALTH" = "critical" ]; then
+              echo "::warning title=World Frictions reserve critical::Only $RESERVE_REMAINING unused reserves remain."
+            elif [ "$RESERVE_HEALTH" = "warning" ]; then
+              echo "::warning title=World Frictions reserve warning::Only $RESERVE_REMAINING unused reserves remain."
+            fi
+          fi
 
       - name: Validate complete distribution bundle
         if: steps.generate.outputs.publish == 'true'
