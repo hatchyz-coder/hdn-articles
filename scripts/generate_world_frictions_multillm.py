@@ -79,8 +79,6 @@ def _groq_call(*,instructions:str,input_text:str,max_output_tokens:int,web_searc
                 break
             raise RuntimeError(f"Groq API failed ({response.status_code}): {response.text[:1000]}")
         if response is None or not response.ok:
-            if response is not None and response.status_code==429:
-                errors.append(f"{model}: rate_limited")
             continue
         payload=response.json(); choices=payload.get("choices") or []
         if not choices: errors.append(f"{model}: no choices"); continue
@@ -111,5 +109,13 @@ def provider_call_openai(*,model:str,instructions:str,input_text:str,max_output_
     reason="All configured World Frictions providers failed: "+" | ".join(errors); core.write_github_output(publish="false",reason=reason); core.write_summary(["## World Frictions provider failure","",reason]); raise RuntimeError(reason)
 
 def main()->int:
-    core._ORIGINAL_CALL_OPENAI=core.call_openai; core.call_openai=provider_call_openai; return core.main()
+    core._ORIGINAL_CALL_OPENAI=core.call_openai
+    core.call_openai=provider_call_openai
+    try:
+        return core.main()
+    except RuntimeError as exc:
+        if str(exc).startswith("All configured World Frictions providers failed:"):
+            print(f"SKIP_PROVIDER_UNAVAILABLE: {exc}")
+            return 0
+        raise
 if __name__=="__main__": raise SystemExit(main())
