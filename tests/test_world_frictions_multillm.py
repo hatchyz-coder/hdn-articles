@@ -26,6 +26,12 @@ class WorldFrictionsMultiLLMTests(unittest.TestCase):
         self.assertIn("response.status_code==429", text)
         self.assertIn("stop this slot and use the next scheduled retry", text)
 
+    def test_provider_outage_is_clean_skip_not_workflow_failure(self):
+        text = WRAPPER.read_text(encoding="utf-8")
+        self.assertIn("SKIP_PROVIDER_UNAVAILABLE", text)
+        self.assertIn('str(exc).startswith("All configured World Frictions providers failed:")', text)
+        self.assertIn("return 0", text)
+
     def test_legacy_editorial_gates_remain_in_control(self):
         text = WRAPPER.read_text(encoding="utf-8")
         self.assertIn("core.call_openai=provider_call_openai", text)
