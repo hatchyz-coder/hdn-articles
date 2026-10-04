@@ -1,0 +1,50 @@
+{
+  "slug": "algorithmic-management-hidden-supervision",
+  "title": "【管理者が見えなくなると、管理は軽くなるのか】アルゴリズム管理の違和感",
+  "social_title": "管理者が見えないのに管理は強くなる？",
+  "description": "AIやソフトウェアが指示・評価・監視を担うほど、管理は軽く見えます。その一方で説明責任や例外対応の負担は誰に移るのか。アルゴリズム管理を構造から考えます。",
+  "summary": "人の管理者が減っても、管理そのものが消えるわけではありません。アルゴリズム管理で見えにくくなる負担の移動を考えます。",
+  "tags": [
+    "世界の違和感",
+    "AI",
+    "働き方",
+    "アルゴリズム管理"
+  ],
+  "title_en": "When the Manager Disappears, Does Management Become Lighter?",
+  "social_title_en": "The hidden burden of algorithmic management",
+  "description_en": "Algorithmic management can make supervision look lighter while shifting explanation, exception handling, and accountability elsewhere.",
+  "summary_en": "Removing a visible manager does not remove management. This piece examines where work and accountability move under algorithmic systems.",
+  "tags_en": [
+    "World Frictions",
+    "AI",
+    "Work",
+    "Algorithmic Management"
+  ],
+  "topic": "アルゴリズム管理",
+  "tension": "管理を自動化するほど、説明と例外処理だけが人へ戻りやすい",
+  "question": "評価や指示の根拠が見えにくくなった時、現場は何を基準に異議を申し立てればよいのでしょうか",
+  "practice": "まず一つの評価・指示プロセスについて、入力情報、判断結果、例外時の人の窓口を紙に書き出します",
+  "lens": "管理者の負担、働く人の負担、システム運用者の負担を別々に見る必要があります",
+  "topic_en": "algorithmic management",
+  "tension_en": "automating management can return explanation and exception handling to people without restoring context",
+  "question_en": "When the basis for an instruction or evaluation becomes less visible, what practical route exists to question or correct it?",
+  "practice_en": "Map one evaluation or instruction process from input to output and explicitly document the human path for exceptions.",
+  "lens_en": "The burden on managers, workers, and system operators should be evaluated separately.",
+  "sources": [
+    {
+      "title": "OECD: Algorithmic management in the workplace",
+      "url": "https://www.oecd.org/en/publications/algorithmic-management-in-the-workplace_287c13c4-en.html",
+      "kind": "research"
+    },
+    {
+      "title": "OECD: How widespread is algorithmic management in workplaces?",
+      "url": "https://www.oecd.org/en/publications/how-widespread-is-algorithmic-management-in-workplaces_cda7a114-en/full-report.html",
+      "kind": "research"
+    },
+    {
+      "title": "EU Platform Work Directive",
+      "url": "https://eur-lex.europa.eu/eli/dir/2024/2831/oj",
+      "kind": "primary"
+    }
+  ]
+}
