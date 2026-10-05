@@ -26,6 +26,7 @@ class WorldFrictionsReserveTests(unittest.TestCase):
             spec = json.loads(path.read_text(encoding="utf-8"))
             candidate, sources = reserve.validate_spec(spec, check_duplicate=False)
             self.assertEqual(len(sources), 3, path.name)
+            self.assertTrue(all(x["url"].startswith("https://") for x in sources), path.name)
             self.assertTrue(any(x["kind"] in {"primary", "research"} for x in sources), path.name)
             self.assertGreaterEqual(len(candidate["canonical"]["body_markdown"]), 2200, path.name)
             self.assertGreaterEqual(len(candidate["english_canonical"]["body_markdown"]), 1500, path.name)
