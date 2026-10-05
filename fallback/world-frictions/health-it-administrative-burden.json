@@ -1,0 +1,50 @@
+{
+  "slug": "health-it-administrative-burden",
+  "title": "【医療DXで入力が増えるなら、それはDXなのか】医療ITと見えない事務負担の違和感",
+  "social_title": "医療DXは、診療時間を増やしているか",
+  "description": "EHRやデジタル化は情報共有を改善できます。一方で入力、報告、テンプレート調整が増えれば、医療者の時間は患者から離れます。医療DXの負担配分を考えます。",
+  "summary": "医療DXの目的は画面を増やすことではありません。医療者の入力・報告負担まで含めて、本当に改善しているかを見ます。",
+  "tags": [
+    "世界の違和感",
+    "医療DX",
+    "EHR",
+    "業務負担"
+  ],
+  "title_en": "Is It Really Digital Transformation if Health IT Creates More Administrative Work?",
+  "social_title_en": "Health IT should return time to care, not add hidden work",
+  "description_en": "EHRs and digital health can improve information flow, but documentation and reporting burden can also pull clinicians away from patient care.",
+  "summary_en": "Digital health should improve care, not merely move administrative work onto clinicians. This piece examines the hidden burden around EHR workflows.",
+  "tags_en": [
+    "World Frictions",
+    "Digital Health",
+    "EHR",
+    "Administrative Burden"
+  ],
+  "topic": "医療DXと医療者の事務負担",
+  "tension": "情報共有を改善するためのデジタル化が、入力・報告・補正作業を医療者へ追加することがある",
+  "question": "新しいシステム導入後、医療者が患者対応以外に使う時間は本当に減っているでしょうか",
+  "practice": "導入前後で、記録、報告、再入力、テンプレート修正、問い合わせ対応に使う時間を比較します",
+  "lens": "システム導入の成功を機能数ではなく、診療に戻せた時間と安全性で評価する必要があります",
+  "topic_en": "digital health and clinician administrative burden",
+  "tension_en": "digital systems designed to improve information flow can add documentation, reporting, and correction work to clinicians",
+  "question_en": "After implementation, has the time clinicians spend away from patient care actually decreased?",
+  "practice_en": "Compare time spent on documentation, reporting, re-entry, template correction, and support before and after implementation.",
+  "lens_en": "Digital health success should be evaluated by time returned to care and safe workflow quality, not feature count.",
+  "sources": [
+    {
+      "title": "WHO Global Strategy on Digital Health 2020-2027",
+      "url": "https://www.who.int/publications/i/item/9789240116870",
+      "kind": "primary"
+    },
+    {
+      "title": "ONC Strategy on Reducing Regulatory and Administrative Burden Relating to Health IT and EHRs",
+      "url": "https://healthit.gov/resources/strategy-on-reducing-regulatory-and-administrative-burden-relating-to-the-use-of-health-it-and-ehrs/",
+      "kind": "primary"
+    },
+    {
+      "title": "ONC Final Report Delivers a Strategy to Reduce EHR Burden",
+      "url": "https://healthit.gov/blog/insights-updates/final-report-delivers-a-strategy-to-reduce-ehr-burden/",
+      "kind": "primary"
+    }
+  ]
+}

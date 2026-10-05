@@ -1,0 +1,50 @@
+{
+  "slug": "ai-summaries-compression-information-loss",
+  "title": "【短く要約するほど、重要な例外は消えていないか】AI要約と情報圧縮の違和感",
+  "social_title": "AI要約は、何を削ったかまで見えているか",
+  "description": "生成AIの要約は大量情報を短くできます。しかし例外、留保、不確実性まで圧縮されると判断材料が失われます。要約を情報設計として考えます。",
+  "summary": "要約は便利ですが、削られた情報は見えません。AI要約で例外や不確実性が落ちるリスクを構造から見ます。",
+  "tags": [
+    "世界の違和感",
+    "生成AI",
+    "要約",
+    "情報設計"
+  ],
+  "title_en": "What Disappears When AI Summaries Make Information Shorter?",
+  "social_title_en": "AI summaries hide what was compressed away",
+  "description_en": "Generative AI can compress large volumes of information, but exceptions, uncertainty, and caveats may disappear with the length.",
+  "summary_en": "A summary shows what remains, not what was removed. This piece looks at the decision risk created by AI information compression.",
+  "tags_en": [
+    "World Frictions",
+    "Generative AI",
+    "Summarization",
+    "Information Design"
+  ],
+  "topic": "生成AIによる要約と情報圧縮",
+  "tension": "情報を短くするほど、例外・留保・不確実性が削られても気づきにくい",
+  "question": "要約を読んだ人は、何が省略されたかを確認できる経路を持っているでしょうか",
+  "practice": "重要判断に使う要約では、原文リンク、主要な留保、未確認点を要約本文と同じ場所に残します",
+  "lens": "要約精度だけでなく、省略された情報へ戻れる可逆性を評価する必要があります",
+  "topic_en": "generative AI summarization and information compression",
+  "tension_en": "shorter outputs can hide the removal of exceptions, caveats, and uncertainty",
+  "question_en": "Can a reader of the summary easily inspect what was omitted before making a consequential decision?",
+  "practice_en": "For consequential summaries, keep the source, major caveats, and unresolved points visible next to the condensed output.",
+  "lens_en": "Summary quality should include reversibility: the ability to return to omitted context.",
+  "sources": [
+    {
+      "title": "NIST AI Resource Center",
+      "url": "https://airc.nist.gov/",
+      "kind": "primary"
+    },
+    {
+      "title": "NIST Generative AI Profile",
+      "url": "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf",
+      "kind": "primary"
+    },
+    {
+      "title": "OECD AI Principles",
+      "url": "https://oecd.ai/en/ai-principles",
+      "kind": "primary"
+    }
+  ]
+}
