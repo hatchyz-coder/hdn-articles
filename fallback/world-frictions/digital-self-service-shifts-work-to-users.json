@@ -1,0 +1,50 @@
+{
+  "slug": "digital-self-service-shifts-work-to-users",
+  "title": "【セルフサービス化で消えた仕事は、どこへ行ったのか】利用者へ移る作業の違和感",
+  "social_title": "セルフサービス化は、本当に作業を減らしているのか",
+  "description": "オンライン化やセルフサービス化は運営側の処理を減らします。一方、入力・確認・例外対応が利用者へ移っていないか。デジタル行政とサービス設計から考えます。",
+  "summary": "窓口の仕事が減っても、作業そのものが消えるとは限りません。セルフサービス化で利用者側へ移る負担を見ます。",
+  "tags": [
+    "世界の違和感",
+    "セルフサービス",
+    "デジタル行政",
+    "UX"
+  ],
+  "title_en": "Where Does the Work Go When Services Become Self-Service?",
+  "social_title_en": "The hidden labor shifted to users by self-service",
+  "description_en": "Self-service can reduce back-office handling while shifting form filling, verification, recovery, and exception work to users.",
+  "summary_en": "Removing a staffed step does not necessarily remove the work. This piece examines the tasks that digital self-service can shift to users.",
+  "tags_en": [
+    "World Frictions",
+    "Self-Service",
+    "Digital Government",
+    "UX"
+  ],
+  "topic": "セルフサービス化と利用者負担",
+  "tension": "運営側の処理を減らすほど、入力・確認・復旧の作業が利用者へ移りやすい",
+  "question": "窓口や担当者の作業が減った時、その代わりに利用者が新しく引き受けた操作まで測っているでしょうか",
+  "practice": "一つのオンライン手続きについて、利用者が入力・確認・再試行・問い合わせに使う作業を最初から最後まで書き出します",
+  "lens": "サービス提供者の効率と利用者の負担を同じ画面で評価する必要があります",
+  "topic_en": "digital self-service and user burden",
+  "tension_en": "reducing staffed processing can shift data entry, verification, recovery, and exception handling to users",
+  "question_en": "When staff work decreases, are the new tasks imposed on users being measured as part of the service cost?",
+  "practice_en": "Map one digital service from start to finish and list every user task involving entry, verification, retry, and support.",
+  "lens_en": "Provider efficiency and user burden should be evaluated on the same service map.",
+  "sources": [
+    {
+      "title": "GOV.UK Service Standard",
+      "url": "https://www.gov.uk/service-manual/service-standard",
+      "kind": "primary"
+    },
+    {
+      "title": "GOV.UK Service Manual",
+      "url": "https://www.gov.uk/service-manual",
+      "kind": "primary"
+    },
+    {
+      "title": "OECD Digital Government Policy Framework",
+      "url": "https://www.oecd.org/en/publications/the-oecd-digital-government-policy-framework_f64fed2a-en.html",
+      "kind": "research"
+    }
+  ]
+}
