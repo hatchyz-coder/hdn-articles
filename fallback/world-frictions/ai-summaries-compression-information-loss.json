@@ -32,8 +32,8 @@
   "lens_en": "Summary quality should include reversibility: the ability to return to omitted context.",
   "sources": [
     {
-      "title": "NIST AI Risk Management Framework",
-      "url": "https://www.nist.gov/itl/ai-risk-management-framework",
+      "title": "NIST AI Resource Center",
+      "url": "https://airc.nist.gov/",
       "kind": "primary"
     },
     {
