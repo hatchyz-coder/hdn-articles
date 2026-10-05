@@ -1,0 +1,50 @@
+{
+  "slug": "terms-consent-information-overload",
+  "title": "【同意ボタンを押せば、本当に理解したことになるのか】利用規約と情報過多の違和感",
+  "social_title": "規約が長いほど、同意は形式になっていないか",
+  "description": "利用規約や契約条件を詳しく書くことは重要です。しかし情報量が増えすぎると、同意は読む行為ではなく通過儀礼になります。実質的な理解を考えます。",
+  "summary": "情報を増やせば透明になるとは限りません。利用規約と同意画面で、説明責任と理解可能性のバランスを考えます。",
+  "tags": [
+    "世界の違和感",
+    "利用規約",
+    "同意",
+    "消費者保護"
+  ],
+  "title_en": "Does Clicking Agree Mean the User Actually Understood the Terms?",
+  "social_title_en": "When disclosure becomes information overload",
+  "description_en": "Detailed terms can improve disclosure, but excessive information can turn consent into a ritual rather than an informed decision.",
+  "summary_en": "More disclosure does not automatically create more understanding. This piece examines consent when terms become too long to use meaningfully.",
+  "tags_en": [
+    "World Frictions",
+    "Terms",
+    "Consent",
+    "Consumer Protection"
+  ],
+  "topic": "利用規約と実質的同意",
+  "tension": "説明を増やすほど透明に見える一方、情報過多で重要条件が読まれなくなりやすい",
+  "question": "同意を取得した事実だけでなく、利用者が重要条件を理解できる形になっているでしょうか",
+  "practice": "料金、更新、解約、データ利用など判断に直結する条件を、長文規約とは別に短く確認できる構造にします",
+  "lens": "法的な開示量だけでなく、利用者が判断に使える情報量と配置を見る必要があります",
+  "topic_en": "terms, disclosure, and meaningful consent",
+  "tension_en": "more disclosure can look transparent while making important conditions harder to identify and understand",
+  "question_en": "Beyond recording agreement, are the material conditions presented in a form a user can actually use to decide?",
+  "practice_en": "Surface material conditions such as price, renewal, cancellation, and data use separately from the full legal text.",
+  "lens_en": "Transparency should be evaluated by usable understanding, not disclosure volume alone.",
+  "sources": [
+    {
+      "title": "EU Unfair Terms in Consumer Contracts Directive",
+      "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:31993L0013",
+      "kind": "primary"
+    },
+    {
+      "title": "EU Consumer Rights Directive",
+      "url": "https://eur-lex.europa.eu/eli/dir/2011/83/oj",
+      "kind": "primary"
+    },
+    {
+      "title": "FTC Negative Option Rule",
+      "url": "https://www.ftc.gov/legal-library/browse/rules/negative-option-rule",
+      "kind": "primary"
+    }
+  ]
+}
