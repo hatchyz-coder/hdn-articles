@@ -1,0 +1,50 @@
+{
+  "slug": "kpi-dashboard-behavior-distortion",
+  "title": "【数字が良くなるほど、現場は良くなっているのか】KPIとダッシュボードの違和感",
+  "social_title": "KPI改善と現場改善は、同じことなのか",
+  "description": "KPIは状況を見える化します。しかし測定指標が目的そのものになると、数字に合わせる行動が増えます。ダッシュボード管理と成果のズレを考えます。",
+  "summary": "測れる数字は管理しやすい一方、測りやすさと重要さは同じではありません。KPIが行動を変える構造を見ます。",
+  "tags": [
+    "世界の違和感",
+    "KPI",
+    "マネジメント",
+    "評価"
+  ],
+  "title_en": "When the KPI Improves, Has the Real Outcome Improved Too?",
+  "social_title_en": "The gap between dashboard performance and real performance",
+  "description_en": "KPIs make performance visible, but when the metric becomes the target, behavior can shift toward improving the number rather than the underlying outcome.",
+  "summary_en": "What is easy to measure is not always what matters most. This piece examines how dashboards and targets reshape behavior.",
+  "tags_en": [
+    "World Frictions",
+    "KPI",
+    "Management",
+    "Evaluation"
+  ],
+  "topic": "KPIとダッシュボード管理",
+  "tension": "測定指標を強く管理するほど、成果そのものより数字を改善する行動が生まれやすい",
+  "question": "そのKPIが上がった時、利用者や現場にとっての本来の成果も同じ方向へ動いているでしょうか",
+  "practice": "一つのKPIについて、数字を上げる行動と、本来達成したい成果へつながる行動を分けて書き出します",
+  "lens": "指標は目的の代理であり、指標そのものを目的化しない評価設計が必要です",
+  "topic_en": "KPIs and dashboard-driven management",
+  "tension_en": "strong target pressure can shift behavior toward improving the metric rather than the underlying outcome",
+  "question_en": "When the KPI rises, is the outcome that users and frontline teams actually care about moving in the same direction?",
+  "practice_en": "For one KPI, separate actions that improve the number from actions that improve the intended outcome.",
+  "lens_en": "A metric is a proxy for an objective and should not silently become the objective itself.",
+  "sources": [
+    {
+      "title": "OECD Good Practices for Performance Budgeting",
+      "url": "https://www.oecd.org/en/publications/oecd-good-practices-for-performance-budgeting_c90b0305-en.html",
+      "kind": "research"
+    },
+    {
+      "title": "OECD Performance Budgeting",
+      "url": "https://www.oecd.org/en/topics/performance-budgeting.html",
+      "kind": "research"
+    },
+    {
+      "title": "HM Treasury Magenta Book",
+      "url": "https://www.gov.uk/government/publications/the-magenta-book",
+      "kind": "primary"
+    }
+  ]
+}
