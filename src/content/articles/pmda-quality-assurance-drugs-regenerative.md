@@ -18,6 +18,12 @@ draft: false
 featured: false
 sourceUrl: "https://www.pmda.go.jp/review-services/inspections/drugs/0001.html"
 cta: consultation
+audiences:
+  - "clinic"
+section: "clinic-compliance"
+industry: "medical"
+series: "clinic-regulation"
+contentType: "regulation"
 ---
 
 PMDAは承認申請に添付される前臨床・臨床・市販後調査等の資料について、GLP／GCP／GPSPへの適合性や現地調査を通じて「信頼性」を実地確認します。クリニックは同意書、データの由来（provenance）、手順書、ログや保管状態といった実務を点検し、担当者と簡単な模擬監査を準備することが実務的に有効です。
