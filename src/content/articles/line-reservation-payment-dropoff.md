@@ -16,6 +16,13 @@ draft: false
 featured: false
 sourceUrl: "https://hdnjapan.com/lhub.html"
 cta: consultation
+audiences:
+  - "clinic"
+  - "lhub"
+section: "lhub-usecase"
+industry: "medical"
+series: "lhub-use-cases"
+contentType: "practical-guide"
 ---
 
 LHubはLINE公式アカウント上で予約・問診・決済・顧客管理・配信を一貫して扱えるサービスです。本記事では、機能の要点（タグ管理、リッチメニュー、問診導線、決済、シナリオ配信、ストア等）を整理し、クリニックが導入前に確認すべき現場の準備や運用改善の観点をHDNの視点で解説します。導入相談への自然な案内も掲載しています。
