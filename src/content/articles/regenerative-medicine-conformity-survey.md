@@ -16,6 +16,12 @@ draft: false
 featured: false
 sourceUrl: "https://www.pmda.go.jp/review-services/gmp-qms-gctp/ensure-safety-regen/0001.html"
 cta: consultation
+audiences:
+  - "clinic"
+section: "clinic-compliance"
+industry: "medical"
+series: "clinic-regulation"
+contentType: "regulation"
 ---
 
 PMDAは特定細胞加工物等の製造施設について、事前提出書類と施設・設備図面、測定・管理記録をもとに適合性調査を行います。クリニックや医療事業者は「ゾーニング（区画）」「測定・検証記録」「ユーティリティ（製造用水・蒸気・ガス等）」「文書化（フロー図・設備一覧）」「外部委託の明確化」を優先して整備すると審査をスムーズにできます。以下はPMDA公表内容の要点整理と、HDNの実務的チェックリストと次のアクション案です。
