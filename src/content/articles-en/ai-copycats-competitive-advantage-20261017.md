@@ -1,7 +1,7 @@
 ---
 title: "Building for a World of Copycats: AI, Creative Rights, and the New Competitive Advantage"
 socialTitle: "Build as if you will be copied. But who protects the creator?"
-description: "A game concept appeared online, and lookalikes surfaced the next day. As AI lowers imitation costs, how can game makers and SaaS businesses protect expression while building advantages that survive copying?"
+description: "A game was copied overnight. As AI reduces imitation costs, how should creators protect their work and build lasting advantages in games, apps, and SaaS?"
 publishedAt: 2026-10-17
 category: "World Frictions"
 tags:
