@@ -16,6 +16,13 @@ draft: false
 featured: false
 sourceUrl: "https://www.mhlw.go.jp/stf/newpage_75576.html"
 cta: consultation
+audiences:
+  - "clinic"
+  - "general"
+section: "research"
+industry: "medical"
+series: "official-sources"
+contentType: "practical-guide"
 ---
 
 厚生労働省は2026年秋、地方所在企業向けの「医薬品・医療機器等の保険適用に関する相談会」を京都・福岡で開催しています。京都会場は10月2日に終了しましたが、福岡会場は11月24日に予定され、相談会の申込期限は11月4日です。本稿は、相談会の事実（開催日程・定員・対象・申込期限）を整理し、クリニックや医療機器メーカーが当日までに確認すべき実務的チェック項目と優先度をHDNの視点で示します。
