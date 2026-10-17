@@ -15,6 +15,12 @@ draft: false
 featured: false
 sourceUrl: "https://www.pmda.go.jp/review-services/drug-reviews/review-information/ctp/0011.html"
 cta: consultation
+audiences:
+  - "clinic"
+section: "clinic-compliance"
+industry: "medical"
+series: "clinic-regulation"
+contentType: "practical-guide"
 ---
 
 PMDAは、新規作用機序を有する革新的な再生医療等製品について「最適使用推進ガイドライン」を公表しています。これらは単なる解説ではなく、患者選定、使用手順、観察・報告、医療機関側の体制整備に関係する実務情報を含みます。本稿は公的情報を根拠に、クリニック運営上で直ちに確認・整備すべき項目と実務的な進め方を示します（出典：PMDA公開資料）。
