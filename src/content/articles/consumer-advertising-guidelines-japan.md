@@ -15,6 +15,13 @@ draft: false
 featured: false
 sourceUrl: "https://www.caa.go.jp/business/guidelines/"
 cta: consultation
+audiences:
+  - "clinic"
+  - "general"
+section: "clinic-compliance"
+industry: "medical"
+series: "clinic-regulation"
+contentType: "regulation"
 ---
 
 消費者庁が公表する各種ガイドラインの内容を踏まえ、クリニックや医療関連事業者が広告・表示で確認すべきポイントと実務対応をわかりやすく整理します。具体的なチェック項目と次のアクションを提示します。
