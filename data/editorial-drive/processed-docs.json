@@ -661,7 +661,7 @@
       "score": 88
     }
   },
-  "updatedAt": "2026-10-04T08:29:04.420839Z",
+  "updatedAt": "2026-10-17T07:13:34.614573Z",
   "fallbackReserves": {
     "lhub-reserve-post-purchase-followup": {
       "usedAt": "2026-09-27T23:41:49.769045Z",
@@ -672,6 +672,11 @@
       "usedAt": "2026-10-04T08:29:04.420808Z",
       "trigger": "api_payload_too_large",
       "reserveFile": "16-first-contact-route.json"
+    },
+    "lhub-reserve-pre-intake-friction-v2": {
+      "usedAt": "2026-10-17T07:13:34.614538Z",
+      "trigger": "api_rate_limited",
+      "reserveFile": "17-pre-intake-friction.json"
     }
   }
 }
