@@ -16,6 +16,13 @@ draft: false
 featured: false
 sourceUrl: "https://www.pmda.go.jp/safety/info-services/drugs/calling-attention/properly-use-alert/0005_c.html"
 cta: lhub
+audiences:
+  - "clinic"
+  - "general"
+section: "clinic-compliance"
+industry: "medical"
+series: "clinic-regulation"
+contentType: "practical-guide"
 ---
 
 PMDAが発出する患者向けの緊急安全性情報（イエローレター／ブルーレター）は、ただ保管する文書ではなく、処方や患者説明、院内プロトコルの変更を即座に促す実務トリガーです。本稿では公的な性質を整理した上で、診療所が優先的に行うべき確認・連絡・記録作業を優先順で示します（出典：PMDA公開ページ）。
