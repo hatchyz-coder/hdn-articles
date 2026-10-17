@@ -15,6 +15,13 @@ draft: false
 featured: false
 sourceUrl: "https://www.pmda.go.jp/safety/reports/patients/0024.html"
 cta: consultation
+audiences:
+  - "clinic"
+  - "general"
+section: "clinic-compliance"
+industry: "medical"
+series: "clinic-regulation"
+contentType: "practical-guide"
 ---
 
 PMDAは患者・家族からの副作用報告を受け付け、整理して厚生労働省へ報告します。クリニックは臨床対応と報告支援を分け、患者への案内文と院内の担当者・記録フローを持つことが実務上の最短改善策です。本稿はPMDAの公的手続き（出典）を踏まえ、現場で使えるチェックリストと次に確認すべき点を示します（HDNの解釈）。
