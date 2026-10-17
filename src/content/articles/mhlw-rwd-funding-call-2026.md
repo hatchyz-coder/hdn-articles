@@ -15,6 +15,13 @@ draft: false
 featured: false
 sourceUrl: "https://www.mhlw.go.jp/stf/newpage_75749.html"
 cta: lhub
+audiences:
+  - "clinic"
+  - "general"
+section: "research"
+industry: "medical"
+series: "official-sources"
+contentType: "practical-guide"
 ---
 
 厚生労働省が公募する「リアルワールドデータ活用促進事業」は、医療機関や事業者が医療データの収集・管理・利活用を進めるための支援を目的とした補助事業です。本文では公募要領の事実を整理し、クリニック経営者が申請や現場実装で直ちに確認すべきポイントと実務的なチェックリストを提示します（出典: 厚生労働省公表の公募要領）。
