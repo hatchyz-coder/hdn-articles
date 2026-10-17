@@ -16,6 +16,13 @@ draft: false
 featured: false
 sourceUrl: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/iyakuhin/index.html"
 cta: consultation
+audiences:
+  - "clinic"
+  - "general"
+section: "clinic-compliance"
+industry: "medical"
+series: "clinic-regulation"
+contentType: "regulation"
 ---
 
 厚生労働省の医薬品・医療機器関連施策は、承認・製造・販売から市販後の安全対策までを含みます。本記事では出典の要点を整理し、クリニックが日常業務で確認すべき具体的な手順と優先事項をHDNの視点で示します。必要なチェック項目や次のアクションも提示します。
