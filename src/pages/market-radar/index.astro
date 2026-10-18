@@ -1,0 +1,73 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import '../../styles/market-radar.css';
+
+const reports = (await getCollection('radarReports', ({ data }) =>
+  data.product === 'market-radar' && !data.draft
+)).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+
+const reviewedReports = reports.filter(({ data }) => data.legalReview !== 'required').length;
+---
+
+<BaseLayout
+  title="MarketRadar | 市場データから消費者の迷いと商機を読む"
+  description="MarketRadarは、市場データを売れ筋ランキングで終わらせず、消費者の迷い、比較軸、商機へ変換する市場分析レポートです。"
+>
+  <section class="radar-hero">
+    <div class="wrap radar-hero-layout">
+      <div>
+        <p class="radar-kicker">MarketRadar / HDN Market Intelligence</p>
+        <h1>売れ筋ではなく、<br />選ばれ方を調べる。</h1>
+      </div>
+      <p class="radar-hero-copy">複数の市場データを照合し、消費者が比較する条件、判断を止める不安、事業者が検証すべき商機をレポートします。</p>
+    </div>
+  </section>
+
+  <main class="wrap radar-main">
+    <section class="radar-method" aria-labelledby="method-title">
+      <p class="radar-section-number">01</p>
+      <div>
+        <h2 id="method-title">数字を、判断材料にする</h2>
+        <p>ランキングを転載するのではなく、取得条件と基準日を明示し、媒体差、比較軸、注意点を分けて読みます。公開前には出典と表現を確認します。</p>
+      </div>
+      <dl class="radar-status" aria-label="公開状況">
+        <div><dt>公開レポート</dt><dd>{reports.length}<span>件</span></dd></div>
+        <div><dt>レビュー済み</dt><dd>{reviewedReports}<span>件</span></dd></div>
+      </dl>
+    </section>
+
+    <section class="radar-reports" aria-labelledby="reports-title">
+      <header class="radar-section-header">
+        <p class="radar-section-number">02</p>
+        <h2 id="reports-title">公開レポート</h2>
+      </header>
+    {reports.length === 0 ? (
+      <div class="radar-empty">
+        <p class="radar-empty-label">PUBLICATION STATUS</p>
+        <h3>最初のレポートを検証中です。</h3>
+        <p>データ基準日、出典、医療・広告表現の確認が終わったものから掲載します。公開本数を優先して審査を省くことはありません。</p>
+      </div>
+    ) : (
+      <ol class="radar-report-list">
+        {reports.map((report, index) => {
+          const slug = report.id.split('/').at(-1);
+          return (
+            <li>
+              <a href={`${import.meta.env.BASE_URL}market-radar/reports/${slug}/`}>
+                <span class="radar-report-index">{String(index + 1).padStart(2, '0')}</span>
+                <span class="radar-report-copy">
+                  <span class="radar-report-meta">{report.data.category} / {report.data.publishedAt.toLocaleDateString('ja-JP')}</span>
+                  <strong>{report.data.title}</strong>
+                  <span>{report.data.description}</span>
+                </span>
+                <span class="radar-report-arrow" aria-hidden="true">→</span>
+              </a>
+            </li>
+          );
+        })}
+      </ol>
+    )}
+    </section>
+  </main>
+</BaseLayout>

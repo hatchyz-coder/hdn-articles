@@ -1,0 +1,42 @@
+{
+  "reportId": "beauty-health-market",
+  "product": "market-radar",
+  "title": "売れ筋より「迷い」を読む。美容・健康市場439件から見えた比較軸",
+  "dataAsOf": "2026-04-30",
+  "sourcePeriod": "2026年4月取得・整理データ",
+  "totals": {
+    "all": 439,
+    "mainAnalysis": 372,
+    "devices": 32,
+    "excluded": 35,
+    "valid": 372,
+    "invalid": 0,
+    "validRate": 1.0
+  },
+  "sources": [
+    { "name": "くまポン", "count": 257, "share": 0.691 },
+    { "name": "Yahoo!ショッピング", "count": 59, "share": 0.159 },
+    { "name": "楽天市場", "count": 56, "share": 0.151 }
+  ],
+  "topCategories": [
+    { "name": "美容クリニック施術", "count": 178, "share": 0.479 },
+    { "name": "ダイエット", "count": 75, "share": 0.202 },
+    { "name": "サプリメント", "count": 56, "share": 0.151 }
+  ],
+  "topNeeds": [
+    { "name": "エイジングケア", "count": 81, "share": 0.218 },
+    { "name": "ダイエット・体重管理", "count": 66, "share": 0.177 },
+    { "name": "美肌ケア", "count": 55, "share": 0.148 },
+    { "name": "疲労・活力", "count": 47, "share": 0.126 }
+  ],
+  "comparisonAxes": [
+    "即効性",
+    "価格",
+    "ダウンタイム",
+    "継続しやすさ",
+    "口コミ・症例の見やすさ"
+  ],
+  "primaryInsight": "年齢サインを自然にケアしたい",
+  "status": "draft",
+  "legalReview": "required"
+}
