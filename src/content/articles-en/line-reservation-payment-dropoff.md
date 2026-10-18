@@ -1,6 +1,6 @@
 ---
 title: "Using LHub to Connect LINE Reservations, Questionnaires, Payments, and Follow-up"
-description: "A practical guide for clinics designing a connected LINE patient journey with LHub across reservations, questionnaires, payment guidance, and follow-up."
+description: "A practical guide for clinics designing a connected LINE patient journey with LHub across reservations, questionnaires, payments, and follow-up."
 publishedAt: 2026-07-16
 category: "LHub"
 tags:
