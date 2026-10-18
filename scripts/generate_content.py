@@ -333,6 +333,12 @@ def main() -> int:
 if __name__ == "__main__":
     try:
         raise SystemExit(main())
+    except RuntimeError as exc:
+        if "api_rate_limited" in str(exc):
+            print(f"DEFER: {exc}", file=sys.stderr)
+            raise SystemExit(75)
+        print(f"ERROR: {exc}", file=sys.stderr)
+        raise SystemExit(1)
     except Exception as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         raise SystemExit(1)
