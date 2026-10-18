@@ -1,6 +1,6 @@
 ---
 title: "How PMDA Assesses Data Reliability: A Practical Checklist for Clinics"
-description: "An operational guide to PMDA reliability assurance for drugs and regenerative medicine products, including GLP, GCP, GPSP, documentation, consent, and audit readiness."
+description: "A practical guide to PMDA reliability assurance for clinics, including GLP, GCP, GPSP, documentation, consent, and audit readiness."
 publishedAt: 2026-09-01
 category: "Quality Assurance"
 tags:
