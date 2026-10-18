@@ -1,6 +1,6 @@
 ---
 title: "How Clinics Should Handle Patient Adverse-Event Reports in Japan"
-description: "A practical guide to PMDA's patient adverse-event reporting system and how clinics can separate clinical care, documentation, and reporting support."
+description: "A practical guide to PMDA patient adverse-event reporting and how clinics can separate clinical care, documentation, and reporting support."
 publishedAt: 2026-08-28
 category: "Safety and Pharmacovigilance"
 tags:
