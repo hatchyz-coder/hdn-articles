@@ -1,6 +1,6 @@
 ---
 title: "PMDA Compliance Inspections for Regenerative Medicine Facilities: A Clinic Checklist"
-description: "A practical checklist for facility layout, environmental records, utilities, documentation, and outsourced responsibilities in regenerative medicine operations."
+description: "A practical checklist for facility layout, environmental records, utilities, documentation, and outsourced responsibilities in regenerative medicine."
 publishedAt: 2026-08-19
 category: "Regenerative Medicine Compliance"
 tags:
