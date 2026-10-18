@@ -1,6 +1,6 @@
 ---
 title: "When PMDA Issues a Drug Safety Alert: A Clinic Response Checklist"
-description: "A practical checklist for clinics responding to PMDA safety communications, including patient identification, clinical review, communication, and documentation."
+description: "A practical checklist for clinics responding to PMDA safety communications, covering patient review, communication, and documentation."
 publishedAt: 2026-08-25
 category: "Drug Safety"
 tags:
