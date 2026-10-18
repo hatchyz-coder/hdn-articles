@@ -1,6 +1,6 @@
 ---
 title: "Japan MHLW Insurance Coverage Consultation: What Healthcare Companies Should Prepare"
-description: "A practical guide to the MHLW insurance coverage consultation meetings, with current information on the Fukuoka session scheduled for November 24, 2026."
+description: "A practical guide to the MHLW insurance coverage consultation meetings, including the Fukuoka session scheduled for November 24, 2026."
 publishedAt: 2026-08-27
 category: "Insurance Coverage"
 tags:
