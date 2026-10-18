@@ -1,6 +1,6 @@
 ---
 title: "Japan MHLW Real-World Data Support Program: What Clinics Should Check First"
-description: "A practical overview of Japan's MHLW real-world data support program, focusing on registry governance, data quality, and operational readiness for clinics and healthcare organizations."
+description: "A practical overview of Japan’s MHLW real-world data support program and the governance, quality, and operational checks clinics should prepare."
 publishedAt: 2026-09-04
 category: "RWD and Grants"
 tags:
