@@ -15,6 +15,8 @@ on:
         type: boolean
   schedule:
     - cron: '15 22 * * 1-5'
+    - cron: '45 1 * * 1-5'
+    - cron: '45 5 * * 1-5'
 
 permissions:
   contents: write
@@ -132,6 +134,7 @@ jobs:
           echo "Reason: ${{ steps.pick.outputs.reason }}"
 
       - name: Generate article and channel drafts
+        id: generate
         if: steps.pick.outputs.selected == 'true'
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
@@ -142,18 +145,32 @@ jobs:
           GOOGLE_DRIVE_INTERNAL_REFERENCE_FOLDER_ID: ${{ vars.GOOGLE_DRIVE_INTERNAL_REFERENCE_FOLDER_ID }}
           GOOGLE_DRIVE_LHUB_ARCHIVE_FOLDER_ID: ${{ vars.GOOGLE_DRIVE_LHUB_ARCHIVE_FOLDER_ID }}
         run: |
+          set +e
           python scripts/generate_content.py \
             --url "${{ steps.pick.outputs.url }}" \
             --slug "${{ steps.pick.outputs.slug }}" \
             --category "${{ steps.pick.outputs.category }}" \
             --cta "${{ steps.pick.outputs.cta }}"
+          rc=$?
+          set -e
+          if [ "$rc" -eq 75 ]; then
+            echo "generated=false" >> "$GITHUB_OUTPUT"
+            echo "reason=api_rate_limited" >> "$GITHUB_OUTPUT"
+            echo "Growth generation deferred after provider rate limit; candidate remains eligible for a later same-day slot."
+            exit 0
+          fi
+          if [ "$rc" -ne 0 ]; then
+            exit "$rc"
+          fi
+          echo "generated=true" >> "$GITHUB_OUTPUT"
+          echo "reason=ok" >> "$GITHUB_OUTPUT"
 
       - name: Build and validate site
-        if: steps.pick.outputs.selected == 'true'
+        if: steps.pick.outputs.selected == 'true' && steps.generate.outputs.generated == 'true'
         run: npm run build
 
       - name: Create review pull request
-        if: steps.pick.outputs.selected == 'true'
+        if: steps.pick.outputs.selected == 'true' && steps.generate.outputs.generated == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           SOURCE_URL: ${{ steps.pick.outputs.url }}
@@ -214,6 +231,8 @@ jobs:
             echo ""
             echo "- WordPress audit requested: ${{ inputs.audit_wordpress || 'false' }}"
             echo "- Candidate selected: ${{ steps.pick.outputs.selected || 'false' }}"
+            echo "- Generation completed: ${{ steps.generate.outputs.generated || 'false' }}"
+            echo "- Generation reason: ${{ steps.generate.outputs.reason || 'not run' }}"
             echo "- Reason: ${{ steps.pick.outputs.reason || 'not available' }}"
             echo "- Score: ${{ steps.pick.outputs.score || 'n/a' }}"
             echo "- Source: ${{ steps.pick.outputs.url || 'n/a' }}"
