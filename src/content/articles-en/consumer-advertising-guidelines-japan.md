@@ -1,6 +1,6 @@
 ---
 title: "Advertising and Display Compliance for Clinics: How to Use Consumer Affairs Guidance"
-description: "A practical guide to reviewing clinic advertising and information materials using consumer-protection principles alongside the separate rules governing medical advertising in Japan."
+description: "A practical guide to reviewing clinic advertising using consumer-protection principles alongside Japan’s separate medical-advertising rules."
 publishedAt: 2026-07-17
 category: "Advertising Compliance"
 tags:
