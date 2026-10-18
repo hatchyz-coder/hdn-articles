@@ -1,6 +1,6 @@
 ---
 title: "How Pharmaceutical and Medical Device Regulation Affects Clinic Operations"
-description: "A practical overview of Japanese pharmaceutical and medical-device regulation for clinics, covering procurement, traceability, safety reporting, recalls, and internal controls."
+description: "A practical overview of Japanese pharmaceutical and medical-device regulation for clinics, covering procurement, traceability, safety, and recalls."
 publishedAt: 2026-07-17
 category: "Pharmaceutical and Medical Device Regulation"
 tags:
