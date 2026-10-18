@@ -1,6 +1,6 @@
 ---
 title: "PMDA Optimal-Use Guidelines for Regenerative Medicine Products: What Clinics Should Check"
-description: "A practical guide to using PMDA optimal-use guidelines when preparing patient selection, treatment workflows, consent, monitoring, and follow-up."
+description: "A practical guide to using PMDA optimal-use guidelines for patient selection, workflows, consent, monitoring, and follow-up."
 publishedAt: 2026-08-17
 category: "Regenerative Medicine"
 tags:
