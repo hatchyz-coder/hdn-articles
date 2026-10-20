@@ -1,7 +1,7 @@
 {
   "selected": false,
   "runLog": [],
-  "createdAt": "2026-10-18T22:41:40.804985+00:00",
+  "createdAt": "2026-10-20T00:03:00.849636+00:00",
   "selectionMode": "changes",
   "metrics": {
     "selectedDocumentId": "",
@@ -13,11 +13,11 @@
     "apiCalls": 0,
     "inputCharacters": 0,
     "openaiSeconds": 0.0,
-    "driveSeconds": 0.91,
+    "driveSeconds": 0.81,
     "docsFetchSeconds": 0.0,
     "stateSaveSeconds": 0.0,
     "fileIoSeconds": 0.0,
-    "executionSeconds": 0.92,
+    "executionSeconds": 0.82,
     "exitReason": "no_candidate"
   }
 }
