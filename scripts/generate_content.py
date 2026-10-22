@@ -134,6 +134,8 @@ def call_openai(
     )
     if response.status_code == 429:
         raise RuntimeError("Groq API HTTP 429 (api_rate_limited); source remains eligible for retry")
+    if response.status_code == 413:
+        raise RuntimeError("Groq API HTTP 413 (api_payload_too_large); source remains eligible for retry")
     response.raise_for_status()
     choices = response.json().get("choices") or []
     if not choices:
@@ -334,7 +336,7 @@ if __name__ == "__main__":
     try:
         raise SystemExit(main())
     except RuntimeError as exc:
-        if "api_rate_limited" in str(exc):
+        if "api_rate_limited" in str(exc) or "api_payload_too_large" in str(exc):
             print(f"DEFER: {exc}", file=sys.stderr)
             raise SystemExit(75)
         print(f"ERROR: {exc}", file=sys.stderr)
