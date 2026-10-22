@@ -21,7 +21,7 @@ DEFAULT_RESERVE_DIR = ROOT / "fallback" / "lhub"
 ARTICLE_DIR = ROOT / "src" / "content" / "articles"
 ENGLISH_DIR = ROOT / "src" / "content" / "articles-en"
 SOCIAL_DIR = ROOT / "social"
-RESERVE_WARNING_THRESHOLD = 10
+RESERVE_WARNING_THRESHOLD = 13
 RESERVE_CRITICAL_THRESHOLD = 7
 
 FALLBACK_REASONS = {

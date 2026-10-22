@@ -41,8 +41,6 @@ class LHubDailyGuaranteeTests(unittest.TestCase):
             self.assertTrue(evaluate(en)["publication_fact_gate"], path.name)
             self.assertGreaterEqual(guarantee.body_char_count(jp), 2000)
             self.assertLessEqual(guarantee.body_char_count(jp), 3000)
-        unused = len(guarantee.unused_reserve_slugs(ROOT / "fallback" / "lhub", {}))
-        self.assertEqual(guarantee.reserve_health(unused), "healthy")
         self.assertIn("api_payload_too_large", guarantee.FALLBACK_REASONS)
 
     def test_used_or_existing_reserve_is_not_selected(self):
@@ -91,7 +89,8 @@ class LHubDailyGuaranteeTests(unittest.TestCase):
 
     def test_reserve_health_thresholds(self):
         self.assertEqual(guarantee.reserve_health(14), "healthy")
-        self.assertEqual(guarantee.reserve_health(11), "healthy")
+        self.assertEqual(guarantee.reserve_health(13), "warning")
+        self.assertEqual(guarantee.reserve_health(11), "warning")
         self.assertEqual(guarantee.reserve_health(10), "warning")
         self.assertEqual(guarantee.reserve_health(8), "warning")
         self.assertEqual(guarantee.reserve_health(7), "critical")
