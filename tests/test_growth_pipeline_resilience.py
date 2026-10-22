@@ -8,9 +8,11 @@ class GrowthPipelineResilienceTests(unittest.TestCase):
     def test_generator_uses_dedicated_rate_limit_exit_code(self):
         text = (ROOT / "scripts" / "generate_content.py").read_text(encoding="utf-8")
         self.assertIn('"api_rate_limited" in str(exc)', text)
+        self.assertIn('"api_payload_too_large" in str(exc)', text)
+        self.assertIn("response.status_code == 413", text)
         self.assertIn("SystemExit(75)", text)
 
-    def test_workflow_cleanly_defers_rate_limit_and_retries_same_day(self):
+    def test_workflow_cleanly_defers_provider_size_or_rate_limit_and_retries_same_day(self):
         text = (ROOT / ".github" / "workflows" / "hdn-growth-pipeline.yml").read_text(encoding="utf-8")
         self.assertIn("id: generate", text)
         self.assertIn('if [ "$rc" -eq 75 ]; then', text)
