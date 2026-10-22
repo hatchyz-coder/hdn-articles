@@ -661,7 +661,7 @@
       "score": 88
     }
   },
-  "updatedAt": "2026-10-18T23:09:54.405399Z",
+  "updatedAt": "2026-10-22T23:27:45.018581Z",
   "fallbackReserves": {
     "lhub-reserve-post-purchase-followup": {
       "usedAt": "2026-09-27T23:41:49.769045Z",
@@ -687,6 +687,11 @@
       "usedAt": "2026-10-18T23:09:54.405364Z",
       "trigger": "api_rate_limited",
       "reserveFile": "19-post-payment-expectations.json"
+    },
+    "lhub-reserve-stage-menu-design-v2": {
+      "usedAt": "2026-10-22T23:27:45.018545Z",
+      "trigger": "api_rate_limited",
+      "reserveFile": "20-stage-menu-design.json"
     }
   }
 }
