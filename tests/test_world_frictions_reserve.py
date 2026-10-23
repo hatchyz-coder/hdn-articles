@@ -17,7 +17,8 @@ class WorldFrictionsReserveTests(unittest.TestCase):
     def test_provider_independent_reserve_inventory_is_replenished(self):
         paths = sorted((ROOT / "fallback" / "world-frictions").glob("*.json"))
         self.assertGreaterEqual(len(paths), 13)
-        self.assertGreaterEqual(len(reserve.unused_specs()), 11)
+        unused = len(reserve.unused_specs())
+        self.assertEqual(reserve.reserve_health(unused), "healthy")
 
 
     def test_every_reserve_passes_static_hard_contract(self):
@@ -38,7 +39,7 @@ class WorldFrictionsReserveTests(unittest.TestCase):
 
     def test_every_unused_reserve_is_not_duplicate_of_published_world_frictions(self):
         rows = reserve.unused_specs()
-        self.assertGreaterEqual(len(rows), 11)
+        self.assertEqual(reserve.reserve_health(len(rows)), "healthy")
         for path, spec in rows:
             candidate, sources = reserve.validate_spec(spec, check_duplicate=True)
             self.assertTrue(candidate["publish"], path.name)
