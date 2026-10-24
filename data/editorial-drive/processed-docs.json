@@ -661,7 +661,7 @@
       "score": 88
     }
   },
-  "updatedAt": "2026-10-23T23:52:04.831308Z",
+  "updatedAt": "2026-10-24T23:11:21.278545Z",
   "fallbackReserves": {
     "lhub-reserve-post-purchase-followup": {
       "usedAt": "2026-09-27T23:41:49.769045Z",
@@ -697,6 +697,11 @@
       "usedAt": "2026-10-23T23:52:04.831269Z",
       "trigger": "api_rate_limited",
       "reserveFile": "24-customer-handoff.json"
+    },
+    "lhub-reserve-pre-visit-reminder-v2": {
+      "usedAt": "2026-10-24T23:11:21.278506Z",
+      "trigger": "api_rate_limited",
+      "reserveFile": "25-pre-visit-reminder.json"
     }
   }
 }
