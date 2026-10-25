@@ -17,10 +17,10 @@ cta: consultation
 audiences:
   - "general"
   - "clinic"
-section: "technology"
-industry: "technology"
+section: "research"
+industry: "other"
 series: "forecast"
-contentType: "analysis"
+contentType: "news-analysis"
 ---
 
 ## 何が起きたのか――「情報流出事件」とはまだ呼べない
