@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T23:43:00.030638+00:00",
+  "updated_at": "2026-10-27T01:02:43.779923+00:00",
   "seen_urls": [
     "https://translation.mhlw.go.jp/LUCMHLW/ns/w1/jaen/",
     "https://translation.mhlw.go.jp/LUCMHLW/ns/w1/jako/",
@@ -137,22 +137,22 @@
     "fc6215de00199c8cc095d5a40803cb4bcc0cb81b1e7da610e92a05997535ee38"
   ],
   "last_run": {
-    "generated_at": "2026-10-25T23:43:00.030626+00:00",
+    "generated_at": "2026-10-27T01:02:43.779907+00:00",
     "dry_run": false,
     "source_id": "",
     "metrics": {
       "targeted_sources": 20,
       "successful_sources": 5,
       "no_candidate_sources": 0,
-      "skipped_sources": 15,
-      "failed_sources": 0,
+      "skipped_sources": 14,
+      "failed_sources": 1,
       "unsupported_sources": 0,
       "encoding_error_sources": 0,
       "fetched_candidates": 50,
       "new_candidates": 0,
       "duplicate_candidates": 50,
-      "http_requests": 6,
-      "execution_seconds": 8.041,
+      "http_requests": 8,
+      "execution_seconds": 5.614,
       "source_results": [
         {
           "source_id": "mhlw",
@@ -181,10 +181,10 @@
         {
           "source_id": "jftc",
           "source_name": "公正取引委員会",
-          "status": "success",
-          "candidate_count": 10,
-          "reason": "Candidates found",
-          "error": ""
+          "status": "failed",
+          "candidate_count": 0,
+          "reason": "403 Client Error: Forbidden for url: https://www.jftc.go.jp/",
+          "error": "403 Client Error: Forbidden for url: https://www.jftc.go.jp/"
         },
         {
           "source_id": "ppc",
@@ -197,9 +197,9 @@
         {
           "source_id": "digital",
           "source_name": "デジタル庁",
-          "status": "skipped",
-          "candidate_count": 0,
-          "reason": "Skipped after reaching MAX_TOTAL candidate limit",
+          "status": "success",
+          "candidate_count": 10,
+          "reason": "Candidates found",
           "error": ""
         },
         {
@@ -319,9 +319,9 @@
     "source_status_counts": {
       "success": 5,
       "no_candidates": 0,
-      "skipped": 15,
+      "skipped": 14,
       "unsupported": 0,
-      "failed": 0,
+      "failed": 1,
       "encoding_error": 0
     },
     "top_candidates": []
