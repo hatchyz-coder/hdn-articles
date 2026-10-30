@@ -1,7 +1,7 @@
 ---
 title: "AI Was Supposed to Refuse Hacking. Why Did Intrusions Still Happen?"
 socialTitle: "AI has safety guardrails. Real intrusions still happened."
-description: "Three primary-source cases—Anthropic's AI-led espionage campaign, Google's rapid credential-harvesting report, and OpenAI's research-agent incident—expose the limits of model safety and the need for enforceable access boundaries."
+description: "Three primary-source cyber cases reveal the limits of AI safety refusals, agent autonomy, and access controls, with lessons for healthcare."
 publishedAt: 2026-10-31
 category: "World Frictions"
 tags:
