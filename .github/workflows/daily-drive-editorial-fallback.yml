@@ -38,5 +38,26 @@ jobs:
         run: |
           set -euo pipefail
           echo "No LHub publication exists for ${{ steps.preflight.outputs.day }}; dispatching one Daily Drive recovery attempt." >> "$GITHUB_STEP_SUMMARY"
+          before=$(gh run list --workflow daily-drive-editorial-publish.yml --event workflow_dispatch --branch main --limit 1 --json databaseId --jq '.[0].databaseId // 0')
           gh workflow run daily-drive-editorial-publish.yml --ref main
-          echo "Recovery dispatch submitted once. The scheduled Daily Drive slots remain the primary retry path." >> "$GITHUB_STEP_SUMMARY"
+          run_id=""
+          for attempt in $(seq 1 24); do
+            run_id=$(gh run list --workflow daily-drive-editorial-publish.yml --event workflow_dispatch --branch main --limit 10 --json databaseId --jq "[.[] | select(.databaseId > $before)] | sort_by(.databaseId) | last | .databaseId // empty")
+            if [ -n "$run_id" ]; then break; fi
+            sleep 5
+          done
+          if [ -z "$run_id" ]; then
+            echo "::error::Recovery dispatch could not be traced to an Actions run"
+            exit 1
+          fi
+          echo "Recovery run: https://github.com/$GITHUB_REPOSITORY/actions/runs/$run_id" >> "$GITHUB_STEP_SUMMARY"
+          gh run watch "$run_id" --exit-status
+          # A successful workflow conclusion may still reflect no selected article:
+          # verify the JST-day published source in the actual post-run main tree.
+          git fetch origin main
+          git checkout --detach origin/main
+          python scripts/lhub_daily_preflight.py | grep -q '^published=true >> "$GITHUB_STEP_SUMMARY"
+ || {
+            echo "::error::Recovery workflow finished without a confirmed daily article"
+            exit 1
+          } >> "$GITHUB_STEP_SUMMARY"
