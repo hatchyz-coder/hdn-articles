@@ -618,9 +618,23 @@
         "sourceTextCharacters": 3869,
         "inputCharacters": 3869
       }
+    },
+    "1l1fu_pYLBihnwwZtSo7LKV76_eZTc957crfzagJRqRI": {
+      "name": "LH7_記事7_職人の手仕事を止めない｜靴・鞄メンテナンス専門店を支えるLHubの仕組みとは",
+      "url": "https://docs.google.com/document/d/1l1fu_pYLBihnwwZtSo7LKV76_eZTc957crfzagJRqRI/edit?usp=drivesdk",
+      "modifiedTime": "2026-11-03T01:04:42.421Z",
+      "status": "skipped_confidential",
+      "startedAt": "2026-11-03T02:43:45.905097+00:00",
+      "retry_count": 0,
+      "finishedAt": "2026-11-03T02:44:22.269320+00:00",
+      "reason": "AI confidentiality flags",
+      "flags": [
+        "external_writer_metadata_present"
+      ],
+      "score": 72
     }
   },
-  "updatedAt": "2026-08-07T01:00:51.942570+00:00",
+  "updatedAt": "2026-11-03T02:44:22.269327+00:00",
   "driveCache": {
     "scopeFolderId": "1UKRBujwOOHFwR-32i0WfDXoG48rl1Ggo",
     "folderIds": [
@@ -677,8 +691,53 @@
           "1R8K22La-iytMBhwhGTj8qhHyl3Zd9FXz"
         ],
         "seenAt": "2026-08-07T01:00:06.028453+00:00"
+      },
+      "1l1fu_pYLBihnwwZtSo7LKV76_eZTc957crfzagJRqRI": {
+        "name": "LH7_記事7_職人の手仕事を止めない｜靴・鞄メンテナンス専門店を支えるLHubの仕組みとは",
+        "modifiedTime": "2026-11-03T01:04:42.421Z",
+        "url": "https://docs.google.com/document/d/1l1fu_pYLBihnwwZtSo7LKV76_eZTc957crfzagJRqRI/edit?usp=drivesdk",
+        "parents": [
+          "1R8K22La-iytMBhwhGTj8qhHyl3Zd9FXz"
+        ],
+        "seenAt": "2026-11-03T02:43:45.900460+00:00"
+      },
+      "1gOgShnFdEKE6ytgUAH1rsXuB5HkbprdbYHnpKFDQJfM": {
+        "name": "LH6_記事2_受験生から卒業生まで管理を最適化｜学校運営のDXを手軽に",
+        "modifiedTime": "2026-11-03T01:04:11.268Z",
+        "url": "https://docs.google.com/document/d/1gOgShnFdEKE6ytgUAH1rsXuB5HkbprdbYHnpKFDQJfM/edit?usp=drivesdk",
+        "parents": [
+          "1R8K22La-iytMBhwhGTj8qhHyl3Zd9FXz"
+        ],
+        "seenAt": "2026-11-03T02:43:45.900479+00:00"
+      },
+      "1_zjyQkypttx2r9K8aMBUw1pubRo3NrQUqaX20r-xNnk": {
+        "name": "LH6_記事4_広告規制を守りながら“会員づくり”｜パチンコ店のLINE集客術",
+        "modifiedTime": "2026-11-03T01:02:58.179Z",
+        "url": "https://docs.google.com/document/d/1_zjyQkypttx2r9K8aMBUw1pubRo3NrQUqaX20r-xNnk/edit?usp=drivesdk",
+        "parents": [
+          "1R8K22La-iytMBhwhGTj8qhHyl3Zd9FXz"
+        ],
+        "seenAt": "2026-11-03T02:43:45.900482+00:00"
+      },
+      "1rLEQQGWiBPFW4LTbnGabw-Q8iT9tYcdg8QZXlFGRSl0": {
+        "name": "LH7_記事3_演奏する時間をもっと豊かに｜LHubで変わるオーケストラ・合唱団の運営",
+        "modifiedTime": "2026-11-03T01:00:01.003Z",
+        "url": "https://docs.google.com/document/d/1rLEQQGWiBPFW4LTbnGabw-Q8iT9tYcdg8QZXlFGRSl0/edit?usp=drivesdk",
+        "parents": [
+          "1R8K22La-iytMBhwhGTj8qhHyl3Zd9FXz"
+        ],
+        "seenAt": "2026-11-03T02:43:45.900484+00:00"
+      },
+      "19vHQgH9HoTBs2_ctyMPg1DoJXl59m2LDmEcaUY-pvwA": {
+        "name": "LH7_記事4_教習予約も入校案内もLINEでスマートに｜自動車教習所の業務改善はLHubで",
+        "modifiedTime": "2026-11-03T01:00:00.818Z",
+        "url": "https://docs.google.com/document/d/19vHQgH9HoTBs2_ctyMPg1DoJXl59m2LDmEcaUY-pvwA/edit?usp=drivesdk",
+        "parents": [
+          "1R8K22La-iytMBhwhGTj8qhHyl3Zd9FXz"
+        ],
+        "seenAt": "2026-11-03T02:43:45.900486+00:00"
       }
     },
-    "changePageToken": "501"
+    "changePageToken": "672"
   }
 }

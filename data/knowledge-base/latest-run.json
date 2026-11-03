@@ -1,23 +1,36 @@
 {
   "selected": false,
   "runLog": [],
-  "createdAt": "2026-11-02T00:04:09.478122+00:00",
+  "createdAt": "2026-11-03T02:43:44.722601+00:00",
   "selectionMode": "changes",
+  "fileId": "1l1fu_pYLBihnwwZtSo7LKV76_eZTc957crfzagJRqRI",
+  "name": "LH7_記事7_職人の手仕事を止めない｜靴・鞄メンテナンス専門店を支えるLHubの仕組みとは",
+  "url": "https://docs.google.com/document/d/1l1fu_pYLBihnwwZtSo7LKV76_eZTc957crfzagJRqRI/edit?usp=drivesdk",
+  "modifiedTime": "2026-11-03T01:04:42.421Z",
+  "sourceProcessing": {
+    "mode": "full_text",
+    "sourceTextCharacters": 3320,
+    "inputCharacters": 3320
+  },
+  "score": 72,
+  "flags": [
+    "external_writer_metadata_present"
+  ],
   "metrics": {
-    "selectedDocumentId": "",
-    "selectedDocumentName": "",
-    "driveFetched": 0,
-    "newDocuments": 0,
-    "aiEvaluations": 0,
+    "selectedDocumentId": "1l1fu_pYLBihnwwZtSo7LKV76_eZTc957crfzagJRqRI",
+    "selectedDocumentName": "LH7_記事7_職人の手仕事を止めない｜靴・鞄メンテナンス専門店を支えるLHubの仕組みとは",
+    "driveFetched": 5,
+    "newDocuments": 5,
+    "aiEvaluations": 1,
     "articlesGenerated": 0,
-    "apiCalls": 0,
-    "inputCharacters": 0,
-    "openaiSeconds": 0.0,
-    "driveSeconds": 0.95,
-    "docsFetchSeconds": 0.0,
+    "apiCalls": 1,
+    "inputCharacters": 13382,
+    "openaiSeconds": 35.52,
+    "driveSeconds": 1.17,
+    "docsFetchSeconds": 0.84,
     "stateSaveSeconds": 0.0,
     "fileIoSeconds": 0.0,
-    "executionSeconds": 0.94,
-    "exitReason": "no_candidate"
+    "executionSeconds": 37.55,
+    "exitReason": "confidential"
   }
 }
