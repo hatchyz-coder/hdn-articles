@@ -1,7 +1,7 @@
 ---
 title: "If Opportunity Is Open to Everyone, Why Do the Same People Keep Getting It?"
 socialTitle: "Open Tools, Unequal Chances"
-description: "AI is making knowledge and tools more accessible, but the chances to learn, demonstrate ability and get hired are still uneven. Evidence from the US, Europe, Japan and emerging economies."
+description: "AI expands access to knowledge, yet learning, proving skills and hiring remain unequal. Evidence from the US, Europe, Japan and emerging economies."
 publishedAt: 2026-11-03
 category: "World Frictions"
 tags:
