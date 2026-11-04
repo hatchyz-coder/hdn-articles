@@ -632,9 +632,24 @@
         "external_writer_metadata_present"
       ],
       "score": 72
+    },
+    "1Nm0qfk8B2ImOZH0vhmslC9JW56YLgLjzIu8UCBCzMaU": {
+      "name": "LH6_記事3_ハンドメイド・雑貨販売など個人ECの運営管理を一元化",
+      "url": "https://docs.google.com/document/d/1Nm0qfk8B2ImOZH0vhmslC9JW56YLgLjzIu8UCBCzMaU/edit?usp=drivesdk",
+      "modifiedTime": "2026-11-03T10:00:04.834Z",
+      "status": "api_timeout",
+      "startedAt": "2026-11-04T00:58:53.830109+00:00",
+      "retry_count": 1,
+      "finishedAt": "2026-11-04T00:59:39.698655+00:00",
+      "reason": "OpenAI API timed out after connect/read timeout",
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3550,
+        "inputCharacters": 3550
+      }
     }
   },
-  "updatedAt": "2026-11-03T02:44:22.269327+00:00",
+  "updatedAt": "2026-11-04T00:59:39.698660+00:00",
   "driveCache": {
     "scopeFolderId": "1UKRBujwOOHFwR-32i0WfDXoG48rl1Ggo",
     "folderIds": [
@@ -736,8 +751,53 @@
           "1R8K22La-iytMBhwhGTj8qhHyl3Zd9FXz"
         ],
         "seenAt": "2026-11-03T02:43:45.900486+00:00"
+      },
+      "1Nm0qfk8B2ImOZH0vhmslC9JW56YLgLjzIu8UCBCzMaU": {
+        "name": "LH6_記事3_ハンドメイド・雑貨販売など個人ECの運営管理を一元化",
+        "modifiedTime": "2026-11-03T10:00:04.834Z",
+        "url": "https://docs.google.com/document/d/1Nm0qfk8B2ImOZH0vhmslC9JW56YLgLjzIu8UCBCzMaU/edit?usp=drivesdk",
+        "parents": [
+          "1pKWOuVv864bolKSN_JeYC6P-7DxTraJ9"
+        ],
+        "seenAt": "2026-11-04T00:58:53.826116+00:00"
+      },
+      "1U3socAJkGI-KyMrme_ZxldMpbSPPBnxNpxRhIWSKRTs": {
+        "name": "LH12_記事7_コスプレ・撮影会をスマートに運営｜LHubで動員力を底上げ",
+        "modifiedTime": "2026-11-03T10:00:04.785Z",
+        "url": "https://docs.google.com/document/d/1U3socAJkGI-KyMrme_ZxldMpbSPPBnxNpxRhIWSKRTs/edit?usp=drivesdk",
+        "parents": [
+          "1R8K22La-iytMBhwhGTj8qhHyl3Zd9FXz"
+        ],
+        "seenAt": "2026-11-04T00:58:53.826136+00:00"
+      },
+      "1rwISJjOOLOv58c-lgo5-y6I_SL2LNRQe5fkOoZQCEWE": {
+        "name": "LH11_記事2_動物病院の予約・診療をもっとスムーズに｜LHubでオンライン診療にも対応",
+        "modifiedTime": "2026-11-03T10:00:04.750Z",
+        "url": "https://docs.google.com/document/d/1rwISJjOOLOv58c-lgo5-y6I_SL2LNRQe5fkOoZQCEWE/edit?usp=drivesdk",
+        "parents": [
+          "1R8K22La-iytMBhwhGTj8qhHyl3Zd9FXz"
+        ],
+        "seenAt": "2026-11-04T00:58:53.826138+00:00"
+      },
+      "1FApb5fu83UdOgCs5e8ILBzN8u67Tuo_NTzltpbKoDVg": {
+        "name": "LH10_記事4_トレイルラン・アウトドアのコミュニティ運営に朗報｜活動資金と交流にLHubが一役",
+        "modifiedTime": "2026-11-03T10:00:04.719Z",
+        "url": "https://docs.google.com/document/d/1FApb5fu83UdOgCs5e8ILBzN8u67Tuo_NTzltpbKoDVg/edit?usp=drivesdk",
+        "parents": [
+          "1R8K22La-iytMBhwhGTj8qhHyl3Zd9FXz"
+        ],
+        "seenAt": "2026-11-04T00:58:53.826140+00:00"
+      },
+      "1h6T5E0rm_Lf_W2Rlb3XKm-_7ah7vmunNs8aoO92Ujgg": {
+        "name": "LH10_記事7_農園体験を安定した収益モデルに｜LHubで季節予約と定額制を実現",
+        "modifiedTime": "2026-11-03T10:00:04.683Z",
+        "url": "https://docs.google.com/document/d/1h6T5E0rm_Lf_W2Rlb3XKm-_7ah7vmunNs8aoO92Ujgg/edit?usp=drivesdk",
+        "parents": [
+          "1R8K22La-iytMBhwhGTj8qhHyl3Zd9FXz"
+        ],
+        "seenAt": "2026-11-04T00:58:53.826142+00:00"
       }
     },
-    "changePageToken": "672"
+    "changePageToken": "772"
   }
 }
