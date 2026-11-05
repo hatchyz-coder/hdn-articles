@@ -367,12 +367,12 @@
       }
     },
     "10xzydtE_CNWfxBNq_-W5-OX1riviwM4wK7Pd4BhbZ-8": {
-      "name": "LH8_記事3_常連客の“推し店”に｜LHubでつくる古着ファンコミュニティ のコピー のコピー",
+      "name": "LH8_記事3_常連客の“推し店”に｜LHubでつくる古着ファンコミュニティ",
       "url": "https://docs.google.com/document/d/10xzydtE_CNWfxBNq_-W5-OX1riviwM4wK7Pd4BhbZ-8/edit?usp=drivesdk",
-      "modifiedTime": "2026-07-23T03:43:02.540Z",
+      "modifiedTime": "2026-11-03T10:00:06.132Z",
       "processedAt": "2026-07-23T06:12:00.759904+00:00",
-      "status": "skipped",
-      "reason": "AI score 80 below threshold or safety flags present",
+      "status": "api_timeout",
+      "reason": "OpenAI API timed out after connect/read timeout",
       "score": 80,
       "eeat": {
         "Experience": 75,
@@ -389,9 +389,11 @@
       "sourceProcessing": {
         "mode": "full_text",
         "sourceTextCharacters": 3589,
-        "chunks": 1,
-        "note": "Full Google Docs body was sent to the article evaluator."
-      }
+        "inputCharacters": 3589
+      },
+      "startedAt": "2026-11-05T01:13:00.503143+00:00",
+      "retry_count": 1,
+      "finishedAt": "2026-11-05T01:13:46.342283+00:00"
     },
     "1tlmyUuowcR_-5slWFABxD59A8dUrpKlgBnIEtlTm4Y0": {
       "name": "LH7_記事7_ファンとの“つながり”を可視化する｜LHubでファンクラブ運営をもっと柔軟に のコピー のコピー",
@@ -649,7 +651,7 @@
       }
     }
   },
-  "updatedAt": "2026-11-04T00:59:39.698660+00:00",
+  "updatedAt": "2026-11-05T01:13:46.342294+00:00",
   "driveCache": {
     "scopeFolderId": "1UKRBujwOOHFwR-32i0WfDXoG48rl1Ggo",
     "folderIds": [
@@ -796,8 +798,53 @@
           "1R8K22La-iytMBhwhGTj8qhHyl3Zd9FXz"
         ],
         "seenAt": "2026-11-04T00:58:53.826142+00:00"
+      },
+      "10xzydtE_CNWfxBNq_-W5-OX1riviwM4wK7Pd4BhbZ-8": {
+        "name": "LH8_記事3_常連客の“推し店”に｜LHubでつくる古着ファンコミュニティ",
+        "modifiedTime": "2026-11-03T10:00:06.132Z",
+        "url": "https://docs.google.com/document/d/10xzydtE_CNWfxBNq_-W5-OX1riviwM4wK7Pd4BhbZ-8/edit?usp=drivesdk",
+        "parents": [
+          "1pKWOuVv864bolKSN_JeYC6P-7DxTraJ9"
+        ],
+        "seenAt": "2026-11-05T01:13:00.496961+00:00"
+      },
+      "13hleUhXDRPre-2kyG9kXbORb6NGwioPlDmbtOyOXKYQ": {
+        "name": "LH11_記事1_古書店・ミニギャラリーの常連づくりに｜LHubで会員制運営をスマートに",
+        "modifiedTime": "2026-11-03T10:00:05.250Z",
+        "url": "https://docs.google.com/document/d/13hleUhXDRPre-2kyG9kXbORb6NGwioPlDmbtOyOXKYQ/edit?usp=drivesdk",
+        "parents": [
+          "1R8K22La-iytMBhwhGTj8qhHyl3Zd9FXz"
+        ],
+        "seenAt": "2026-11-05T01:13:00.496977+00:00"
+      },
+      "1QyvVBXL3Py2f6yTxQC_2zpg3oE74dBmkDk_S_Su3PII": {
+        "name": "LH8_記事5_施術も物販も一元管理｜美容クリニックの業務効率化はLHubで",
+        "modifiedTime": "2026-11-03T10:00:05.230Z",
+        "url": "https://docs.google.com/document/d/1QyvVBXL3Py2f6yTxQC_2zpg3oE74dBmkDk_S_Su3PII/edit?usp=drivesdk",
+        "parents": [
+          "1pKWOuVv864bolKSN_JeYC6P-7DxTraJ9"
+        ],
+        "seenAt": "2026-11-05T01:13:00.496981+00:00"
+      },
+      "1rT-f34x4rmQLa97BxQ-EacnSAvahMvpC4yF6tkbzW4A": {
+        "name": "LH8_記事1_3業種で実証｜LHubが変える「販売・予約・顧客管理」の新常識",
+        "modifiedTime": "2026-11-03T10:00:05.211Z",
+        "url": "https://docs.google.com/document/d/1rT-f34x4rmQLa97BxQ-EacnSAvahMvpC4yF6tkbzW4A/edit?usp=drivesdk",
+        "parents": [
+          "1pKWOuVv864bolKSN_JeYC6P-7DxTraJ9"
+        ],
+        "seenAt": "2026-11-05T01:13:00.496984+00:00"
+      },
+      "1bF1K35xX-m4sbSfofIFCoM2_lSHu8DCXPiZLa8cklss": {
+        "name": "LH8_記事4_オンライン診療をもっとスムーズに｜LHubで予約から処方箋発行まで完結",
+        "modifiedTime": "2026-11-03T10:00:05.211Z",
+        "url": "https://docs.google.com/document/d/1bF1K35xX-m4sbSfofIFCoM2_lSHu8DCXPiZLa8cklss/edit?usp=drivesdk",
+        "parents": [
+          "1pKWOuVv864bolKSN_JeYC6P-7DxTraJ9"
+        ],
+        "seenAt": "2026-11-05T01:13:00.496986+00:00"
       }
     },
-    "changePageToken": "772"
+    "changePageToken": "793"
   }
 }

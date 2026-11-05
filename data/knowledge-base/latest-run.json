@@ -1,32 +1,32 @@
 {
   "selected": false,
   "runLog": [],
-  "createdAt": "2026-11-04T00:58:52.036656+00:00",
+  "createdAt": "2026-11-05T01:12:59.714277+00:00",
   "selectionMode": "changes",
-  "fileId": "1Nm0qfk8B2ImOZH0vhmslC9JW56YLgLjzIu8UCBCzMaU",
-  "name": "LH6_記事3_ハンドメイド・雑貨販売など個人ECの運営管理を一元化",
-  "url": "https://docs.google.com/document/d/1Nm0qfk8B2ImOZH0vhmslC9JW56YLgLjzIu8UCBCzMaU/edit?usp=drivesdk",
-  "modifiedTime": "2026-11-03T10:00:04.834Z",
+  "fileId": "10xzydtE_CNWfxBNq_-W5-OX1riviwM4wK7Pd4BhbZ-8",
+  "name": "LH8_記事3_常連客の“推し店”に｜LHubでつくる古着ファンコミュニティ",
+  "url": "https://docs.google.com/document/d/10xzydtE_CNWfxBNq_-W5-OX1riviwM4wK7Pd4BhbZ-8/edit?usp=drivesdk",
+  "modifiedTime": "2026-11-03T10:00:06.132Z",
   "sourceProcessing": {
     "mode": "full_text",
-    "sourceTextCharacters": 3550,
-    "inputCharacters": 3550
+    "sourceTextCharacters": 3589,
+    "inputCharacters": 3589
   },
   "metrics": {
-    "selectedDocumentId": "1Nm0qfk8B2ImOZH0vhmslC9JW56YLgLjzIu8UCBCzMaU",
-    "selectedDocumentName": "LH6_記事3_ハンドメイド・雑貨販売など個人ECの運営管理を一元化",
+    "selectedDocumentId": "10xzydtE_CNWfxBNq_-W5-OX1riviwM4wK7Pd4BhbZ-8",
+    "selectedDocumentName": "LH8_記事3_常連客の“推し店”に｜LHubでつくる古着ファンコミュニティ",
     "driveFetched": 5,
     "newDocuments": 5,
     "aiEvaluations": 1,
     "articlesGenerated": 0,
     "apiCalls": 1,
-    "inputCharacters": 13597,
-    "openaiSeconds": 45.08,
-    "driveSeconds": 1.79,
-    "docsFetchSeconds": 0.78,
+    "inputCharacters": 13644,
+    "openaiSeconds": 45.02,
+    "driveSeconds": 0.78,
+    "docsFetchSeconds": 0.82,
     "stateSaveSeconds": 0.0,
     "fileIoSeconds": 0.0,
-    "executionSeconds": 47.66,
+    "executionSeconds": 46.63,
     "exitReason": "api_timeout"
   }
 }
