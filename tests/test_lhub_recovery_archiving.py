@@ -58,17 +58,13 @@ class RecoveryTests(unittest.TestCase):
     def test_recovery_preflight_verification_is_valid_shell(self):
         import subprocess
         workflow = (Path(__file__).resolve().parents[1] / ".github/workflows/daily-drive-editorial-fallback.yml").read_text(encoding="utf-8")
-        marker = "          git fetch origin main\\n"
+        marker = "          git fetch origin main\n"
         self.assertIn(marker, workflow)
         shell = workflow.split(marker, 1)[1]
-        # The publish-check command must not swallow the summary redirect into
-        # a quoted grep pattern, as that makes recovery always report failure.
-        self.assertIn("grep -q '^published=true
-    unittest.main()
-", shell)
+        self.assertIn("grep -q '^published=true$'", shell)
         self.assertIn("GITHUB_OUTPUT= python scripts/lhub_daily_preflight.py", shell)
         self.assertNotIn("grep -q '^published=true >>", shell)
-        extracted = "\\n".join(line[10:] if line.startswith("          ") else "" for line in shell.splitlines())
+        extracted = "\n".join(line[10:] if line.startswith("          ") else "" for line in shell.splitlines())
         subprocess.run(["bash", "-n"], input=extracted, text=True, check=True)
 
 if __name__ == "__main__":
