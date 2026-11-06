@@ -188,6 +188,7 @@ def _groq_models() -> list[str]:
         os.environ.get("HDN_GROQ_MODEL", DEFAULT_GROQ_MODEL).strip(),
         os.environ.get("HDN_GROQ_FALLBACK_MODEL", DEFAULT_GROQ_FALLBACK_MODEL).strip(),
         DEFAULT_GROQ_MODEL,
+        "openai/gpt-oss-120b",  # one bounded alternate Groq model; no paid OpenAI
     ]
     return list(dict.fromkeys(
         model for model in configured
@@ -267,11 +268,15 @@ def call_openai_once(doc: dict[str, Any], source_text: str, source_processing: d
                 raise TimeoutError("Groq API timed out during editorial generation") from exc
 
             if response.status_code == 429:
-                # The slot must stop without repeatedly spending the provider's limited quota.
-                # Preserve the draft and let the next scheduled slot check availability again.
+                # Do not retry this exhausted model. Try at most one other free Groq
+                # model before invoking the repository's reserve publication path.
+                if index + 1 < len(models):
+                    print(f"Groq model={model} rate limited; trying alternate {models[index + 1]}",
+                          file=sys.stderr, flush=True)
+                    continue
                 base.write_output("selected", "false")
                 base.write_output("reason", "api_rate_limited")
-                raise RuntimeError("Groq API HTTP 429 (api_rate_limited); defer until next scheduled slot")
+                raise RuntimeError("Groq API HTTP 429 (api_rate_limited); no alternate model available")
 
             if response.status_code == 413:
                 # Do not repeat an oversized request in the same slot. Daily Guarantee

@@ -370,6 +370,36 @@ jobs:
           fi
           gh run watch "$run_id" --exit-status
 
+      # Archiving is best effort and never changes whether a publication succeeded.
+      # Only source-backed (non-reserve) articles carry a Drive file_id.
+      - name: Archive successfully published Drive seed
+        if: ${{ success() && steps.editorial.outputs.selected == 'true' && steps.editorial.outputs.file_id != '' && steps.merge.outcome == 'success' && vars.GOOGLE_DRIVE_LHUB_PUBLISHED_FOLDER_ID != '' }}
+        continue-on-error: true
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          SOURCE_FOLDER: ${{ vars.GOOGLE_DRIVE_LHUB_ARCHIVE_FOLDER_ID }}
+          ARCHIVE_FOLDER: ${{ vars.GOOGLE_DRIVE_LHUB_PUBLISHED_FOLDER_ID }}
+          SOURCE_DOCUMENT: ${{ steps.editorial.outputs.file_id }}
+          SLUG: ${{ steps.editorial.outputs.slug }}
+        run: |
+          python scripts/archive_published_drive_seed.py \
+            --slug "$SLUG" --file-id "$SOURCE_DOCUMENT" \
+            --source-folder "$SOURCE_FOLDER" --archive-folder "$ARCHIVE_FOLDER"
+
+      - name: Audit daily LHub publication and reserve inventory
+        if: always()
+        run: |
+          python scripts/audit_lhub_daily.py --since 2026-10-31 --output /tmp/lhub-daily-audit.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('/tmp/lhub-daily-audit.json').read_text())
+          print('LHub missing dates:', ', '.join(data['missing_days']) or 'none')
+          print('Unused reserve slugs:', data['reserve']['remaining'])
+          if data['reserve']['remaining'] < 14:
+              print('::warning title=LHub reserve shortage::Replenish validated reserve articles.')
+          PY
+
       - name: Publication summary
         if: steps.editorial.outputs.selected == 'true' && steps.fact_gate.outputs.passed == 'true'
         env:

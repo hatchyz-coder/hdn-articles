@@ -74,7 +74,7 @@ class DriveEditorialTests(unittest.TestCase):
             },
             clear=False,
         ):
-            self.assertEqual(editorial._groq_models(), ["openai/gpt-oss-20b"])
+            self.assertEqual(editorial._groq_models(), ["openai/gpt-oss-20b", "openai/gpt-oss-120b"])
 
     def test_gpt_oss_browser_search_shape_is_bounded(self):
         body = editorial._groq_request_body("openai/gpt-oss-20b", "instructions", "payload")
