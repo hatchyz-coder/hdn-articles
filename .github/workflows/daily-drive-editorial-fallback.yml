@@ -56,8 +56,11 @@ jobs:
           # verify the JST-day published source in the actual post-run main tree.
           git fetch origin main
           git checkout --detach origin/main
-          python scripts/lhub_daily_preflight.py | grep -q '^published=true >> "$GITHUB_STEP_SUMMARY"
- || {
+          # Preflight writes machine-readable values to GITHUB_OUTPUT when set.
+          # In this shell, suppress it so the published=true line is printed.
+          if GITHUB_OUTPUT= python scripts/lhub_daily_preflight.py | grep -q '^published=true$'; then
+            echo "Confirmed a published LHub article on current JST day." >> "$GITHUB_STEP_SUMMARY"
+          else
             echo "::error::Recovery workflow finished without a confirmed daily article"
             exit 1
-          } >> "$GITHUB_STEP_SUMMARY"
+          fi
