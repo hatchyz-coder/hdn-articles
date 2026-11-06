@@ -1,32 +1,23 @@
 {
   "selected": false,
   "runLog": [],
-  "createdAt": "2026-11-05T01:12:59.714277+00:00",
+  "createdAt": "2026-11-06T01:18:18.231591+00:00",
   "selectionMode": "changes",
-  "fileId": "10xzydtE_CNWfxBNq_-W5-OX1riviwM4wK7Pd4BhbZ-8",
-  "name": "LH8_記事3_常連客の“推し店”に｜LHubでつくる古着ファンコミュニティ",
-  "url": "https://docs.google.com/document/d/10xzydtE_CNWfxBNq_-W5-OX1riviwM4wK7Pd4BhbZ-8/edit?usp=drivesdk",
-  "modifiedTime": "2026-11-03T10:00:06.132Z",
-  "sourceProcessing": {
-    "mode": "full_text",
-    "sourceTextCharacters": 3589,
-    "inputCharacters": 3589
-  },
   "metrics": {
-    "selectedDocumentId": "10xzydtE_CNWfxBNq_-W5-OX1riviwM4wK7Pd4BhbZ-8",
-    "selectedDocumentName": "LH8_記事3_常連客の“推し店”に｜LHubでつくる古着ファンコミュニティ",
-    "driveFetched": 5,
-    "newDocuments": 5,
-    "aiEvaluations": 1,
+    "selectedDocumentId": "",
+    "selectedDocumentName": "",
+    "driveFetched": 0,
+    "newDocuments": 0,
+    "aiEvaluations": 0,
     "articlesGenerated": 0,
-    "apiCalls": 1,
-    "inputCharacters": 13644,
-    "openaiSeconds": 45.02,
-    "driveSeconds": 0.78,
-    "docsFetchSeconds": 0.82,
+    "apiCalls": 0,
+    "inputCharacters": 0,
+    "openaiSeconds": 0.0,
+    "driveSeconds": 0.59,
+    "docsFetchSeconds": 0.0,
     "stateSaveSeconds": 0.0,
     "fileIoSeconds": 0.0,
-    "executionSeconds": 46.63,
-    "exitReason": "api_timeout"
+    "executionSeconds": 0.6,
+    "exitReason": "no_candidate"
   }
 }
