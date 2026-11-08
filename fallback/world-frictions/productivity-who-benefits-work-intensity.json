@@ -1,0 +1,50 @@
+{
+  "slug": "productivity-who-benefits-work-intensity",
+  "title": "【早く終わらせた人ほど、仕事が増えていないか】生産性の分配の違和感",
+  "social_title": "効率化の利益は誰に戻るのか",
+  "description": "AIで作業時間を短縮しても、担当業務と期待値が増えるだけでは働く人の負担は減りません。生産性向上と仕事の密度の関係を考えます。",
+  "summary": "仕事が早く終わっても人が楽になるとは限りません。効率化で生まれた余裕が誰に戻るのかを問います。",
+  "title_en": "Does Faster Work Just Mean More Work for the Same Person?",
+  "social_title_en": "Who benefits from AI-driven efficiency?",
+  "description_en": "AI can accelerate tasks without easing workloads. Consider whether saved time becomes space to think or simply a higher volume of assignments.",
+  "summary_en": "Speeding up tasks does not automatically reduce pressure. The missing question is who receives the benefits of productivity gains.",
+  "topic": "AIによる作業効率化と仕事の密度",
+  "tension": "処理速度が上がるほど仕事量の期待値も上がり、働く人の余裕が増えない場合がある",
+  "question": "作業時間の削減分を、改善や学習に使えているでしょうか",
+  "practice": "処理件数だけでなく例外対応と疲労、休息や学習に使える時間を合わせて測ります",
+  "lens": "生産性は組織の成果だけでなく、働く人の持続可能性も含めて評価できます",
+  "topic_en": "AI productivity and increasing work intensity",
+  "tension_en": "faster completion may raise expectations and task volume without giving workers more breathing room",
+  "question_en": "When time is saved, can people use some of it for learning, recovery and improvement?",
+  "practice_en": "Measure exceptions, overload and time for improvement alongside throughput and cycle time.",
+  "lens_en": "Productivity needs to account for sustainable work, not only output per hour.",
+  "tags": [
+    "世界の違和感",
+    "能力開発",
+    "AI",
+    "組織"
+  ],
+  "tags_en": [
+    "World Frictions",
+    "Skills",
+    "AI",
+    "Work"
+  ],
+  "sources": [
+    {
+      "title": "ILO: Evidence on GenAI and work organisation",
+      "url": "https://www.ilo.org/publications/impact-genai-jobs-productivity-and-work-organization-review-empirical",
+      "kind": "research"
+    },
+    {
+      "title": "World Economic Forum: Future of Jobs Report 2025",
+      "url": "https://jp.weforum.org/publications/the-future-of-jobs-report-2025",
+      "kind": "research"
+    },
+    {
+      "title": "European Commission: AI skills and literacy",
+      "url": "https://digital-strategy.ec.europa.eu/en/policies/ai-talent-skills-and-literacy",
+      "kind": "primary"
+    }
+  ]
+}
