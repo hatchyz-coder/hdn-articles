@@ -117,7 +117,7 @@ def ai_rank(candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
                     if content.get("type") == "output_text":
                         chunks.append(content.get("text", ""))
             text = "".join(chunks)
-        text = re.sub(r"^\x60\x60\x60(?:json)?\\s*|\\s*\x60\x60\x60$", "", text.strip(), flags=re.I | re.S)
+        text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text.strip(), flags=re.I | re.S)
         ranked = json.loads(text)
         if not isinstance(ranked, list):
             raise ValueError("AI ranker must return a list")
