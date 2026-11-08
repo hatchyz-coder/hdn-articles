@@ -21,7 +21,7 @@ def published(article_dir: Path) -> dict[str, list[str]]:
     days = {}
     for path in article_dir.glob("*.md"):
         body = path.read_text(encoding="utf-8")
-        if field(body, "draft").lower() == "true":
+        if field(body, "draft").lower() == "true" or field(body, "backfillFor"):
             continue
         if field(body, "section") != "lhub-usecase" and not re.search(
             r'(?m)^\s+-\s*["\']?lhub["\']?\s*$', body.split("---", 2)[1] if body.startswith("---") else ""
@@ -34,6 +34,24 @@ def published(article_dir: Path) -> dict[str, list[str]]:
             continue
         days.setdefault(day, []).append(path.stem)
     return {d: sorted(v) for d, v in days.items()}
+
+def backfilled(article_dir: Path) -> dict[str, list[str]]:
+    """Index supplementary releases by originally missed day, without backdating."""
+    days: dict[str, list[str]] = {}
+    for path in article_dir.glob("*.md"):
+        content = path.read_text(encoding="utf-8")
+        missed = field(content, "backfillFor")
+        if not missed or field(content, "draft").lower() == "true":
+            continue
+        published_day = field(content, "publishedAt")
+        try:
+            if date.fromisoformat(published_day) < date.fromisoformat(missed):
+                continue
+        except ValueError:
+            continue
+        days.setdefault(missed, []).append(path.stem)
+    return {day: sorted(slugs) for day, slugs in days.items()}
+
 
 def reserve_inventory(reserve_dir: Path, state: dict, jp: Path, en: Path) -> dict:
     used = state.get("fallbackReserves", {})
@@ -55,11 +73,15 @@ def audit(root: Path, start: date, end: date) -> dict:
     state_file = root / "data/editorial-drive/processed-docs.json"
     state = json.loads(state_file.read_text(encoding="utf-8")) if state_file.exists() else {}
     days = published(jp)
+    recovery = backfilled(jp)
     span = [start + timedelta(days=i) for i in range(max(0, (end - start).days + 1))]
+    missed = [d.isoformat() for d in span if not days.get(d.isoformat())]
     return {
         "range": [start.isoformat(), end.isoformat()],
         "published": {d: v for d, v in days.items() if start.isoformat() <= d <= end.isoformat()},
-        "missing_days": [d.isoformat() for d in span if not days.get(d.isoformat())],
+        "missing_days": missed,
+        "backfilled_days": {d: recovery[d] for d in missed if recovery.get(d)},
+        "uncompensated_days": [d for d in missed if not recovery.get(d)],
         "duplicate_days": {d: v for d, v in days.items() if len(v) > 1 and start.isoformat() <= d <= end.isoformat()},
         "reserve": reserve_inventory(root / "fallback/lhub", state, jp, root / "src/content/articles-en"),
         "state_updated_at": state.get("updatedAt"),
