@@ -234,7 +234,15 @@ def choose_reserve(reserve_dir: Path, state: dict[str, Any], day: str) -> tuple[
             continue
         if (ARTICLE_DIR / f"{slug}.md").exists() or (ENGLISH_DIR / f"{slug}.md").exists():
             continue
-        jp, en = validate_reserve(data, day)
+        try:
+            jp, en = validate_reserve(data, day)
+            # A passing factual gate is not a translation quality gate.
+            # Skip the malformed reserve instead of aborting the daily fallback.
+            if re.search(r"[\u3040-\u30ff\u3400-\u9fff]", en):
+                raise ValueError(f"{slug}: Japanese text in English article")
+        except ValueError as exc:
+            print(f"WARN: skip invalid LHub reserve {path.name}: {exc}", file=sys.stderr)
+            continue
         return path, data, jp, en
     return None
 
