@@ -1,5 +1,5 @@
 ---
-title: "予約変更時の引き継ぎ: A Practical Clinic Workflow"
+title: "Coordinating Appointment Changes across Staff: A Practical Clinic Workflow"
 description: "A safe clinic operations guide covering intake, handoff, escalation, and accurate communication without undocumented product claims."
 publishedAt: 2026-11-08
 updatedAt: 2026-11-08
@@ -24,7 +24,7 @@ This guide distinguishes provisional intake from confirmed decisions and keeps c
 
 ## The operational boundary
 
-予約変更の依頼を担当者間で確実に引き継ぐ. A request being received does not mean the intended result is confirmed.
+Make sure appointment-change requests are handed over consistently without treating a request as a confirmed change. A request being received does not mean the intended result is confirmed.
 
 ## Ownership and verification
 
