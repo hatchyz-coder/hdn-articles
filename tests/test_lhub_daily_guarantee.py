@@ -45,7 +45,7 @@ class LHubDailyGuaranteeTests(unittest.TestCase):
 
 
     def test_fresh_reserves_have_english_only_titles_and_bodies(self):
-        for number in range(33, 45):
+        for number in range(33, 54):
             path = next((ROOT / "fallback" / "lhub").glob(f"{number}-*.json"))
             data = json.loads(path.read_text(encoding="utf-8"))
             english = guarantee.build_markdown(data, "en", "2026-11-08")
