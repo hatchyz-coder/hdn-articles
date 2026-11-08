@@ -1,0 +1,50 @@
+{
+  "slug": "reskilling-time-who-provides-it",
+  "title": "【学び直せと言いながら、学ぶ時間は誰が用意するのか】能力開発の自己責任の違和感",
+  "social_title": "学び直す時間は誰の責任なのか",
+  "description": "新しいスキルの習得を求めながら、職場が学習時間や挑戦機会を十分に確保しない矛盾を考えます。労働者と組織の責任分担を一次資料を通じて整理します。",
+  "summary": "人材の能力開発は大切です。ただし、研修の必要性を語るだけではなく、学習時間と実践機会を誰が用意するかも問われます。",
+  "title_en": "Who Makes Time for Reskilling When Everyone Is Told to Learn?",
+  "social_title_en": "The hidden cost of reskilling",
+  "description_en": "Employers ask workers to reskill, yet learning time and practical opportunities remain unevenly distributed. Who should make room for development?",
+  "summary_en": "As organisations demand new skills, the real design question is whether people have the time and opportunities to acquire and apply them.",
+  "topic": "職場での学び直しと学習時間",
+  "tension": "能力開発を求めるほど本人の時間を前提にし、職場の余裕や実践機会が見落とされやすい",
+  "question": "新しいスキルを求める時、学習時間を業務の一部として確保しているでしょうか",
+  "practice": "研修受講時間に加えて、習得した知識を試す仕事と評価の機会を設けます",
+  "lens": "個人の努力と組織の学習環境は別々ではなく、互いに成長の可能性を決めています",
+  "topic_en": "reskilling time and workplace learning",
+  "tension_en": "organisations may demand new skills while treating time to learn as an individual responsibility",
+  "question_en": "When new skills are expected, does the organisation protect time for learning and practice?",
+  "practice_en": "Track supported learning time together with opportunities to apply new skills in real tasks.",
+  "lens_en": "Individual motivation and workplace learning conditions together shape development.",
+  "tags": [
+    "世界の違和感",
+    "能力開発",
+    "AI",
+    "組織"
+  ],
+  "tags_en": [
+    "World Frictions",
+    "Skills",
+    "AI",
+    "Work"
+  ],
+  "sources": [
+    {
+      "title": "World Economic Forum: Future of Jobs Report 2025",
+      "url": "https://jp.weforum.org/publications/the-future-of-jobs-report-2025",
+      "kind": "research"
+    },
+    {
+      "title": "ILO: Evidence on GenAI, jobs and work organisation",
+      "url": "https://www.ilo.org/publications/impact-genai-jobs-productivity-and-work-organization-review-empirical",
+      "kind": "research"
+    },
+    {
+      "title": "European Commission: AI skills and literacy",
+      "url": "https://digital-strategy.ec.europa.eu/en/policies/ai-talent-skills-and-literacy",
+      "kind": "primary"
+    }
+  ]
+}
