@@ -82,6 +82,10 @@ def frontmatter_value(markdown: str, key: str) -> str:
 
 
 def is_lhub_article(markdown: str) -> bool:
+    # A backfill release is supplementary and must not count as the
+    # single regular Daily Guarantee article for the current JST day.
+    if frontmatter_value(markdown, "backfillFor"):
+        return False
     if frontmatter_value(markdown, "draft").lower() == "true":
         return False
     if frontmatter_value(markdown, "section") == "lhub-usecase":
