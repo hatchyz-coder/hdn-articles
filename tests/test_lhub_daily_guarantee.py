@@ -43,6 +43,35 @@ class LHubDailyGuaranteeTests(unittest.TestCase):
             self.assertLessEqual(guarantee.body_char_count(jp), 3000)
         self.assertIn("api_payload_too_large", guarantee.FALLBACK_REASONS)
 
+
+    def test_fresh_reserves_have_english_only_titles_and_bodies(self):
+        for number in range(33, 45):
+            path = next((ROOT / "fallback" / "lhub").glob(f"{number}-*.json"))
+            data = json.loads(path.read_text(encoding="utf-8"))
+            english = guarantee.build_markdown(data, "en", "2026-11-08")
+            self.assertIsNone(
+                __import__("re").search(r"[\u3040-\u30ff\u3400-\u9fff]", english),
+                path.name,
+            )
+
+    def test_choose_reserve_skips_bad_english_instead_of_stopping(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            reserve_dir = Path(tmp) / "reserves"
+            reserve_dir.mkdir()
+            source = json.loads(next((ROOT / "fallback" / "lhub").glob("33-*.json")).read_text(encoding="utf-8"))
+            malformed = dict(source)
+            malformed["slug"] = "bad-english"
+            malformed["english_title"] = "日本語 mixed with English"
+            good = dict(source)
+            good["slug"] = "good-english"
+            (reserve_dir / "01.json").write_text(json.dumps(malformed, ensure_ascii=False), encoding="utf-8")
+            (reserve_dir / "02.json").write_text(json.dumps(good, ensure_ascii=False), encoding="utf-8")
+            with mock.patch.object(guarantee, "ARTICLE_DIR", Path(tmp) / "articles"), \
+                 mock.patch.object(guarantee, "ENGLISH_DIR", Path(tmp) / "articles-en"):
+                chosen = guarantee.choose_reserve(reserve_dir, {}, "2026-11-08")
+            self.assertIsNotNone(chosen)
+            self.assertEqual(chosen[1]["slug"], "good-english")
+
     def test_used_or_existing_reserve_is_not_selected(self):
         with tempfile.TemporaryDirectory() as tmp:
             reserve_dir = Path(tmp) / "reserve"
