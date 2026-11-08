@@ -98,25 +98,33 @@ def ai_rank(candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
         "model": os.getenv("OPENAI_MODEL", "gpt-5-mini"),
         "input": prompt,
     }
-    response = requests.post(
-        "https://api.openai.com/v1/responses",
-        headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-        json=payload,
-        timeout=120,
-    )
-    response.raise_for_status()
-    data = response.json()
-    text = data.get("output_text", "")
-    if not text:
-        chunks: list[str] = []
-        for item in data.get("output", []):
-            for content in item.get("content", []):
-                if content.get("type") == "output_text":
-                    chunks.append(content.get("text", ""))
-        text = "".join(chunks)
-    text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text.strip(), flags=re.I | re.S)
-    ranked = json.loads(text)
-    by_id = {int(item["id"]): item for item in ranked}
+    # OpenAI enrichment is optional: official-source keyword ranking remains
+    # usable if the provider is unavailable, throttled or returns bad JSON.
+    try:
+        response = requests.post(
+            "https://api.openai.com/v1/responses",
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+            json=payload,
+            timeout=45,
+        )
+        response.raise_for_status()
+        data = response.json()
+        text = data.get("output_text", "")
+        if not text:
+            chunks: list[str] = []
+            for item in data.get("output", []):
+                for content in item.get("content", []):
+                    if content.get("type") == "output_text":
+                        chunks.append(content.get("text", ""))
+            text = "".join(chunks)
+        text = re.sub(r"^\x60\x60\x60(?:json)?\\s*|\\s*\x60\x60\x60$", "", text.strip(), flags=re.I | re.S)
+        ranked = json.loads(text)
+        if not isinstance(ranked, list):
+            raise ValueError("AI ranker must return a list")
+        by_id = {int(item["id"]): item for item in ranked}
+    except (requests.RequestException, ValueError, TypeError, KeyError, IndexError) as exc:
+        print(f"WARN: optional AI ranking unavailable ({type(exc).__name__}); preserving keyword-ranked official candidates")
+        return candidates
     for idx, candidate in enumerate(candidates):
         ai = by_id.get(idx, {})
         candidate["ai_score"] = int(ai.get("ai_score", 0))
