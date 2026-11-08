@@ -1,0 +1,50 @@
+{
+  "slug": "ai-literacy-training-paper-compliance",
+  "title": "【研修を受けたら、AIを安全に使えるようになったのか】形式的な学習の違和感",
+  "social_title": "研修の受講記録は実力の証明なのか",
+  "description": "AI研修を受けたという事実と、業務で安全に判断できる能力は別物です。研修制度が形式的な記録に偏る問題を実務の目線で考察します。",
+  "summary": "教育受講と実際の能力は同じではありません。研修を数えるだけでなく、仕事の現場で確認すべきことを整理します。",
+  "title_en": "Does Completing AI Training Mean a Worker Can Use AI Responsibly?",
+  "social_title_en": "Training completion is not capability",
+  "description_en": "Training attendance is easy to record, but practical judgment is harder to verify. AI literacy needs relevant workplace learning and review.",
+  "summary_en": "A completed course does not automatically establish responsible judgment. Effective AI literacy requires practice matched to real work.",
+  "topic": "AIリテラシー研修の受講と実務能力",
+  "tension": "研修の実施回数や受講率が管理指標になり、判断能力を確かめる機会が不足しやすい",
+  "question": "研修を受けた人が自分の仕事で何を判断できるか、確認しているでしょうか",
+  "practice": "実務に近い短い課題で、情報保護や誤りの訂正ができるか観察します",
+  "lens": "受講率は入力指標であり、安全な仕事の成果を直接示すものではありません",
+  "topic_en": "AI literacy training and practical decision-making",
+  "tension_en": "course completion is easy to count while the ability to make responsible work decisions is harder to verify",
+  "question_en": "After training, can workers demonstrate responsible judgment on tasks they actually perform?",
+  "practice_en": "Use small realistic exercises to check privacy, error correction and escalation rather than counting attendance alone.",
+  "lens_en": "Training participation is an input metric, not direct evidence of safe performance.",
+  "tags": [
+    "世界の違和感",
+    "能力開発",
+    "AI",
+    "組織"
+  ],
+  "tags_en": [
+    "World Frictions",
+    "Skills",
+    "AI",
+    "Work"
+  ],
+  "sources": [
+    {
+      "title": "European Commission: AI literacy Q&A",
+      "url": "https://digital-strategy.ec.europa.eu/en/faqs/ai-literacy-questions-answers",
+      "kind": "primary"
+    },
+    {
+      "title": "EU AI Act Article 4",
+      "url": "https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-4",
+      "kind": "primary"
+    },
+    {
+      "title": "World Economic Forum: Future of Jobs Report 2025",
+      "url": "https://jp.weforum.org/publications/the-future-of-jobs-report-2025",
+      "kind": "research"
+    }
+  ]
+}
