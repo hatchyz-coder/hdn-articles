@@ -661,7 +661,7 @@
       "score": 88
     }
   },
-  "updatedAt": "2026-11-07T15:08:45.177013Z",
+  "updatedAt": "2026-11-08T15:35:36.573777Z",
   "fallbackReserves": {
     "lhub-reserve-post-purchase-followup": {
       "usedAt": "2026-09-27T23:41:49.769045Z",
@@ -737,6 +737,11 @@
       "usedAt": "2026-11-07T15:08:45.176977Z",
       "trigger": "api_rate_limited",
       "reserveFile": "32-reschedule-handoff.json"
+    },
+    "lhub-reserve-clinic-consent-explanation-timing-202611": {
+      "usedAt": "2026-11-08T15:35:36.573745Z",
+      "trigger": "api_payload_too_large",
+      "reserveFile": "33-consent-explanation-timing.json"
     }
   }
 }
