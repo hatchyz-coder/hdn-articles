@@ -102,7 +102,7 @@ def main() -> int:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(output + "\n", encoding="utf-8")
     print(output)
-    return int(args.strict and bool(data["missing_days"] or data["duplicate_days"] or data["reserve"]["remaining"] == 0))
+    return int(args.strict and bool(data["uncompensated_days"] or data["duplicate_days"] or data["reserve"]["remaining"] == 0))
 
 if __name__ == "__main__":
     raise SystemExit(main())
