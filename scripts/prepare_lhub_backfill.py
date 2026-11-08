@@ -30,7 +30,7 @@ MANIFEST = {
 }
 
 
-def prepare(root: Path, release_date: date, *, preview: bool = True) -> list[dict[str, str]]:
+def prepare(root: Path, release_date: date, *, preview: bool = True, refresh_staged: bool = False) -> list[dict[str, str]]:
     if release_date < date(2026, 11, 8):
         raise ValueError("Backfill release must be no earlier than November 8, 2026")
     results = []
@@ -41,7 +41,13 @@ def prepare(root: Path, release_date: date, *, preview: bool = True) -> list[dic
         target_ja = root / "src/content/articles" / f"{slug}.md"
         target_en = root / "src/content/articles-en" / f"{slug}.md"
         if target_ja.exists() or target_en.exists():
-            raise FileExistsError(f"Already published or staged: {slug}")
+            if not refresh_staged or not (target_ja.exists() and target_en.exists()):
+                raise FileExistsError(f"Already published or staged: {slug}")
+            # Only revise articles explicitly staged for the same missing day.
+            for existing in (target_ja, target_en):
+                current = existing.read_text(encoding="utf-8")
+                if f"backfillFor: {missed_day}" not in current:
+                    raise FileExistsError(f"Refusing to overwrite a non-backfill article: {slug}")
 
         ja, en = guarantee.validate_reserve(data, release_date.isoformat())
         if re.search(r"[\u3040-\u30ff\u3400-\u9fff]", en):
@@ -71,8 +77,11 @@ def main() -> int:
     parser.add_argument("--root", type=Path, default=ROOT)
     parser.add_argument("--release-date", type=date.fromisoformat, default=datetime.now(JST).date())
     parser.add_argument("--write", action="store_true", help="write local Markdown; does not push or deploy")
+    parser.add_argument("--refresh-staged", action="store_true", help="only replace matching backfillFor articles, useful if approval moves the actual release day")
     args = parser.parse_args()
-    result = prepare(args.root, args.release_date, preview=not args.write)
+    if args.refresh_staged and not args.write:
+        parser.error("--refresh-staged requires --write")
+    result = prepare(args.root, args.release_date, preview=not args.write, refresh_staged=args.refresh_staged)
     print(json.dumps({"preview": not args.write, "backfill": result}, ensure_ascii=False, indent=2))
     return 0
 
