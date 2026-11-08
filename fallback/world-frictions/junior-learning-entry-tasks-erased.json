@@ -1,0 +1,50 @@
+{
+  "slug": "junior-learning-entry-tasks-erased",
+  "title": "【新人の仕事を自動化して、次のベテランは育つのか】経験の入口の違和感",
+  "social_title": "新人が仕事を覚える入口はどこにあるのか",
+  "description": "定型業務を自動化するほど、若手が観察し失敗しながら仕事を学ぶ機会が減るかもしれません。経験と生産性の設計の矛盾を考察します。",
+  "summary": "単純作業を減らすことと、育つための経験を残すことは両立できるでしょうか。将来の中核人材の育成を考えます。",
+  "title_en": "Who Trains Tomorrow's Experts When Entry-Level Tasks Disappear?",
+  "social_title_en": "The learning ladder behind entry-level work",
+  "description_en": "Automating routine work can improve efficiency, but organisations still need pathways for newcomers to learn judgment and gain experience.",
+  "summary_en": "Removing routine tasks is not the same as removing learning needs. Organisations need deliberate paths to practical experience.",
+  "topic": "新人育成と自動化で減る定型業務",
+  "tension": "単純な仕事を削減する一方、若手が業務を覚える初期の経験まで減らす可能性がある",
+  "question": "新人が現場の判断を覚えるための実務経験をどこで確保するのでしょうか",
+  "practice": "単純作業をただ残すのではなく、説明、例外対応、判断の振り返りを計画的に任せます",
+  "lens": "効率化と技能継承を同じ設計に入れなければ、長期的な人材供給が弱くなり得ます",
+  "topic_en": "junior worker development and task automation",
+  "tension_en": "automation removes routine work while also potentially reducing the early experience on which professional judgment is built",
+  "question_en": "Where can newcomers gain supervised hands-on experience when routine tasks are automated?",
+  "practice_en": "Assign supported exception handling, explanation and reflection tasks rather than preserving busywork for its own sake.",
+  "lens_en": "Long-term skill development must be designed alongside short-term automation gains.",
+  "tags": [
+    "世界の違和感",
+    "能力開発",
+    "AI",
+    "組織"
+  ],
+  "tags_en": [
+    "World Frictions",
+    "Skills",
+    "AI",
+    "Work"
+  ],
+  "sources": [
+    {
+      "title": "World Economic Forum: Future of Jobs Report 2025",
+      "url": "https://jp.weforum.org/publications/the-future-of-jobs-report-2025",
+      "kind": "research"
+    },
+    {
+      "title": "ILO: Evidence on GenAI, jobs and work organisation",
+      "url": "https://www.ilo.org/publications/impact-genai-jobs-productivity-and-work-organization-review-empirical",
+      "kind": "research"
+    },
+    {
+      "title": "European Commission: AI literacy Q&A",
+      "url": "https://digital-strategy.ec.europa.eu/en/faqs/ai-literacy-questions-answers",
+      "kind": "primary"
+    }
+  ]
+}
