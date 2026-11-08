@@ -1,5 +1,5 @@
 ---
-title: "初回相談前の情報整理: A Practical Clinic Workflow"
+title: "Preparing for a First Clinic Consultation: A Practical Clinic Workflow"
 description: "A safe clinic operations guide covering intake, handoff, escalation, and accurate communication without undocumented product claims."
 publishedAt: 2026-11-07
 updatedAt: 2026-11-07
@@ -24,7 +24,7 @@ This guide distinguishes provisional intake from confirmed decisions and keeps c
 
 ## The operational boundary
 
-相談の目的と当日に確認したいことを事前に整理する. A request being received does not mean the intended result is confirmed.
+Help patients understand which preparation details are provisional and which decisions require an actual consultation. A request being received does not mean the intended result is confirmed.
 
 ## Ownership and verification
 
