@@ -661,7 +661,7 @@
       "score": 88
     }
   },
-  "updatedAt": "2026-11-08T15:35:36.573777Z",
+  "updatedAt": "2026-11-09T19:07:26.355579Z",
   "fallbackReserves": {
     "lhub-reserve-post-purchase-followup": {
       "usedAt": "2026-09-27T23:41:49.769045Z",
@@ -742,6 +742,11 @@
       "usedAt": "2026-11-08T15:35:36.573745Z",
       "trigger": "api_payload_too_large",
       "reserveFile": "33-consent-explanation-timing.json"
+    },
+    "lhub-reserve-clinic-staff-escalation-boundary-202611": {
+      "usedAt": "2026-11-09T19:07:26.355546Z",
+      "trigger": "api_rate_limited",
+      "reserveFile": "34-staff-escalation-boundary.json"
     }
   }
 }
