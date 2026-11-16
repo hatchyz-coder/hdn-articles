@@ -661,7 +661,7 @@
       "score": 88
     }
   },
-  "updatedAt": "2026-11-15T15:53:17.175658Z",
+  "updatedAt": "2026-11-16T18:55:31.916910Z",
   "fallbackReserves": {
     "lhub-reserve-post-purchase-followup": {
       "usedAt": "2026-09-27T23:41:49.769045Z",
@@ -777,6 +777,11 @@
       "usedAt": "2026-11-15T15:53:17.175623Z",
       "trigger": "api_rate_limited",
       "reserveFile": "40-proxy-inquiry-privacy.json"
+    },
+    "lhub-reserve-clinic-afterhours-response-boundary-202611": {
+      "usedAt": "2026-11-16T18:55:31.916881Z",
+      "trigger": "api_rate_limited",
+      "reserveFile": "41-afterhours-response-boundary.json"
     }
   }
 }
