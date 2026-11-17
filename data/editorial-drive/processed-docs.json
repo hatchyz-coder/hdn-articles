@@ -661,7 +661,7 @@
       "score": 88
     }
   },
-  "updatedAt": "2026-11-16T18:55:31.916910Z",
+  "updatedAt": "2026-11-17T17:53:24.666822Z",
   "fallbackReserves": {
     "lhub-reserve-post-purchase-followup": {
       "usedAt": "2026-09-27T23:41:49.769045Z",
@@ -782,6 +782,11 @@
       "usedAt": "2026-11-16T18:55:31.916881Z",
       "trigger": "api_rate_limited",
       "reserveFile": "41-afterhours-response-boundary.json"
+    },
+    "lhub-reserve-clinic-waitlist-communication-contract-202611": {
+      "usedAt": "2026-11-17T17:53:24.666787Z",
+      "trigger": "api_payload_too_large",
+      "reserveFile": "42-waitlist-communication-contract.json"
     }
   }
 }
