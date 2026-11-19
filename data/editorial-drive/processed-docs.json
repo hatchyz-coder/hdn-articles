@@ -661,7 +661,7 @@
       "score": 88
     }
   },
-  "updatedAt": "2026-11-18T17:33:52.979459Z",
+  "updatedAt": "2026-11-19T17:37:40.321958Z",
   "fallbackReserves": {
     "lhub-reserve-post-purchase-followup": {
       "usedAt": "2026-09-27T23:41:49.769045Z",
@@ -792,6 +792,11 @@
       "usedAt": "2026-11-18T17:33:52.979413Z",
       "trigger": "api_rate_limited",
       "reserveFile": "43-previsit-document-checklist.json"
+    },
+    "lhub-reserve-clinic-faq-ownership-review-202611": {
+      "usedAt": "2026-11-19T17:37:40.321924Z",
+      "trigger": "api_payload_too_large",
+      "reserveFile": "44-faq-ownership-review.json"
     }
   }
 }
