@@ -39,6 +39,14 @@ def clean_x_body(text: str) -> str:
     return text
 
 
+def ensure_x_title(text: str) -> str:
+    """Repair a cosmetic heading omission without losing the article link."""
+    text = text.strip()
+    if text.startswith("【"):
+        return text
+    return clean_x_body("【LINE運用】\n" + text)
+
+
 def validate_social_copy(channel: str, text: str, article_url: str) -> None:
     text = text.strip()
     if article_url not in text:
@@ -84,7 +92,7 @@ def finalize_social_posts(slug: str) -> list[Path]:
     finalized = [
         finalize_post(
             paths["x"],
-            clean_x_body(paths["x"].read_text(encoding="utf-8")),
+            ensure_x_title(clean_x_body(paths["x"].read_text(encoding="utf-8"))),
             article_url,
             "続きはこちら",
         ),
