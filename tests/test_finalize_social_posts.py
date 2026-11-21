@@ -41,7 +41,7 @@ class FinalizeSocialPostsTests(unittest.TestCase):
             self.assertIn("記事はこちら\n" + url, (folder / "facebook.md").read_text(encoding="utf-8"))
 
     def test_missing_x_title_is_repaired_without_failing_publication(self):
-        self.assertEqual(ensure_x_title("見出しがありません。"), "【LINE運用】\\n見出しがありません。".replace("\\\\n", "\\n"))
+        self.assertEqual(ensure_x_title("見出しがありません。"), "【LINE運用】\n見出しがありません。")
 
     def test_validate_social_copy_rejects_facebook_under_1200(self):
         url = "https://article.hdnjapan.com/articles/test/"
