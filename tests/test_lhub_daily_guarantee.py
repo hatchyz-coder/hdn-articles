@@ -43,6 +43,21 @@ class LHubDailyGuaranteeTests(unittest.TestCase):
             self.assertLessEqual(guarantee.body_char_count(jp), 3000)
         self.assertIn("api_payload_too_large", guarantee.FALLBACK_REASONS)
 
+    def test_replenished_english_reserves_contain_no_japanese_text(self):
+        import re
+        for n in range(45, 59):
+            matches = list((ROOT / "fallback" / "lhub").glob(f"{n}-*.json"))
+            self.assertEqual(len(matches), 1, n)
+            data = json.loads(matches[0].read_text(encoding="utf-8"))
+            fields = (
+                data["english_title"], data["english_description"],
+                data["english_summary"], data["english_body_markdown"],
+            )
+            self.assertIsNone(
+                re.search(r"[\u3040-\u30ff\u3400-\u9fff]", "\n".join(fields)),
+                matches[0].name,
+            )
+
     def test_used_or_existing_reserve_is_not_selected(self):
         with tempfile.TemporaryDirectory() as tmp:
             reserve_dir = Path(tmp) / "reserve"
