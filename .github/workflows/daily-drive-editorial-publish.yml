@@ -233,11 +233,21 @@ jobs:
             echo "The Drive seed was not persisted as published; a later slot may regenerate it."
           } >> "$GITHUB_STEP_SUMMARY"
 
+      # Social metadata is an output of publication, not a publication safety gate.
+      # Cosmetic mistakes cannot hold a verified JP/EN article hostage.
       - name: Finalize social copy with production URL
+        id: social_copy
+        continue-on-error: true
         if: steps.editorial.outputs.selected == 'true' && steps.fact_gate.outputs.passed == 'true'
         env:
           SLUG: ${{ steps.editorial.outputs.slug }}
         run: python scripts/finalize_social_posts.py --article-path "src/content/articles/${SLUG}.md"
+
+      - name: Warn if social formatting needs a later correction
+        if: steps.editorial.outputs.selected == 'true' && steps.fact_gate.outputs.passed == 'true' && steps.social_copy.outcome == 'failure'
+        run: |
+          echo "::warning title=Social copy follow-up::Article publication continues. Social formatting requires a separate repair."
+          echo "Social formatting failed; article publication continues after factual and build gates." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Lint
         if: steps.editorial.outputs.selected == 'true' && steps.fact_gate.outputs.passed == 'true'
