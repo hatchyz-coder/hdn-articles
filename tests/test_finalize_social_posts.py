@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from scripts.finalize_social_posts import clean_social_body, clean_x_body, finalize_social_posts, validate_social_copy
+from scripts.finalize_social_posts import clean_social_body, clean_x_body, ensure_x_title, finalize_social_posts, validate_social_copy
 
 
 class FinalizeSocialPostsTests(unittest.TestCase):
@@ -39,6 +39,9 @@ class FinalizeSocialPostsTests(unittest.TestCase):
             self.assertIn("続きはこちら\n" + url, (folder / "x.md").read_text(encoding="utf-8"))
             self.assertIn("記事はこちら\n" + url, (folder / "linkedin.md").read_text(encoding="utf-8"))
             self.assertIn("記事はこちら\n" + url, (folder / "facebook.md").read_text(encoding="utf-8"))
+
+    def test_missing_x_title_is_repaired_without_failing_publication(self):
+        self.assertEqual(ensure_x_title("見出しがありません。"), "【LINE運用】\n見出しがありません。")
 
     def test_validate_social_copy_rejects_facebook_under_1200(self):
         url = "https://article.hdnjapan.com/articles/test/"
