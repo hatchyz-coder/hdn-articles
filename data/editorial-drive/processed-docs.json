@@ -659,9 +659,23 @@
       },
       "slug": "seiyu-lhub-recording-requests",
       "score": 88
+    },
+    "22719b1e7ca15dff5f59769ace5e1815761f5b6def7ad3c5f67baab3e52fdc86": {
+      "modifiedTime": "2026-11-03T00:58:51.740Z",
+      "status": "generated",
+      "startedAt": "2026-11-24T19:42:01.870976+00:00",
+      "retry_count": 0,
+      "finishedAt": "2026-11-24T19:42:34.982789+00:00",
+      "slug": "lawyers-using-line-to-improve-client-communication",
+      "score": 85,
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3549,
+        "inputCharacters": 3549
+      }
     }
   },
-  "updatedAt": "2026-11-23T23:08:33.773944Z",
+  "updatedAt": "2026-11-24T19:42:34.982795+00:00",
   "fallbackReserves": {
     "lhub-reserve-post-purchase-followup": {
       "usedAt": "2026-09-27T23:41:49.769045Z",
