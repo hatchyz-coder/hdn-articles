@@ -675,7 +675,7 @@
       }
     }
   },
-  "updatedAt": "2026-11-24T19:42:34.982795+00:00",
+  "updatedAt": "2026-11-25T18:51:06.368552Z",
   "fallbackReserves": {
     "lhub-reserve-post-purchase-followup": {
       "usedAt": "2026-09-27T23:41:49.769045Z",
@@ -816,6 +816,11 @@
       "usedAt": "2026-11-23T23:08:33.773914Z",
       "trigger": "api_rate_limited",
       "reserveFile": "45-contact-preference-verification.json"
+    },
+    "lhub-reserve-clinic-appointment-delay-updates-202611": {
+      "usedAt": "2026-11-25T18:51:06.368523Z",
+      "trigger": "api_payload_too_large",
+      "reserveFile": "46-appointment-delay-updates.json"
     }
   }
 }
