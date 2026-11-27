@@ -673,9 +673,39 @@
         "sourceTextCharacters": 3549,
         "inputCharacters": 3549
       }
+    },
+    "40c39cf03a06c58b34d73d88508a759ba687c6f13ed38c232f8cf1c4f614412b": {
+      "modifiedTime": "2026-11-03T00:57:59.895Z",
+      "status": "fact_gate_failed",
+      "startedAt": "2026-11-27T18:26:52.259222+00:00",
+      "retry_count": 0,
+      "finishedAt": "2026-11-27T18:27:11.513911+00:00",
+      "slug": "public-accountant-consulting-spot-work-lhub",
+      "score": 82,
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3357,
+        "inputCharacters": 3357
+      },
+      "reason": "unverified_product_feature",
+      "manualReview": true
+    },
+    "c4811a6014858cd4e5d7e754c27e65f1d86a7165cacf5456c4827eeaad68785e": {
+      "modifiedTime": "2026-11-03T00:58:00.028Z",
+      "status": "generated",
+      "startedAt": "2026-11-27T18:28:05.846955+00:00",
+      "retry_count": 0,
+      "finishedAt": "2026-11-27T18:28:29.957734+00:00",
+      "slug": "tax-accountant-busy-season-lhub",
+      "score": 92,
+      "sourceProcessing": {
+        "mode": "full_text",
+        "sourceTextCharacters": 3392,
+        "inputCharacters": 3392
+      }
     }
   },
-  "updatedAt": "2026-11-26T18:39:31.901386Z",
+  "updatedAt": "2026-11-27T18:28:29.957741+00:00",
   "fallbackReserves": {
     "lhub-reserve-post-purchase-followup": {
       "usedAt": "2026-09-27T23:41:49.769045Z",
